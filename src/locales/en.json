@@ -1,0 +1,65 @@
+{
+  "nav": {
+    "collections": "Collections",
+    "shop": "Shop",
+    "occasions": "Occasions",
+    "sale": "Sale",
+    "cart": "Cart",
+    "wishlist": "Wishlist",
+    "account": "Account",
+    "search": "Search"
+  },
+  "home": {
+    "newArrivals": "New Arrivals",
+    "bestSellers": "Best Sellers",
+    "shopByCategory": "Shop by Category",
+    "shopByFabric": "Shop by Fabric",
+    "shopByOccasion": "Shop by Occasion",
+    "customerReviews": "Customer Reviews",
+    "instagramFeed": "Instagram Feed",
+    "viewAll": "View All",
+    "shopNow": "Shop Now"
+  },
+  "product": {
+    "addToBag": "Add to Bag",
+    "buyNow": "Buy Now",
+    "offerPrice": "Offer Price",
+    "price": "Price",
+    "includes": "Includes",
+    "washCare": "Wash Care",
+    "deliveryTime": "Delivery Time",
+    "returnPolicy": "Return Policy",
+    "sizes": "Sizes",
+    "similarProducts": "Similar Products",
+    "writeReview": "Write a Review",
+    "whatsapp": "Inquire on WhatsApp"
+  },
+  "cart": {
+    "title": "Shopping Bag",
+    "empty": "Your Bag is Empty",
+    "checkout": "Proceed to Checkout",
+    "coupon": "Have a coupon?",
+    "subtotal": "Subtotal",
+    "total": "Total",
+    "shipping": "Shipping"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "loginOtp": "Login with OTP",
+    "address": "Delivery Address",
+    "payment": "Payment",
+    "orderConfirmed": "Order Confirmed!",
+    "trackOrder": "Track Order"
+  },
+  "account": {
+    "dashboard": "Dashboard",
+    "orders": "My Orders",
+    "wishlist": "Wishlist",
+    "addresses": "Addresses",
+    "settings": "Settings"
+  },
+  "common": {
+    "free": "FREE",
+    "language": "Language"
+  }
+}

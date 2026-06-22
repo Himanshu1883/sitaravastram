@@ -16,7 +16,7 @@ export default function ShopByOccasion() {
       <div className="relative max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeading
           overline="Every Moment, Every Woman"
-          title="Dressed for Every Occasion"
+          title="Shop by Occasion"
           subtitle="From the quiet grace of a workday to the dazzling joy of a wedding — Sitara Vastram has a look that's yours."
           center
           light

@@ -6,6 +6,7 @@ export interface Product {
   originalPrice?: number;
   discount?: number;
   images: string[];
+  video?: string;
   category: string;
   fabric: string;
   occasion: string[];
@@ -15,7 +16,12 @@ export interface Product {
   reviewCount: number;
   description: string;
   details: string[];
+  includes: string[];
+  washCare: string;
+  deliveryTime: string;
+  returnPolicy: string;
   sku: string;
+  stock?: number;
   isNew?: boolean;
   isBestSeller?: boolean;
   inStock: boolean;
@@ -32,6 +38,7 @@ export interface Category {
 
 export interface Review {
   id: string;
+  productId?: string;
   author: string;
   location: string;
   rating: number;
@@ -96,9 +103,55 @@ export interface Address {
 export interface Order {
   id: string;
   date: string;
-  status: 'placed' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled';
+  status: 'placed' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled' | 'returned';
   items: CartItem[];
+  subtotal: number;
+  discount: number;
+  shipping: number;
+  codFee: number;
   total: number;
+  paymentMethod: 'razorpay' | 'cod';
+  couponCode?: string;
   address: Address;
   trackingNumber?: string;
+  phone?: string;
+}
+
+export interface Coupon {
+  id: string;
+  code: string;
+  type: 'percent' | 'flat';
+  value: number;
+  minOrder: number;
+  expiry: string;
+  usageLimit: number;
+  usedCount: number;
+  active: boolean;
+}
+
+export interface AdminOrder extends Order {
+  customer: string;
+}
+
+export interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  sentAt: string;
+  audience: string;
+}
+
+export interface ReturnRequest {
+  id: string;
+  orderId: string;
+  customer: string;
+  product: string;
+  reason: string;
+  status: 'pending' | 'approved' | 'rejected' | 'refunded';
+  date: string;
+}
+
+export interface InstagramPost {
+  image: string;
+  url: string;
 }

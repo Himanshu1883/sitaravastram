@@ -46,7 +46,7 @@ const features = [
 export default function FeaturedCollection() {
   return (
     <section className="py-20 bg-cream-100">
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full">
         {/* Heading */}
         <div className="text-center mb-16">
           <p className="font-inter text-xs tracking-[0.25em] uppercase font-semibold text-rosegold-500 mb-3">

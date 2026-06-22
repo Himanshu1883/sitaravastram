@@ -11,7 +11,7 @@ import 'swiper/css/pagination';
 export default function CustomerReviews() {
   return (
     <section className="py-20 bg-white overflow-hidden">
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="section-container">
         <SectionHeading
           overline="Women Who Wear Sitara"
           title="Their Words, Our Pride"

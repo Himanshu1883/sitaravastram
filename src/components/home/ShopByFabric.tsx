@@ -5,7 +5,7 @@ import { fabrics } from '../../data/products';
 export default function ShopByFabric() {
   return (
     <section className="py-20 bg-white">
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="section-container">
         <SectionHeading
           overline="Material Stories"
           title="Shop by Fabric"

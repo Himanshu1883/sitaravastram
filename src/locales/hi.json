@@ -1,0 +1,65 @@
+﻿{
+  "nav": {
+    "collections": "संग्रह",
+    "shop": "खरीदारी",
+    "occasions": "अवसर",
+    "sale": "सेल",
+    "cart": "कार्ट",
+    "wishlist": "विशलिस्ट",
+    "account": "खाता",
+    "search": "खोजें"
+  },
+  "home": {
+    "newArrivals": "नए आगमन",
+    "bestSellers": "सबसे ज़्यादा बिकने वाले",
+    "shopByCategory": "श्रेणी के अनुसार खरीदें",
+    "shopByFabric": "कपड़े के अनुसार खरीदें",
+    "shopByOccasion": "अवसर के अनुसार खरीदें",
+    "customerReviews": "ग्राहक समीक्षाएँ",
+    "instagramFeed": "इंस्टाग्राम फ़ीड",
+    "viewAll": "सभी देखें",
+    "shopNow": "अभी खरीदें"
+  },
+  "product": {
+    "addToBag": "बैग में डालें",
+    "buyNow": "अभी खरीदें",
+    "offerPrice": "ऑफ़र कीमत",
+    "price": "कीमत",
+    "includes": "शामिल है",
+    "washCare": "धुलाई की देखभाल",
+    "deliveryTime": "डिलीवरी समय",
+    "returnPolicy": "वापसी नीति",
+    "sizes": "साइज़",
+    "similarProducts": "मिलते-जुलते उत्पाद",
+    "writeReview": "समीक्षा लिखें",
+    "whatsapp": "व्हाट्सएप पर पूछें"
+  },
+  "cart": {
+    "title": "शॉपिंग बैग",
+    "empty": "आपका बैग खाली है",
+    "checkout": "चेकआउट पर जाएँ",
+    "coupon": "कूपन है?",
+    "subtotal": "उप-योग",
+    "total": "कुल",
+    "shipping": "शिपिंग"
+  },
+  "checkout": {
+    "title": "चेकआउट",
+    "loginOtp": "OTP से लॉगिन",
+    "address": "डिलीवरी पता",
+    "payment": "भुगतान",
+    "orderConfirmed": "ऑर्डर की पुष्टि हो गई!",
+    "trackOrder": "ऑर्डर ट्रैक करें"
+  },
+  "account": {
+    "dashboard": "डैशबोर्ड",
+    "orders": "मेरे ऑर्डर",
+    "wishlist": "विशलिस्ट",
+    "addresses": "पते",
+    "settings": "सेटिंग्स"
+  },
+  "common": {
+    "free": "मुफ़्त",
+    "language": "भाषा"
+  }
+}

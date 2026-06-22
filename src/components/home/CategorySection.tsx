@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import SectionHeading from '../ui/SectionHeading';
-import { categories } from '../../data/products';
+import { homepageCategories } from '../../data/products';
 
 export default function CategorySection() {
   return (
@@ -20,7 +20,7 @@ export default function CategorySection() {
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-5">
-          {categories.map((category, i) => (
+          {homepageCategories.map((category, i) => (
             <Link
               key={category.id}
               to={`/collections/${category.slug}`}

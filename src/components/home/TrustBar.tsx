@@ -11,7 +11,7 @@ const trustItems = [
 export default function TrustBar() {
   return (
     <section className="bg-white border-y border-rosegold-200/40 shadow-sm">
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="section-container">
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 divide-x divide-rosegold-100">
           {trustItems.map(({ icon: Icon, label, sublabel }) => (
             <div

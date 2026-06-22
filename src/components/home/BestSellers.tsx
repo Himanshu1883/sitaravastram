@@ -15,7 +15,7 @@ const displayProducts = bestsellers.length > 0 ? bestsellers : products;
 export default function BestSellers() {
   return (
     <section className="py-20 bg-cream-100">
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="section-container">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-4">
           <SectionHeading
             overline="Most Loved"

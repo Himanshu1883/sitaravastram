@@ -18,7 +18,7 @@ export default function Newsletter() {
       <div className="absolute top-1/2 left-8 w-32 h-32 rounded-full border border-rosegold-400/10 pointer-events-none" />
       <div className="absolute top-1/4 right-8 w-20 h-20 rounded-full border border-rosegold-400/15 pointer-events-none" />
 
-      <div className="relative max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative section-container">
         <div className="max-w-2xl mx-auto text-center">
           {/* Icon */}
           <div className="w-14 h-14 rounded-full bg-rosegold-500/20 border border-rosegold-400/30 flex items-center justify-center mx-auto mb-6">

@@ -14,6 +14,14 @@
     --light-rose: #E8C9B0;
     --cream: #FAF7F4;
     --text-dark: #1A1A2E;
+    --announcement-h: 2.25rem;
+    --navbar-h: 4rem;
+  }
+
+  @media (min-width: 1024px) {
+    :root {
+      --navbar-h: 5rem;
+    }
   }
 
   * {
@@ -22,6 +30,7 @@
 
   html {
     scroll-behavior: smooth;
+    overflow-x: hidden;
   }
 
   body {
@@ -105,6 +114,22 @@
 
   .glass-card {
     @apply backdrop-blur-md bg-white/10 border border-white/20 rounded-sm;
+  }
+
+  .section-container {
+    @apply w-full max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .hero-fullscreen {
+    position: relative;
+    overflow: hidden;
+    width: 100vw;
+    max-width: 100vw;
+    height: 100svh;
+    min-height: 600px;
+    margin-top: calc(-1 * (var(--announcement-h) + var(--navbar-h)));
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
   }
 
   .input-field {

@@ -14,7 +14,7 @@ export default function HeroSection() {
   const swiperRef = useRef(null);
 
   return (
-    <section className="relative h-screen min-h-[600px] max-h-[920px] overflow-hidden">
+    <section className="hero-fullscreen">
       <Swiper
         ref={swiperRef}
         modules={[Navigation, Pagination, Autoplay, EffectFade]}
@@ -45,8 +45,11 @@ export default function HeroSection() {
               <div className="absolute top-1/3 right-1/3 w-64 h-64 rounded-full border border-rosegold-400/15 float-slow hidden lg:block" style={{ animationDelay: '2s' }} />
 
               {/* Content */}
-              <div className="relative h-full flex items-center">
-                <div className="max-w-screen-xl mx-auto px-6 sm:px-8 lg:px-12 w-full">
+              <div
+                className="relative h-full flex items-center"
+                style={{ paddingTop: 'calc(var(--announcement-h) + var(--navbar-h))' }}
+              >
+                <div className="section-container">
                   <div className="max-w-xl">
                     {/* Badge */}
                     {slide.badge && (
