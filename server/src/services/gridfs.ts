@@ -1,3 +1,4 @@
+import { readFileSync } from 'fs';
 import { Readable } from 'stream';
 import mongoose from 'mongoose';
 import { getGridFSBucket } from '../config/db.js';
@@ -47,6 +48,35 @@ export async function uploadFromUrl(
   const fileId = await uploadBuffer(buffer, filename, contentType, { ...metadata, originalUrl: url });
   urlCache.set(url, fileId);
   return fileId;
+}
+
+function contentTypeFromFilename(filename: string): string {
+  const ext = filename.split('.').pop()?.toLowerCase();
+  if (ext === 'png') return 'image/png';
+  if (ext === 'webp') return 'image/webp';
+  if (ext === 'gif') return 'image/gif';
+  return 'image/jpeg';
+}
+
+export async function uploadLocalFile(
+  filePath: string,
+  uploadName: string,
+  metadata: Record<string, unknown> = {},
+): Promise<string> {
+  const buffer = readFileSync(filePath);
+  const contentType = contentTypeFromFilename(uploadName);
+  const fileId = await uploadBuffer(buffer, uploadName, contentType, { ...metadata, kind: 'image' });
+  return mediaUrl(fileId);
+}
+
+export async function uploadLocalFiles(paths: string[], prefix: string): Promise<string[]> {
+  const results: string[] = [];
+  for (let i = 0; i < paths.length; i++) {
+    const basename = paths[i].split(/[/\\]/).pop() ?? `file-${i}`;
+    const url = await uploadLocalFile(paths[i], `${prefix}-${i}-${basename}`);
+    results.push(url);
+  }
+  return results;
 }
 
 export async function uploadUrls(urls: string[], prefix: string): Promise<string[]> {

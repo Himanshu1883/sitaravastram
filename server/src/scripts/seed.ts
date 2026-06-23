@@ -13,10 +13,14 @@ import { Order } from '../models/Order.js';
 import { ReturnRequest } from '../models/Return.js';
 import { Admin } from '../models/Admin.js';
 import { hashPassword } from '../middleware/auth.js';
-import { uploadUrls, clearUrlCache } from '../services/gridfs.js';
+import { uploadUrls, uploadLocalFiles, uploadLocalFile, clearUrlCache } from '../services/gridfs.js';
+import { seedProducts } from '../seed/products.js';
+import { groupProductImages, resolveImagePath } from '../seed/localImages.js';
+import { HERO_BANNER_FILES, CATEGORY_IMAGE_FILES, featuredCollectionsSeed } from '../seed/marketing.js';
 import mongoose from 'mongoose';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const IMAGES_DIR = join(__dirname, '../seed/images');
 const catalog = JSON.parse(readFileSync(join(__dirname, '../seed/catalog.json'), 'utf-8'));
 
 const seedOrders = [
@@ -37,11 +41,27 @@ async function migrateUrl(url: string | undefined, prefix: string): Promise<stri
   return migrated;
 }
 
+const marketingUrlCache = new Map<string, string>();
+
+async function uploadMarketingFile(filename: string, prefix: string): Promise<string | undefined> {
+  const cached = marketingUrlCache.get(filename);
+  if (cached) return cached;
+  const path = resolveImagePath(IMAGES_DIR, filename);
+  if (!path) {
+    console.warn(`  ⚠ Missing marketing image: ${filename}`);
+    return undefined;
+  }
+  const safeName = filename.replace(/[^a-z0-9.]+/gi, '-');
+  const url = await uploadLocalFile(path, `${prefix}-${safeName}`, { kind: 'image' });
+  marketingUrlCache.set(filename, url);
+  return url;
+}
+
 async function seed(force: boolean) {
   await connectDb();
   clearUrlCache();
 
-  const { products, categories, homepageCategories, heroSlides, reviews, fabrics, occasions, instagramPosts, occasionSlugMap, allColors, defaultCoupons } = catalog;
+  const { categories, homepageCategories, heroSlides, reviews, fabrics, occasions, instagramPosts, occasionSlugMap, allColors, defaultCoupons } = catalog;
 
   const existing = await Product.countDocuments();
   if (existing > 0 && !force) {
@@ -67,12 +87,14 @@ async function seed(force: boolean) {
     ]);
   }
 
-  console.log('Uploading media to GridFS (this may take a few minutes)...');
+  console.log('Uploading marketing media to GridFS...');
 
   const homepageSlugs = new Set(homepageCategories.map((c: { slug: string }) => c.slug));
 
   for (const cat of categories) {
-    const image = await migrateUrl(cat.image, `cat-${cat.slug}`);
+    const imageFile = CATEGORY_IMAGE_FILES[cat.slug as string];
+    const localImage = imageFile ? await uploadMarketingFile(imageFile, `cat-${cat.slug}`) : undefined;
+    const image = localImage || (await migrateUrl(cat.image, `cat-${cat.slug}`)) || cat.image;
     await Category.create({
       legacyId: cat.id,
       name: cat.name,
@@ -83,8 +105,11 @@ async function seed(force: boolean) {
     });
   }
 
-  for (const slide of heroSlides) {
-    const image = await migrateUrl(slide.image, `hero-${slide.id}`);
+  for (let i = 0; i < heroSlides.length; i++) {
+    const slide = heroSlides[i];
+    const bannerFile = HERO_BANNER_FILES[i];
+    const localImage = await uploadMarketingFile(bannerFile, `hero-${slide.id}`);
+    const image = localImage || (await migrateUrl(slide.image, `hero-${slide.id}`)) || slide.image;
     await HeroSlide.create({
       legacyId: slide.id,
       title: slide.title,
@@ -118,17 +143,37 @@ async function seed(force: boolean) {
     })),
   );
 
+  const featuredCollections = await Promise.all(
+    featuredCollectionsSeed.map(async f => ({
+      id: f.id,
+      href: f.href,
+      imageAlt: f.imageAlt,
+      reverse: f.reverse,
+      image: (await uploadMarketingFile(f.imageFile, `featured-${f.id}`)) || '',
+    })),
+  );
+
   await HomepageBlock.create([
     { key: 'fabrics', data: migratedFabrics },
     { key: 'occasions', data: migratedOccasions },
     { key: 'instagramPosts', data: migratedInstagram },
     { key: 'occasionSlugMap', data: occasionSlugMap },
     { key: 'allColors', data: allColors },
+    { key: 'featuredCollections', data: featuredCollections },
   ]);
 
-  for (const product of products) {
-    const images = await uploadUrls(product.images, `product-${product.slug}`);
-    const video = product.video ? await migrateUrl(product.video, `video-${product.slug}`) : undefined;
+  const productImageMap = groupProductImages(IMAGES_DIR);
+  const missing = seedProducts.filter(p => !productImageMap.has(p.imageIndex));
+  if (missing.length) {
+    throw new Error(
+      `Missing local images for products: ${missing.map(p => p.imageIndex).join(', ')} in ${IMAGES_DIR}`,
+    );
+  }
+
+  console.log('Uploading product images from local files...');
+  for (const product of seedProducts) {
+    const localPaths = productImageMap.get(product.imageIndex)!;
+    const images = await uploadLocalFiles(localPaths, `product-${product.slug}`);
     await Product.create({
       legacyId: product.id,
       name: product.name,
@@ -137,7 +182,6 @@ async function seed(force: boolean) {
       originalPrice: product.originalPrice,
       discount: product.discount,
       images,
-      video,
       category: product.category,
       fabric: product.fabric,
       occasion: product.occasion,
@@ -158,7 +202,7 @@ async function seed(force: boolean) {
       inStock: product.inStock,
       tags: product.tags,
     });
-    console.log(`  ✓ ${product.name}`);
+    console.log(`  ✓ ${product.name} (${images.length} images)`);
   }
 
   for (const coupon of defaultCoupons) {
@@ -228,7 +272,7 @@ async function seed(force: boolean) {
   });
 
   console.log('\nSeed complete!');
-  console.log(`  Products: ${products.length}`);
+  console.log(`  Products: ${seedProducts.length}`);
   console.log(`  Categories: ${categories.length}`);
   console.log(`  Admin: ${env.adminEmail}`);
   await disconnectDb();

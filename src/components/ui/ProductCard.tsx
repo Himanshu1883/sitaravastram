@@ -8,7 +8,7 @@ import { toggleWishlist, selectIsWishlisted } from '../../store/wishlistSlice';
 import type { Product } from '../../types';
 import type { RootState } from '../../store';
 import { useFormatPrice } from '../../hooks/useFormatPrice';
-import { mediaUrl } from '../../lib/api';
+import CatalogImage from './CatalogImage';
 import ShopBagPlusIcon from './ShopBagPlusIcon';
 
 interface ProductCardProps {
@@ -47,8 +47,8 @@ export default function ProductCard({ product, className = '' }: ProductCardProp
     >
       {/* Image */}
       <div className="relative overflow-hidden aspect-[3/4] bg-cream-200">
-        <img
-          src={mediaUrl(product.images[hovered && product.images.length > 1 ? 1 : 0])}
+        <CatalogImage
+          src={product.images[hovered && product.images.length > 1 ? 1 : 0]}
           alt={product.name}
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
         />

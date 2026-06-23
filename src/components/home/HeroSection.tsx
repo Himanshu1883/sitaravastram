@@ -6,7 +6,7 @@ import { Navigation, Pagination, Autoplay, EffectFade } from 'swiper/modules';
 import { ArrowRight, ChevronRight } from 'lucide-react';
 import { useContentTranslation } from '../../hooks/useContentTranslation';
 import { useHomepage } from '../../hooks/useCatalog';
-import { mediaUrl } from '../../lib/api';
+import CatalogImage from '../ui/CatalogImage';
 
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -37,14 +37,15 @@ export default function HeroSection() {
         speed={900}
         className="hero-swiper h-full w-full"
       >
-        {heroSlides.map(slide => (
+        {heroSlides.map((slide, index) => (
           <SwiperSlide key={slide.id}>
             <div className="relative h-full w-full">
               {/* Background */}
               <div className="absolute inset-0">
-                <img
-                  src={mediaUrl(slide.image)}
+                <CatalogImage
+                  src={slide.image}
                   alt={hero(slide.id, 'title', slide.title)}
+                  priority={index === 0}
                   className="w-full h-full object-cover object-top"
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-navy-700/85 via-navy-700/50 to-transparent" />

@@ -90,6 +90,14 @@ export const fetchHomepage = () => api<HomepageData>('/api/homepage');
 export const fetchReviews = (productId?: string) =>
   api<import('../types').Review[]>(`/api/reviews${productId ? `?productId=${productId}` : ''}`);
 
+export interface FeaturedCollectionItem {
+  id: number;
+  image: string;
+  imageAlt: string;
+  href: string;
+  reverse: boolean;
+}
+
 export interface HomepageData {
   heroSlides: import('../types').HeroSlide[];
   homepageCategories: import('../types').Category[];
@@ -101,6 +109,7 @@ export interface HomepageData {
   bestSellers: import('../types').Product[];
   occasionSlugMap: Record<string, string>;
   allColors: string[];
+  featuredCollections: FeaturedCollectionItem[];
 }
 
 // Commerce

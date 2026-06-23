@@ -5,14 +5,17 @@ export interface MegaMenuLink {
 
 export interface MegaMenuColumn {
   heading: string;
+  /** Resolved from categories API at runtime */
   image?: string;
+  imageSlug?: string;
   links: MegaMenuLink[];
 }
 
 export interface MegaMenuPromo {
   title: string;
   description?: string;
-  image: string;
+  image?: string;
+  imageSlug?: string;
   href: string;
   cta?: string;
 }
@@ -26,9 +29,6 @@ export interface NavItem {
   columns: MegaMenuColumn[];
   promos?: MegaMenuPromo[];
 }
-
-const PX = (id: number, w = 600) =>
-  `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=${w}`;
 
 export const navItems: NavItem[] = [
   {
@@ -52,15 +52,15 @@ export const navItems: NavItem[] = [
           { label: 'Kurta Sets', href: '/collections/kurta-sets' },
           { label: 'Party Wear', href: '/collections/party-wear' },
           { label: 'Dupattas', href: '/collections/dupattas' },
-          { label: 'Silk Collection', href: '/collections/silk' },
+          { label: 'Silk Collection', href: '/collections/premium-collection' },
         ],
       },
       {
         heading: 'Shop by Occasion',
         links: [
-          { label: 'Everyday Essentials', href: '/collections/casual' },
-          { label: 'Office Wear', href: '/collections/office' },
-          { label: 'Weekend', href: '/collections/casual' },
+          { label: 'Everyday Essentials', href: '/collections/everyday-wear' },
+          { label: 'Office Wear', href: '/collections/office-wear' },
+          { label: 'Weekend', href: '/collections/everyday-wear' },
           { label: 'Festive Ready', href: '/collections/festive' },
           { label: 'Wedding Dressing', href: '/collections/wedding' },
         ],
@@ -80,13 +80,13 @@ export const navItems: NavItem[] = [
       {
         title: 'Cotton Favorites',
         description: 'Breathable, relaxed pieces for everyday wear.',
-        image: PX(33824984),
+        imageSlug: 'cotton-suits',
         href: '/collections/cotton-suits',
       },
       {
         title: 'New This Week',
         description: 'Fresh arrivals handpicked for you.',
-        image: PX(17503287),
+        imageSlug: 'party-wear',
         href: '/collections/new-arrivals',
         cta: 'Shop New Arrivals',
       },
@@ -99,7 +99,7 @@ export const navItems: NavItem[] = [
     columns: [
       {
         heading: 'Cotton Suits',
-        image: PX(33824984),
+        imageSlug: 'cotton-suits',
         links: [
           { label: 'Everyday Cotton', href: '/collections/cotton-suits' },
           { label: 'Printed Suits', href: '/collections/printed-suits' },
@@ -108,7 +108,7 @@ export const navItems: NavItem[] = [
       },
       {
         heading: 'Kurta Sets',
-        image: PX(20690511),
+        imageSlug: 'kurta-sets',
         links: [
           { label: 'Casual Kurtas', href: '/collections/kurta-sets' },
           { label: 'Palazzo Sets', href: '/collections/kurta-sets' },
@@ -117,25 +117,25 @@ export const navItems: NavItem[] = [
       },
       {
         heading: 'Party Wear',
-        image: PX(14952771),
+        imageSlug: 'party-wear',
         links: [
           { label: 'Evening Suits', href: '/collections/party-wear' },
           { label: 'Designer Picks', href: '/collections/designer-suits' },
-          { label: 'Embroidered', href: '/collections/party' },
+          { label: 'Embroidered', href: '/collections/party-wear' },
         ],
       },
       {
         heading: 'Festive',
-        image: PX(7176428),
+        imageSlug: 'festive',
         links: [
           { label: 'Festive Suits', href: '/collections/festive' },
-          { label: 'Silk Collection', href: '/collections/silk' },
+          { label: 'Silk Collection', href: '/collections/premium-collection' },
           { label: 'Wedding Edit', href: '/collections/wedding' },
         ],
       },
       {
         heading: 'Dupattas',
-        image: PX(7176438),
+        imageSlug: 'dupattas',
         links: [
           { label: 'Silk Dupattas', href: '/collections/dupattas' },
           { label: 'Printed Dupattas', href: '/collections/dupattas' },
@@ -155,15 +155,15 @@ export const navItems: NavItem[] = [
         links: [
           { label: 'Wedding Season', href: '/collections/wedding' },
           { label: 'Festive Edit', href: '/collections/festive' },
-          { label: 'Party Nights', href: '/collections/party' },
+          { label: 'Party Nights', href: '/collections/party-wear' },
           { label: 'Bridal Circle', href: '/collections/wedding' },
         ],
       },
       {
         heading: 'Everyday',
         links: [
-          { label: 'Casual Wear', href: '/collections/casual' },
-          { label: 'Office Wear', href: '/collections/office' },
+          { label: 'Casual Wear', href: '/collections/everyday-wear' },
+          { label: 'Office Wear', href: '/collections/office-wear' },
           { label: 'Cotton Comfort', href: '/collections/cotton-suits' },
           { label: 'Everyday Wear', href: '/collections/everyday-wear' },
         ],
@@ -191,13 +191,13 @@ export const navItems: NavItem[] = [
       {
         title: 'Wedding Collection',
         description: 'For the bride and her closest circle.',
-        image: PX(4048043),
+        imageSlug: 'wedding',
         href: '/collections/wedding',
       },
       {
         title: 'Festive Splendour',
         description: 'Rich embroideries and jewel-toned silks.',
-        image: PX(7176428),
+        imageSlug: 'festive',
         href: '/collections/festive',
         cta: 'Shop Festive',
       },
@@ -210,7 +210,7 @@ export const navItems: NavItem[] = [
     columns: [
       {
         heading: 'All Sale',
-        image: PX(17503287),
+        imageSlug: 'printed-suits',
         links: [
           { label: 'View All Deals', href: '/sale' },
           { label: 'Under ₹1499', href: '/sale' },
@@ -219,7 +219,7 @@ export const navItems: NavItem[] = [
       },
       {
         heading: 'Cotton',
-        image: PX(33824984),
+        imageSlug: 'cotton-suits',
         links: [
           { label: 'Cotton Suits', href: '/collections/cotton-suits' },
           { label: 'Printed Suits', href: '/collections/printed-suits' },
@@ -228,16 +228,16 @@ export const navItems: NavItem[] = [
       },
       {
         heading: 'Festive Sale',
-        image: PX(7176428),
+        imageSlug: 'festive',
         links: [
           { label: 'Festive Suits', href: '/collections/festive' },
           { label: 'Party Wear', href: '/collections/party-wear' },
-          { label: 'Silk Deals', href: '/collections/silk' },
+          { label: 'Silk Deals', href: '/collections/premium-collection' },
         ],
       },
       {
         heading: 'Clearance',
-        image: PX(17503287),
+        imageSlug: 'dupattas',
         links: [
           { label: 'Last Chance', href: '/sale' },
           { label: 'Dupattas', href: '/collections/dupattas' },

@@ -21,3 +21,7 @@ dist-ssr
 *.sln
 *.sw?
 .env
+
+# Seed images live in MongoDB GridFS after seeding — keep local copies outside git
+server/src/seed/images/*
+!server/src/seed/images/.gitkeep

@@ -1,7 +1,6 @@
 import HeroSection from '../components/home/HeroSection';
 import TrustBar from '../components/home/TrustBar';
-import CategorySection from '../components/home/CategorySection';
-import NewArrivals from '../components/home/NewArrivals';
+import CategoryShowcase from '../components/home/CategorySection';
 import BestSellers from '../components/home/BestSellers';
 import ShopByFabric from '../components/home/ShopByFabric';
 import ShopByOccasion from '../components/home/ShopByOccasion';
@@ -15,8 +14,7 @@ export default function HomePage() {
     <main>
       <HeroSection />
       <TrustBar />
-      <CategorySection />
-      <NewArrivals />
+      <CategoryShowcase />
       <BestSellers />
       <ShopByFabric />
       <ShopByOccasion />

@@ -1,74 +1,53 @@
-import { useState, useEffect, useCallback } from 'react';
-import type { Product, Category } from '../types';
-import { fetchProducts, fetchProduct, fetchCategories, fetchHomepage, type HomepageData } from '../lib/api';
+import type { HomepageData } from '../lib/api';
+import {
+  useGetHomepageQuery,
+  useGetProductsQuery,
+  useGetProductQuery,
+  useGetCategoriesQuery,
+} from '../store/catalogApi';
+
+function rtkErrorMessage(error: unknown): string | null {
+  if (!error) return null;
+  if (typeof error === 'object' && error !== null && 'status' in error) {
+    return `Request failed (${String((error as { status: unknown }).status)})`;
+  }
+  return 'Request failed';
+}
 
 export function useProducts(params?: Record<string, string>) {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const paramKey = JSON.stringify(params ?? {});
-
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    fetchProducts(params)
-      .then(data => { if (!cancelled) setProducts(data); })
-      .catch(err => { if (!cancelled) setError(err.message); })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
-  }, [paramKey]);
-
-  return { products, loading, error };
+  const { data, isLoading, isFetching, error } = useGetProductsQuery(params ?? undefined);
+  return {
+    products: data ?? [],
+    loading: isLoading || isFetching,
+    error: rtkErrorMessage(error),
+  };
 }
 
 export function useProduct(slug: string | undefined) {
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!slug) return;
-    let cancelled = false;
-    setLoading(true);
-    fetchProduct(slug)
-      .then(data => { if (!cancelled) setProduct(data); })
-      .catch(err => { if (!cancelled) setError(err.message); })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
-  }, [slug]);
-
-  return { product, loading, error };
+  const { data, isLoading, isFetching, error } = useGetProductQuery(slug ?? '', { skip: !slug });
+  return {
+    product: data ?? null,
+    loading: isLoading || isFetching,
+    error: rtkErrorMessage(error),
+  };
 }
 
 export function useCategories(featured?: boolean) {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetchCategories(featured)
-      .then(data => { if (!cancelled) setCategories(data); })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
-  }, [featured]);
-
-  return { categories, loading };
+  const { data, isLoading, isFetching } = useGetCategoriesQuery(featured);
+  return {
+    categories: data ?? [],
+    loading: isLoading || isFetching,
+  };
 }
 
 export function useHomepage() {
-  const [data, setData] = useState<HomepageData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const reload = useCallback(() => {
-    setLoading(true);
-    fetchHomepage()
-      .then(setData)
-      .catch(err => setError(err.message))
-      .finally(() => setLoading(false));
-  }, []);
-
-  useEffect(() => { reload(); }, [reload]);
-
-  return { data, loading, error, reload };
+  const { data, isLoading, error, refetch } = useGetHomepageQuery();
+  return {
+    data: (data ?? null) as HomepageData | null,
+    loading: isLoading && !data,
+    error: rtkErrorMessage(error),
+    reload: refetch,
+  };
 }
+
+export type { HomepageData };

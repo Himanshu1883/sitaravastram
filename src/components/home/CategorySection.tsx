@@ -3,7 +3,8 @@ import { ArrowRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useContentTranslation } from '../../hooks/useContentTranslation';
 import { useCategories, useHomepage } from '../../hooks/useCatalog';
-import { mediaUrl } from '../../lib/api';
+import CatalogImage from '../ui/CatalogImage';
+import NewArrivals from './NewArrivals';
 import type { Category } from '../../types';
 
 function bySlug(slug: string, categories: Category[], fallback: Category): Category {
@@ -12,7 +13,6 @@ function bySlug(slug: string, categories: Category[], fallback: Category): Categ
 
 function CollagePanel({
   category,
-  tagKey,
   hero = false,
   className = '',
   categoryName,
@@ -22,7 +22,6 @@ function CollagePanel({
   shopNowLabel,
 }: {
   category: Category;
-  tagKey?: string;
   hero?: boolean;
   className?: string;
   categoryName: string;
@@ -36,9 +35,10 @@ function CollagePanel({
       to={`/collections/${category.slug}`}
       className={`group relative block h-full min-h-0 overflow-hidden bg-navy-950 ${className}`}
     >
-      <img
-        src={mediaUrl(category.image)}
+      <CatalogImage
+        src={category.image}
         alt={categoryName}
+        priority={hero}
         className="absolute inset-0 h-full w-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-[1.05]"
       />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-navy-950/85 via-navy-950/30 to-navy-950/10 transition-opacity duration-500 group-hover:from-navy-950/90" />
@@ -86,7 +86,25 @@ function Banner({ children, className = '' }: { children: React.ReactNode; class
   );
 }
 
-export default function CategorySection() {
+function ExploreFooter() {
+  const { t } = useTranslation();
+  return (
+    <div className="flex flex-col items-center justify-center gap-4 bg-[#faf8f5] px-6 py-14 text-center sm:flex-row sm:py-16">
+      <p className="font-heading text-2xl font-medium text-navy-700 sm:text-3xl">
+        {t('home.exploreEveryCategory')}
+      </p>
+      <Link
+        to="/collections"
+        className="group inline-flex items-center gap-2 border border-navy-700 px-6 py-3 text-[11px] font-medium uppercase tracking-[0.18em] text-navy-700 transition-colors duration-300 hover:bg-navy-700 hover:text-white"
+      >
+        {t('home.viewAllCollections')}
+        <ArrowRight size={14} className="transition-transform duration-300 group-hover:translate-x-1" />
+      </Link>
+    </div>
+  );
+}
+
+function CategoryCollage({ part }: { part: 'first' | 'second' }) {
   const { t } = useTranslation();
   const { category: categoryLabel } = useContentTranslation();
   const { categories } = useCategories();
@@ -94,6 +112,7 @@ export default function CategorySection() {
   const h = homepage?.homepageCategories ?? categories.filter(c => c.featured).slice(0, 6);
   const fallback = h[0] ?? categories[0];
   if (!fallback) return null;
+
   const wedding = bySlug('wedding', categories, fallback);
   const office = bySlug('office-wear', categories, fallback);
   const premium = bySlug('premium-collection', categories, fallback);
@@ -103,7 +122,6 @@ export default function CategorySection() {
   const panel = (cat: Category, tagKey?: string, hero = false, className = '') => (
     <CollagePanel
       category={cat}
-      tagKey={tagKey}
       hero={hero}
       className={className}
       categoryName={categoryLabel(cat.slug, cat.name)}
@@ -114,74 +132,81 @@ export default function CategorySection() {
     />
   );
 
-  return (
-    <section className="w-full overflow-hidden bg-navy-950">
-      <Banner>
-        <div className="grid h-full w-full grid-cols-2 gap-1">
-          {panel(h[0], 'bestseller')}
-          {panel(h[1], 'partyEdit')}
-        </div>
-      </Banner>
-
-      <Banner>
-        <div className="grid h-full w-full grid-cols-1 gap-1 sm:grid-cols-3">
-          {panel(h[2], 'prints')}
-          {panel(h[3], 'festive')}
-          {panel(h[4])}
-        </div>
-      </Banner>
-
-      <Banner>
-        <div className="grid h-full w-full grid-cols-1 gap-1 md:grid-cols-2">
-          {panel(h[5], 'accessories', true)}
-          <div className="grid min-h-0 grid-rows-2 gap-1">
-            {panel(wedding, 'bridal')}
-            {panel(premium, 'premium')}
+  if (part === 'first') {
+    return (
+      <>
+        <Banner>
+          <div className="grid h-full w-full grid-cols-2 gap-1">
+            {panel(h[0], 'bestseller')}
+            {panel(h[1], 'partyEdit')}
           </div>
-        </div>
-      </Banner>
+        </Banner>
+        <Banner>
+          <div className="grid h-full w-full grid-cols-1 gap-1 sm:grid-cols-3">
+            {panel(h[2], 'prints')}
+            {panel(h[3], 'festive')}
+            {panel(h[4])}
+          </div>
+        </Banner>
+        <Banner>
+          <div className="grid h-full w-full grid-cols-1 gap-1 md:grid-cols-2">
+            {panel(h[5], 'accessories', true)}
+            <div className="grid min-h-0 grid-rows-2 gap-1">
+              {panel(wedding, 'bridal')}
+              {panel(premium, 'premium')}
+            </div>
+          </div>
+        </Banner>
+      </>
+    );
+  }
 
+  return (
+    <>
       <Banner>
         <div className="grid h-full w-full grid-cols-2 grid-rows-2 gap-1">
-          {panel(h[0])}
+          {panel(everyday, 'everyday')}
           {panel(h[2], 'new')}
           {panel(office)}
-          {panel(h[1], 'evening')}
+          {panel(designer, 'designer')}
         </div>
       </Banner>
-
       <Banner>
         <div className="grid h-full w-full grid-cols-1 gap-1 md:grid-cols-[2fr_3fr]">
           <div className="grid min-h-0 grid-rows-2 gap-1">
-            {panel(everyday, 'everyday')}
-            {panel(designer, 'designer')}
+            {panel(h[1], 'evening')}
+            {panel(h[4], 'kurtaSets')}
           </div>
           {panel(h[3], 'celebration', true)}
         </div>
       </Banner>
-
       <Banner>
         <div className="grid h-full w-full grid-cols-1 gap-1 lg:grid-cols-[3fr_2fr]">
           {panel(wedding, 'weddingCollection', true)}
           <div className="grid min-h-0 grid-rows-2 gap-1">
-            {panel(h[4], 'kurtaSets')}
+            {panel(h[0])}
             {panel(h[5])}
           </div>
         </div>
       </Banner>
+    </>
+  );
+}
 
-      <div className="flex flex-col items-center justify-center gap-4 bg-[#faf8f5] px-6 py-14 text-center sm:flex-row sm:py-16">
-        <p className="font-heading text-2xl font-medium text-navy-700 sm:text-3xl">
-          {t('home.exploreEveryCategory')}
-        </p>
-        <Link
-          to="/collections"
-          className="group inline-flex items-center gap-2 border border-navy-700 px-6 py-3 text-[11px] font-medium uppercase tracking-[0.18em] text-navy-700 transition-colors duration-300 hover:bg-navy-700 hover:text-white"
-        >
-          {t('home.viewAllCollections')}
-          <ArrowRight size={14} className="transition-transform duration-300 group-hover:translate-x-1" />
-        </Link>
-      </div>
-    </section>
+/** Category collage split around New Arrivals for better scroll rhythm. */
+export default function CategoryShowcase() {
+  return (
+    <>
+      <section className="w-full overflow-hidden bg-navy-950">
+        <CategoryCollage part="first" />
+      </section>
+
+      <NewArrivals embedded />
+
+      <section className="w-full overflow-hidden bg-navy-950">
+        <CategoryCollage part="second" />
+        <ExploreFooter />
+      </section>
+    </>
   );
 }

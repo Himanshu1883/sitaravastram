@@ -41,6 +41,7 @@ router.get('/', async (_req, res, next) => {
       bestSellers: bestSellers.map(p => toProductDto(p as never)),
       occasionSlugMap: blockMap.occasionSlugMap || {},
       allColors: blockMap.allColors || [],
+      featuredCollections: blockMap.featuredCollections || [],
     });
   } catch (err) {
     next(err);

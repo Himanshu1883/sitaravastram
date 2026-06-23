@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import type { MegaMenuColumn, MegaMenuPromo, NavItem } from '../../data/nav';
+import CatalogImage from '../ui/CatalogImage';
 
 function MegaColumnLinks({
   column,
@@ -39,12 +40,14 @@ function MegaPromoCard({
 }) {
   return (
     <Link to={promo.href} onClick={onNavigate} className="group block text-center min-w-0">
-      <div className="mega-arch overflow-hidden mb-4 bg-cream-200">
-        <img
-          src={promo.image}
-          alt={promo.title}
-          className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
-        />
+      <div className="mega-arch overflow-hidden mb-4 bg-cream-200 aspect-[3/4] sm:aspect-[4/5]">
+        {promo.image && (
+          <CatalogImage
+            src={promo.image}
+            alt={promo.title}
+            className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
+          />
+        )}
       </div>
       <h3 className="type-overline text-navy-900 mb-2">
         {promo.title}
@@ -69,16 +72,13 @@ function ColumnsMegaMenu({
   onNavigate?: () => void;
 }) {
   return (
-    <div
-      className="grid gap-8"
-      style={{ gridTemplateColumns: `repeat(${columns.length}, minmax(0, 1fr))` }}
-    >
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 sm:gap-8">
       {columns.map(column => (
         <div key={column.heading} className="min-w-0">
           {column.image && (
             <Link to={column.links[0]?.href ?? '/collections'} onClick={onNavigate} className="block mb-4 group">
-              <div className="aspect-[4/3] overflow-hidden bg-cream-200">
-                <img
+              <div className="aspect-[4/3] overflow-hidden bg-cream-200 rounded-sm">
+                <CatalogImage
                   src={column.image}
                   alt={column.heading}
                   className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
@@ -118,14 +118,14 @@ function EditorialMegaMenu({
   onNavigate?: () => void;
 }) {
   return (
-    <div className="flex gap-10 xl:gap-14">
-      <div className="flex-1 grid grid-cols-2 lg:grid-cols-4 gap-8 xl:gap-10">
+    <div className="flex flex-col lg:flex-row gap-10 xl:gap-14">
+      <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 xl:gap-10">
         {columns.map(column => (
           <MegaColumnLinks key={column.heading} column={column} onNavigate={onNavigate} />
         ))}
       </div>
       {promos && promos.length > 0 && (
-        <div className="hidden lg:grid grid-cols-2 gap-8 xl:gap-10 w-[min(42%,520px)] flex-shrink-0">
+        <div className="grid grid-cols-2 gap-6 sm:gap-8 lg:w-[min(42%,520px)] lg:flex-shrink-0">
           {promos.map(promo => (
             <MegaPromoCard key={promo.title} promo={promo} onNavigate={onNavigate} />
           ))}
@@ -145,8 +145,8 @@ export default function MegaMenu({
   if (!item.columns.length) return null;
 
   return (
-    <div className="absolute left-0 right-0 top-full bg-white border-b border-gray-100 shadow-[0_12px_40px_rgba(0,0,0,0.08)] animate-fade-in z-50">
-      <div className="section-container py-10 lg:py-12">
+    <div className="absolute left-0 right-0 top-full bg-white border-b border-gray-100 shadow-[0_12px_40px_rgba(0,0,0,0.08)] animate-fade-in z-50 max-h-[min(85vh,720px)] overflow-y-auto overscroll-contain">
+      <div className="section-container py-8 sm:py-10 lg:py-12">
         {item.megaLayout === 'columns' ? (
           <ColumnsMegaMenu columns={item.columns} onNavigate={onNavigate} />
         ) : (

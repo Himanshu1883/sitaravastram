@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useContentTranslation } from '../../hooks/useContentTranslation';
 import { useHomepage } from '../../hooks/useCatalog';
-import { mediaUrl } from '../../lib/api';
+import CatalogImage from '../ui/CatalogImage';
 
 export default function CategoryStrip() {
   const location = useLocation();
@@ -31,9 +31,10 @@ export default function CategoryStrip() {
                       : 'ring-white group-hover:ring-rosegold-200 group-hover:shadow-[0_3px_12px_rgba(0,0,0,0.12)]'
                   }`}
                 >
-                  <img
-                    src={mediaUrl(cat.image)}
+                  <CatalogImage
+                    src={cat.image}
                     alt={name}
+                    priority
                     className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
                   />
                 </div>

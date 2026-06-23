@@ -1,10 +1,23 @@
-import { configureStore, type Middleware, type UnknownAction } from '@reduxjs/toolkit';
+import { combineReducers, configureStore, type Middleware, type UnknownAction } from '@reduxjs/toolkit';
+import {
+  persistStore,
+  persistReducer,
+  FLUSH,
+  REHYDRATE,
+  PAUSE,
+  PERSIST,
+  PURGE,
+  REGISTER,
+} from 'redux-persist';
+import storage from 'redux-persist/lib/storage/session';
 import cartReducer from './cartSlice';
 import wishlistReducer from './wishlistSlice';
 import couponReducer from './couponSlice';
 import ordersReducer from './ordersSlice';
 import authReducer from './authSlice';
 import currencyReducer from './currencySlice';
+import { catalogApi } from './catalogApi';
+import { preloadHomepageImages } from '../lib/preloadImages';
 
 const CART_KEY = 'sitara_cart';
 const WISHLIST_KEY = 'sitara_wishlist';
@@ -37,21 +50,49 @@ const localStorageMiddleware: Middleware = store => next => action => {
   return result;
 };
 
+const rootReducer = combineReducers({
+  cart: cartReducer,
+  wishlist: wishlistReducer,
+  coupon: couponReducer,
+  orders: ordersReducer,
+  auth: authReducer,
+  currency: currencyReducer,
+  [catalogApi.reducerPath]: catalogApi.reducer,
+});
+
+const persistConfig = {
+  key: 'sitara-catalog',
+  storage,
+  whitelist: [catalogApi.reducerPath],
+};
+
+const persistedReducer = persistReducer(persistConfig, rootReducer);
+
 export const store = configureStore({
-  reducer: {
-    cart: cartReducer,
-    wishlist: wishlistReducer,
-    coupon: couponReducer,
-    orders: ordersReducer,
-    auth: authReducer,
-    currency: currencyReducer,
-  },
+  reducer: persistedReducer,
   preloadedState: {
     cart: preloadedCart,
     wishlist: preloadedWishlist,
   },
-  middleware: getDefaultMiddleware => getDefaultMiddleware().concat(localStorageMiddleware),
+  middleware: getDefaultMiddleware =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+      },
+    }).concat(catalogApi.middleware, localStorageMiddleware),
 });
+
+export const persistor = persistStore(store);
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
+
+/** Warm catalog cache + preload above-the-fold images (deduped by RTK Query). */
+export function prefetchCatalog() {
+  store.dispatch(catalogApi.endpoints.getHomepage.initiate(undefined, { forceRefetch: false }))
+    .unwrap()
+    .then(preloadHomepageImages)
+    .catch(() => undefined);
+  store.dispatch(catalogApi.endpoints.getProducts.initiate(undefined, { forceRefetch: false }));
+  store.dispatch(catalogApi.endpoints.getCategories.initiate(undefined, { forceRefetch: false }));
+}
