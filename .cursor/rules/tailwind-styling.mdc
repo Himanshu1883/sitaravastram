@@ -1,0 +1,39 @@
+---
+description: Use Tailwind for all UI styling; avoid adding new CSS to index.css
+alwaysApply: true
+---
+
+# Tailwind-First Styling
+
+When making UI or styling changes in this project, **always use Tailwind utility classes** directly in components.
+
+## Do
+
+- Put layout, spacing, colors, typography, hover/focus states, and responsive styles in `className` on the component
+- Extend `tailwind.config.js` for reusable design tokens (colors, spacing, fonts) shared across the app
+- Use Tailwind arbitrary values when needed: `bg-[#f3f3f3]`, `h-[calc(100svh-6rem)]`
+- Hide scrollbars with utilities: `[scrollbar-width:none] [&::-webkit-scrollbar]:hidden`
+
+## Don't
+
+- Add new custom classes or blocks to `src/index.css` for component styling
+- Create one-off `.my-component` CSS rules when Tailwind can express the same thing
+- Duplicate values in both CSS variables and Tailwind unless required for third-party integration
+
+## Exceptions (only when Tailwind is impractical)
+
+- Third-party library overrides (e.g. Swiper styles)
+- Existing global systems: `shopify-typography.css`, font imports, base resets
+- Complex keyframe animations — prefer `tailwind.config.js` `keyframes` / `animation` over raw CSS
+
+## Examples
+
+```tsx
+// ❌ BAD — new CSS in index.css
+// .category-strip { height: 5.5rem; background: #f3f3f3; }
+
+// ✅ GOOD — Tailwind on the component
+<div className="h-[5.5rem] overflow-hidden shrink-0 bg-[#f3f3f3] border-t border-black/[0.04]">
+```
+
+When refactoring existing `index.css` styles, move them to Tailwind in the component (and update related files like hero overlap margins) rather than leaving split styling in both places.

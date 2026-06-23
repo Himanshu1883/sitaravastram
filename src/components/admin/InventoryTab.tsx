@@ -1,10 +1,8 @@
-import type { AdminData } from '../../hooks/useAdminData';
+import type { AdminData, AdminApi } from '../../hooks/useAdminApi';
 
-export default function InventoryTab({ data, update }: { data: AdminData; update: (p: Partial<AdminData>) => void }) {
-  const updateStock = (id: string, stock: number) => {
-    update({
-      products: data.products.map(p => p.id === id ? { ...p, stock, inStock: stock > 0 } : p),
-    });
+export default function InventoryTab({ data, api }: { data: AdminData; api: AdminApi }) {
+  const updateStock = async (id: string, stock: number) => {
+    await api.updateStock(id, stock, stock > 0);
   };
 
   return (

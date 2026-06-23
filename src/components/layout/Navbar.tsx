@@ -1,108 +1,80 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ShoppingBag, Heart, Search, Menu, X, ChevronDown, Globe, Phone } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { selectCartCount, toggleCart } from '../../store/cartSlice';
 import { selectWishlistIds } from '../../store/wishlistSlice';
+import type { NavItem } from '../../data/nav';
+import { useTranslatedNav } from '../../hooks/useTranslatedNav';
+import MegaMenu from './MegaMenu';
+import Logo from '../ui/Logo';
+import CurrencySelector from '../ui/CurrencySelector';
+import SearchOverlay from './SearchOverlay';
+import { openAuthModal, selectAuth } from '../../store/authSlice';
 
-const navItems = [
-  {
-    label: 'Collections',
-    href: '/collections',
-    children: [
-      { label: 'New Arrivals', href: '/collections/new-arrivals' },
-      { label: 'Best Sellers', href: '/collections/best-sellers' },
-      { label: 'Featured', href: '/collections/featured' },
-    ],
-  },
-  {
-    label: 'Shop',
-    href: '/shop',
-    children: [
-      { label: 'Cotton Suits', href: '/collections/cotton-suits' },
-      { label: 'Party Wear', href: '/collections/party-wear' },
-      { label: 'Designer Suits', href: '/collections/designer-suits' },
-      { label: 'Kurta Sets', href: '/collections/kurta-sets' },
-      { label: 'Dupattas', href: '/collections/dupattas' },
-      { label: 'Silk Collection', href: '/collections/silk' },
-    ],
-  },
-  {
-    label: 'Occasions',
-    href: '/occasions',
-    children: [
-      { label: 'Casual Wear', href: '/collections/casual' },
-      { label: 'Office Wear', href: '/collections/office' },
-      { label: 'Party Wear', href: '/collections/party' },
-      { label: 'Festive', href: '/collections/festive' },
-      { label: 'Wedding', href: '/collections/wedding' },
-    ],
-  },
-  { label: 'Sale', href: '/sale' },
-];
-
-function NavLinks({
-  className = '',
-  onNavigate,
+function DesktopNavLinks({
+  items,
+  activeMega,
+  setActiveMega,
 }: {
-  className?: string;
-  onNavigate?: () => void;
+  items: NavItem[];
+  activeMega: string | null;
+  setActiveMega: (label: string | null) => void;
 }) {
-  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
-
   return (
-    <div className={className}>
-      {navItems.map(item => (
+    <div className="flex items-center gap-10 xl:gap-14 2xl:gap-16">
+      {items.map(item => (
         <div
           key={item.label}
           className="relative"
-          onMouseEnter={() => item.children && setActiveDropdown(item.label)}
-          onMouseLeave={() => setActiveDropdown(null)}
+          onMouseEnter={() => item.columns.length > 0 && setActiveMega(item.href)}
         >
           <Link
             to={item.href}
-            onClick={onNavigate}
-            className={`flex items-center gap-1 font-inter text-sm font-medium tracking-wide text-navy-700 transition-colors duration-200 hover:text-rosegold-500 ${item.label === 'Sale' ? 'text-red-500 font-semibold' : ''}`}
+            className={`flex items-center gap-1.5 type-nav font-bold transition-colors duration-200 hover:text-rosegold-500 ${
+              activeMega === item.href ? 'text-rosegold-500' : item.href === '/sale' ? 'text-red-500' : 'text-navy-700'
+            }`}
           >
             {item.label}
-            {item.children && <ChevronDown size={14} className="opacity-60" />}
+            {item.columns.length > 0 && <ChevronDown size={14} className={`opacity-60 transition-transform ${activeMega === item.href ? 'rotate-180' : ''}`} />}
           </Link>
-
-          {item.children && activeDropdown === item.label && (
-            <div className="absolute top-full left-0 mt-2 w-48 bg-white shadow-luxury-lg border border-rosegold-200/30 rounded-sm py-2 z-50">
-              {item.children.map(child => (
-                <Link
-                  key={child.label}
-                  to={child.href}
-                  onClick={onNavigate}
-                  className="block px-4 py-2.5 text-sm font-inter text-navy-700 hover:bg-cream-100 hover:text-rosegold-500 transition-colors duration-150"
-                >
-                  {child.label}
-                </Link>
-              ))}
-            </div>
-          )}
         </div>
       ))}
     </div>
   );
 }
 
-export default function Navbar() {
+export default function Navbar({ showCategoryStrip = false }: { showCategoryStrip?: boolean }) {
   const { t, i18n } = useTranslation();
+  const navItems = useTranslatedNav();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const searchRef = useRef<HTMLInputElement>(null);
+  const [activeMega, setActiveMega] = useState<string | null>(null);
+  const headerRef = useRef<HTMLElement>(null);
   const location = useLocation();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const cartCount = useSelector(selectCartCount);
   const wishlistIds = useSelector(selectWishlistIds);
+  const { isLoggedIn } = useSelector(selectAuth);
+
+  const handleAccountClick = () => {
+    if (isLoggedIn) {
+      navigate('/account');
+    } else {
+      dispatch(openAuthModal('/account'));
+    }
+  };
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 10);
+    document.documentElement.classList.toggle('no-category-strip', !showCategoryStrip);
+    return () => document.documentElement.classList.remove('no-category-strip');
+  }, [showCategoryStrip]);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 8);
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
@@ -111,11 +83,8 @@ export default function Navbar() {
   useEffect(() => {
     setMobileOpen(false);
     setSearchOpen(false);
+    setActiveMega(null);
   }, [location]);
-
-  useEffect(() => {
-    if (searchOpen) searchRef.current?.focus();
-  }, [searchOpen]);
 
   const toggleLanguage = () => {
     const next = i18n.language === 'en' ? 'hi' : 'en';
@@ -123,51 +92,55 @@ export default function Navbar() {
     localStorage.setItem('sitara_lang', next);
   };
 
+  const activeItem = navItems.find(item => item.href === activeMega);
+
   return (
     <>
       {/* Announcement — scrolls away */}
-      <div className="bg-navy-700 text-white text-center py-2 px-4 text-xs font-inter tracking-widest">
-        <span className="hidden sm:inline">
-          USE CODE <strong>SITARA10</strong> FOR 10% OFF YOUR FIRST ORDER &nbsp;|&nbsp; FREE SHIPPING ABOVE ₹999 &nbsp;|&nbsp; COD AVAILABLE &nbsp;|&nbsp; 7-DAY RETURNS
-        </span>
-        <span className="sm:hidden">USE CODE <strong>SITARA10</strong> FOR 10% OFF · FREE SHIPPING ABOVE ₹999</span>
+      <div className="bg-navy-700 text-white text-center py-2 px-4 type-body-xs tracking-[0.12em]">
+        <span className="hidden sm:inline" dangerouslySetInnerHTML={{ __html: t('nav.announcementDesktop') }} />
+        <span className="sm:hidden" dangerouslySetInnerHTML={{ __html: t('nav.announcementMobile') }} />
       </div>
 
-      {/* Sticky navbar */}
-      <nav
-        className={`sticky top-0 z-50 bg-white border-b transition-all duration-300 ${
-          scrolled ? 'border-rosegold-200/60 shadow-luxury' : 'border-rosegold-100/80'
+      {/* Sticky header: navbar + category strip + megamenu */}
+      <header
+        ref={headerRef}
+        className={`site-header sticky top-0 z-[95] bg-white transition-shadow duration-300 ${
+          scrolled || activeMega || searchOpen ? 'shadow-luxury' : ''
         }`}
+        onMouseLeave={() => setActiveMega(null)}
       >
-        <div className="section-container">
-          {/* Desktop: 3-column — nav left | logo center | actions right */}
-          <div className="hidden lg:grid lg:grid-cols-[1fr_auto_1fr] items-center h-20 gap-4">
-            <NavLinks className="flex items-center gap-7 justify-start" />
+        <nav
+          className={`relative border-b transition-colors duration-300 ${
+            scrolled || activeMega ? 'border-rosegold-200/60' : 'border-rosegold-100/80'
+          }`}
+        >
+          {/* Desktop — full width, equal columns around centered logo */}
+          <div className="hidden lg:grid lg:grid-cols-[1fr_auto_1fr] items-center h-24 w-full px-4 sm:px-6 lg:px-8 xl:px-10">
+            <div className="flex items-center justify-start min-w-0 pr-6 xl:pr-10">
+              <DesktopNavLinks items={navItems} activeMega={activeMega} setActiveMega={setActiveMega} />
+            </div>
 
-            <Link to="/" className="flex items-center gap-3 justify-center group">
-              <img
-                src="/assets/images/sitaravastram_logo.webp"
-                alt="Sitara Vastram"
-                className="h-11 w-11 object-contain transition-transform duration-300 group-hover:scale-105"
-              />
-              <span className="font-playfair text-2xl font-semibold text-navy-700 tracking-wide whitespace-nowrap">
-                SitaraVastram
-              </span>
-            </Link>
+            <Logo
+              to="/"
+              size="nav"
+              className="justify-self-center z-10 transition-transform duration-300 hover:scale-[1.03]"
+            />
 
-            <div className="flex items-center gap-1 justify-end">
+            <div className="flex items-center justify-end gap-4 xl:gap-6 2xl:gap-8 min-w-0 pl-6 xl:pl-10">
+              <CurrencySelector variant="desktop" />
               <button
                 onClick={toggleLanguage}
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-sm text-xs font-inter font-medium border border-rosegold-200 text-navy-700 hover:border-rosegold-500 transition-colors"
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-sm text-xs font-body font-bold text-navy-700 hover:border-rosegold-500 transition-colors"
                 title={t('common.language')}
               >
                 <Globe size={14} />
-                {i18n.language === 'en' ? 'हिं' : 'EN'}
+                {i18n.language === 'en' ? t('common.hiShort') : t('common.enShort')}
               </button>
               <button
                 className="p-2.5 rounded-sm text-navy-700 hover:text-rosegold-500 transition-colors"
-                onClick={() => setSearchOpen(!searchOpen)}
-                aria-label="Search"
+                onClick={() => setSearchOpen(true)}
+                aria-label={t('nav.search')}
               >
                 <Search size={19} />
               </button>
@@ -195,133 +168,127 @@ export default function Navbar() {
                   </span>
                 )}
               </button>
-              <Link
-                to="/account"
-                className="ml-1 px-4 py-2 text-sm font-inter font-medium tracking-wide rounded-sm border border-navy-700 text-navy-700 hover:bg-navy-700 hover:text-white transition-all duration-200"
+              <button
+                type="button"
+                onClick={handleAccountClick}
+                className="px-4 py-2 text-sm font-body font-bold tracking-wide rounded-sm border border-navy-700 text-navy-700 hover:bg-navy-700 hover:text-white transition-all duration-200"
               >
-                My Account
-              </Link>
+                {t('nav.myAccount')}
+              </button>
             </div>
           </div>
 
           {/* Mobile */}
-          <div className="flex lg:hidden items-center justify-between h-16 gap-3">
-            <button
-              className="p-2 text-navy-700 hover:text-rosegold-500 transition-colors"
-              onClick={() => setMobileOpen(!mobileOpen)}
-              aria-label="Toggle menu"
-            >
-              {mobileOpen ? <X size={22} /> : <Menu size={22} />}
-            </button>
+          <div className="relative flex lg:hidden items-center justify-between h-[4.25rem] gap-3 w-full px-4 sm:px-6">
+              <button
+                className="p-2 text-navy-700 hover:text-rosegold-500 transition-colors"
+                onClick={() => setMobileOpen(!mobileOpen)}
+                aria-label="Toggle menu"
+              >
+                {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+              </button>
 
-            <Link to="/" className="flex items-center gap-2 min-w-0">
-              <img
-                src="/assets/images/sitaravastram_logo.webp"
-                alt="Sitara Vastram"
-                className="h-9 w-9 object-contain flex-shrink-0"
+              <Logo
+                to="/"
+                size="lg"
+                className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2"
               />
-              <span className="font-playfair text-lg font-semibold text-navy-700 truncate">
-                SitaraVastram
-              </span>
-            </Link>
 
-            <div className="flex items-center gap-0.5">
-              <button
-                className="p-2 text-navy-700 hover:text-rosegold-500"
-                onClick={() => setSearchOpen(!searchOpen)}
-                aria-label="Search"
-              >
-                <Search size={18} />
-              </button>
-              <button
-                className="p-2 text-navy-700 hover:text-rosegold-500 relative"
-                onClick={() => dispatch(toggleCart())}
-                aria-label="Cart"
-              >
-                <ShoppingBag size={18} />
-                {cartCount > 0 && (
-                  <span className="absolute top-0.5 right-0.5 w-3.5 h-3.5 bg-rosegold-500 text-white text-[10px] rounded-full flex items-center justify-center">
-                    {cartCount}
-                  </span>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {searchOpen && (
-          <div className="border-t border-rosegold-200/40 bg-white">
-            <div className="section-container py-4">
-              <div className="relative max-w-2xl mx-auto">
-                <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input
-                  ref={searchRef}
-                  type="text"
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  placeholder="Search for suits, kurtas, silk, wedding..."
-                  className="w-full pl-12 pr-10 py-3.5 border border-rosegold-200 rounded-sm font-inter text-sm text-navy-700 bg-cream-100 focus:outline-none focus:border-rosegold-500 focus:ring-2 focus:ring-rosegold-200 placeholder:text-gray-400"
-                />
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery('')}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-navy-700"
-                  >
-                    <X size={16} />
-                  </button>
-                )}
+              <div className="flex items-center gap-0.5">
+                <CurrencySelector variant="compact" />
+                <button
+                  className="p-2 text-navy-700 hover:text-rosegold-500"
+                  onClick={() => setSearchOpen(true)}
+                  aria-label={t('nav.search')}
+                >
+                  <Search size={18} />
+                </button>
+                <button
+                  className="p-2 text-navy-700 hover:text-rosegold-500 relative"
+                  onClick={() => dispatch(toggleCart())}
+                  aria-label="Cart"
+                >
+                  <ShoppingBag size={18} />
+                  {cartCount > 0 && (
+                    <span className="absolute top-0.5 right-0.5 w-3.5 h-3.5 bg-rosegold-500 text-white text-[10px] rounded-full flex items-center justify-center">
+                      {cartCount}
+                    </span>
+                  )}
+                </button>
               </div>
             </div>
-          </div>
-        )}
-      </nav>
+
+          {activeItem && (
+            <MegaMenu item={activeItem} onNavigate={() => setActiveMega(null)} />
+          )}
+        </nav>
+      </header>
+
+      <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} anchorRef={headerRef} />
 
       {mobileOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden">
+        <div className="fixed inset-0 z-[60] lg:hidden">
           <div className="absolute inset-0 bg-navy-900/60 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
-          <div className="absolute left-0 top-0 h-full w-80 bg-white shadow-luxury-xl flex flex-col">
-            <div className="flex items-center justify-between px-6 py-5 border-b border-rosegold-200/40">
-              <Link to="/" className="flex items-center gap-2" onClick={() => setMobileOpen(false)}>
-                <img src="/assets/images/sitaravastram_logo.webp" alt="Sitara Vastram" className="h-9 w-9" />
-                <span className="font-playfair text-lg font-semibold text-navy-700">SitaraVastram</span>
-              </Link>
+          <div className="absolute left-0 top-0 h-full w-[min(100vw-3rem,22rem)] bg-white shadow-luxury-xl flex flex-col">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-rosegold-200/40">
+              <span className="type-heading-sm text-navy-700">{t('nav.menu')}</span>
               <button onClick={() => setMobileOpen(false)} className="p-2 text-navy-700 hover:text-rosegold-500">
                 <X size={20} />
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto py-4 px-4">
+            <div className="flex-1 overflow-y-auto py-3 px-3">
               {navItems.map(item => (
-                <div key={item.label} className="mb-1">
+                <div key={item.label} className="mb-3">
                   <Link
                     to={item.href}
                     onClick={() => setMobileOpen(false)}
-                    className={`flex items-center justify-between px-4 py-3 rounded-sm text-sm font-inter font-medium text-navy-700 hover:bg-cream-100 hover:text-rosegold-500 transition-colors ${item.label === 'Sale' ? 'text-red-500' : ''}`}
+                    className={`flex items-center justify-between px-3 py-2.5 rounded-sm text-sm font-body font-semibold ${
+                      item.href === '/sale' ? 'text-red-500' : 'text-navy-700'
+                    } hover:bg-cream-100`}
                   >
                     {item.label}
-                    {item.children && <ChevronDown size={14} />}
                   </Link>
-                  {item.children && (
-                    <div className="ml-4 border-l-2 border-rosegold-200/50 pl-4 mt-1 mb-2">
-                      {item.children.map(child => (
+                  {item.columns.map(column => (
+                    <div key={column.heading} className="px-3 mt-2 mb-3">
+                      <p className="text-[10px] font-semibold tracking-[0.15em] uppercase text-gray-500 mb-2">
+                        {column.heading}
+                      </p>
+                      {column.links.map(link => (
                         <Link
-                          key={child.label}
-                          to={child.href}
+                          key={link.href + link.label}
+                          to={link.href}
                           onClick={() => setMobileOpen(false)}
-                          className="block py-2 text-xs font-inter text-gray-600 hover:text-rosegold-500 transition-colors"
+                          className="block py-1.5 text-sm text-navy-700 hover:text-rosegold-500"
                         >
-                          {child.label}
+                          {link.label}
                         </Link>
                       ))}
                     </div>
-                  )}
+                  ))}
                 </div>
               ))}
             </div>
-            <div className="px-6 pb-8 pt-4 border-t border-rosegold-200/40">
-              <Link to="/account" className="btn-primary w-full text-center block mb-3" onClick={() => setMobileOpen(false)}>
-                My Account
-              </Link>
-              <a href="tel:+919876543210" className="flex items-center gap-2 text-sm font-inter text-navy-700 justify-center hover:text-rosegold-500 transition-colors">
+            <div className="px-5 pb-6 pt-3 border-t border-rosegold-200/40 space-y-2">
+              <div className="flex gap-2">
+                <CurrencySelector variant="menu" className="flex-1 min-w-0" />
+                <button
+                  onClick={toggleLanguage}
+                  className="flex-1 py-2 text-xs font-body font-medium border border-rosegold-200 rounded-sm text-navy-700"
+                >
+                  {i18n.language === 'en' ? t('common.hindi') : t('common.english')}
+                </button>
+              </div>
+              <button
+                type="button"
+                className="btn-primary w-full text-center block"
+                onClick={() => {
+                  setMobileOpen(false);
+                  handleAccountClick();
+                }}
+              >
+                {t('nav.myAccount')}
+              </button>
+              <a href="tel:+919876543210" className="flex items-center gap-2 text-sm font-body text-navy-700 justify-center hover:text-rosegold-500 transition-colors">
                 <Phone size={16} />
                 +91 98765 43210
               </a>

@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { FileText, Printer } from 'lucide-react';
-import type { AdminData } from '../../hooks/useAdminData';
+import type { AdminData, AdminApi } from '../../hooks/useAdminApi';
 import type { AdminOrder } from '../../types';
 
-export default function OrdersTab({ data, update }: { data: AdminData; update: (p: Partial<AdminData>) => void }) {
+export default function OrdersTab({ data, api }: { data: AdminData; api: AdminApi }) {
   const [invoiceOrder, setInvoiceOrder] = useState<AdminOrder | null>(null);
   const [labelOrder, setLabelOrder] = useState<AdminOrder | null>(null);
 
-  const updateStatus = (id: string, status: AdminOrder['status']) => {
-    update({ orders: data.orders.map(o => o.id === id ? { ...o, status } : o) });
+  const updateStatus = async (id: string, status: AdminOrder['status']) => {
+    await api.updateOrderStatus(id, status);
   };
 
   return (
@@ -18,7 +18,7 @@ export default function OrdersTab({ data, update }: { data: AdminData; update: (
           <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
             <div>
               <p className="font-semibold text-navy-700">#{order.id} — {order.customer}</p>
-              <p className="text-xs text-gray-500">{order.date} 뿯½ 뿯₽{order.total.toLocaleString('en-IN')} 뿯½ {order.paymentMethod.toUpperCase()}</p>
+              <p className="text-xs text-gray-500">{order.date} · ₹{order.total.toLocaleString('en-IN')} · {order.paymentMethod.toUpperCase()}</p>
             </div>
             <select value={order.status} onChange={e => updateStatus(order.id, e.target.value as AdminOrder['status'])} className="text-xs border border-gray-200 rounded-sm px-2 py-1.5 capitalize">
               {['placed', 'confirmed', 'shipped', 'delivered', 'cancelled', 'returned'].map(s => <option key={s} value={s}>{s}</option>)}
@@ -34,12 +34,12 @@ export default function OrdersTab({ data, update }: { data: AdminData; update: (
       {invoiceOrder && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={() => setInvoiceOrder(null)}>
           <div className="bg-white max-w-md w-full p-8 rounded-sm" onClick={e => e.stopPropagation()}>
-            <h3 className="font-playfair text-xl font-semibold text-navy-700 mb-4">Invoice #{invoiceOrder.id}</h3>
+            <h3 className="font-heading text-xl font-semibold text-navy-700 mb-4">Invoice #{invoiceOrder.id}</h3>
             <p className="text-sm text-gray-600 mb-1">Customer: {invoiceOrder.customer}</p>
             <p className="text-sm text-gray-600 mb-1">Date: {invoiceOrder.date}</p>
             <p className="text-sm text-gray-600 mb-4">Payment: {invoiceOrder.paymentMethod}</p>
             <div className="border-t border-b border-gray-100 py-3 mb-4">
-              <div className="flex justify-between font-semibold"><span>Total</span><span>뿯₽{invoiceOrder.total.toLocaleString('en-IN')}</span></div>
+              <div className="flex justify-between font-semibold"><span>Total</span><span>₹{invoiceOrder.total.toLocaleString('en-IN')}</span></div>
             </div>
             <button onClick={() => window.print()} className="btn-primary text-sm w-full">Print Invoice</button>
           </div>

@@ -1,3 +1,4 @@
+@import './styles/shopify-typography.css';
 @import 'swiper/css';
 @import 'swiper/css/navigation';
 @import 'swiper/css/pagination';
@@ -15,13 +16,27 @@
     --cream: #FAF7F4;
     --text-dark: #1A1A2E;
     --announcement-h: 2.25rem;
-    --navbar-h: 4rem;
+    --navbar-h: 4.25rem;
+    --site-header-h: calc(var(--announcement-h) + var(--navbar-h));
+    /* Measured to match category strip content height */
+    --category-strip-h: 6.5rem;
+  }
+
+  @media (min-width: 640px) {
+    :root {
+      --category-strip-h: 7rem;
+    }
   }
 
   @media (min-width: 1024px) {
     :root {
-      --navbar-h: 5rem;
+      --navbar-h: 6rem;
+      --category-strip-h: 7.5rem;
     }
+  }
+
+  html.no-category-strip {
+    --category-strip-h: 0px;
   }
 
   * {
@@ -29,12 +44,15 @@
   }
 
   html {
-    scroll-behavior: smooth;
     overflow-x: hidden;
   }
 
   body {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: var(--font-body);
+    font-size: var(--kit-font-size-base);
+    font-weight: var(--element-text-font-weight--body);
+    line-height: var(--kit-body-line-height);
+    letter-spacing: var(--kit-body-letter-spacing);
     color: #1A1A2E;
     background-color: #FAF7F4;
     -webkit-font-smoothing: antialiased;
@@ -42,7 +60,17 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Playfair Display', Georgia, serif;
+    font-family: var(--font-heading);
+    font-weight: var(--kit-heading-font-weight);
+    line-height: var(--kit-heading-line-height);
+    letter-spacing: var(--kit-heading-letter-spacing);
+    text-transform: var(--kit-heading-text-transform);
+  }
+
+  html[lang='hi'] body,
+  html[lang='hi'] .font-body,
+  html[lang='hi'] .font-inter {
+    font-family: var(--font-hindi);
   }
 
   ::selection {
@@ -71,23 +99,47 @@
 
 @layer components {
   .btn-primary {
-    @apply bg-navy-700 text-white font-inter font-medium px-6 py-3 rounded-sm tracking-wider uppercase text-sm transition-all duration-300 hover:bg-rosegold-500 hover:shadow-rose active:scale-95;
+    font-family: var(--font-body);
+    font-size: var(--element-button-font-size);
+    font-weight: var(--font-weight-500);
+    letter-spacing: var(--element-button-letter-spacing);
+    text-transform: var(--element-button-text-transform);
+    padding-block: var(--element-button-padding-block);
+    padding-inline: var(--element-button-padding-inline);
+    border-radius: var(--element-button-radius);
+    @apply bg-navy-700 text-white transition-all duration-300 hover:bg-rosegold-500 hover:shadow-rose active:scale-95;
   }
 
   .btn-outline {
-    @apply border border-white text-white font-inter font-medium px-6 py-3 rounded-sm tracking-wider uppercase text-sm transition-all duration-300 hover:bg-white hover:text-navy-700 active:scale-95;
+    font-family: var(--font-body);
+    font-size: var(--element-button-font-size);
+    font-weight: var(--font-weight-500);
+    letter-spacing: var(--element-button-letter-spacing);
+    text-transform: var(--element-button-text-transform);
+    padding-block: var(--element-button-padding-block);
+    padding-inline: var(--element-button-padding-inline);
+    border-radius: var(--element-button-radius);
+    @apply border border-white text-white transition-all duration-300 hover:bg-white hover:text-navy-700 active:scale-95;
   }
 
   .btn-rose {
-    @apply bg-rosegold-500 text-white font-inter font-medium px-6 py-3 rounded-sm tracking-wider uppercase text-sm transition-all duration-300 hover:bg-rosegold-600 hover:shadow-rose active:scale-95;
+    font-family: var(--font-body);
+    font-size: var(--element-button-font-size);
+    font-weight: var(--font-weight-500);
+    letter-spacing: var(--element-button-letter-spacing);
+    text-transform: var(--element-button-text-transform);
+    padding-block: var(--element-button-padding-block);
+    padding-inline: var(--element-button-padding-inline);
+    border-radius: var(--element-button-radius);
+    @apply bg-rosegold-500 text-white transition-all duration-300 hover:bg-rosegold-600 hover:shadow-rose active:scale-95;
   }
 
   .section-heading {
-    @apply font-playfair text-3xl md:text-4xl lg:text-5xl text-navy-700 font-semibold leading-tight;
+    @apply type-heading-xl text-navy-700;
   }
 
   .section-subheading {
-    @apply font-inter text-base text-rosegold-500 tracking-widest uppercase font-medium;
+    @apply type-overline text-rosegold-500;
   }
 
   .luxury-card {
@@ -109,7 +161,7 @@
   }
 
   .nav-link {
-    @apply font-inter text-sm font-medium tracking-wide text-navy-700 hover:text-rosegold-500 transition-colors duration-200 relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-rosegold-500 after:transition-all after:duration-300 hover:after:w-full;
+    @apply type-nav text-navy-700 hover:text-rosegold-500 transition-colors duration-200 relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-rosegold-500 after:transition-all after:duration-300 hover:after:w-full;
   }
 
   .glass-card {
@@ -123,21 +175,33 @@
   .hero-fullscreen {
     position: relative;
     overflow: hidden;
-    width: 100vw;
-    max-width: 100vw;
-    height: 100svh;
-    min-height: 600px;
-    margin-top: calc(-1 * (var(--announcement-h) + var(--navbar-h)));
-    margin-left: calc(50% - 50vw);
-    margin-right: calc(50% - 50vw);
+    width: 100%;
+    /* Fixed overlap — strip height never changes on scroll (no vertical jump) */
+    height: calc(100svh - var(--navbar-h));
+    margin-top: calc(-1 * var(--category-strip-h));
+    min-height: 480px;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+
+  .site-header {
+    transform: translateZ(0);
+    backface-visibility: hidden;
   }
 
   .input-field {
-    @apply w-full border border-rosegold-200 rounded-sm px-4 py-3 font-inter text-sm text-navy-700 bg-white focus:outline-none focus:border-rosegold-500 focus:ring-2 focus:ring-rosegold-200 transition-all duration-200 placeholder:text-gray-400;
+    font-family: var(--font-body);
+    font-size: var(--element-input-font-size);
+    line-height: var(--element-input-line-height);
+    letter-spacing: var(--element-input-letter-spacing);
+    padding-block: var(--element-input-padding-block);
+    padding-inline: var(--element-input-padding-inline);
+    border-radius: var(--element-input-radius);
+    @apply w-full border border-rosegold-200 text-navy-700 bg-white focus:outline-none focus:border-rosegold-500 focus:ring-2 focus:ring-rosegold-200 transition-all duration-200 placeholder:text-gray-400;
   }
 
   .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 text-xs font-inter font-medium tracking-wide rounded-sm;
+    @apply type-badge inline-flex items-center px-2.5 py-0.5 rounded-sm;
   }
 
   .badge-sale {
@@ -154,9 +218,11 @@
 }
 
 @layer utilities {
-  .font-playfair { font-family: 'Playfair Display', Georgia, serif; }
-  .font-inter { font-family: 'Inter', system-ui, sans-serif; }
-  .font-devanagari { font-family: 'Noto Sans Devanagari', sans-serif; }
+  .font-playfair { font-family: var(--font-heading); }
+  .font-inter { font-family: var(--font-body); }
+  .font-heading { font-family: var(--font-heading); }
+  .font-body { font-family: var(--font-body); }
+  .font-devanagari { font-family: var(--font-hindi); }
 
   .text-balance { text-wrap: balance; }
 
@@ -185,6 +251,19 @@
 
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+
+  .mega-arch {
+    aspect-ratio: 4 / 5;
+    border-radius: 50% 50% 0 0 / 18% 18% 0 0;
+  }
+
+  .brand-logo {
+    flex-shrink: 0;
+  }
+
+  .brand-logo-emblem {
+    flex-shrink: 0;
   }
 }
 
@@ -250,6 +329,41 @@
   background: #1B2A4A;
   color: white;
   border-color: #1B2A4A;
+}
+
+/* Customer reviews carousel */
+.reviews-swiper {
+  overflow: hidden;
+}
+
+.reviews-swiper .swiper-slide {
+  width: auto;
+  height: auto;
+}
+
+.reviews-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 9999px;
+  background: #1a1a1a;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.2s ease, background-color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.reviews-nav-btn:hover:not(:disabled) {
+  background: #333;
+  transform: scale(1.04);
+}
+
+.reviews-nav-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
 }
 
 /* Floating animation for decorative elements */

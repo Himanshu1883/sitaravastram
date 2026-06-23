@@ -1,0 +1,42 @@
+import { Router } from 'express';
+import healthRoutes from './health.js';
+import mediaRoutes from './media.js';
+import homepageRoutes from './homepage.js';
+import productRoutes from './products.js';
+import categoryRoutes from './categories.js';
+import reviewRoutes from './reviews.js';
+import authRoutes from './auth.js';
+import adminAuthRoutes from './adminAuth.js';
+import couponRoutes from './coupons.js';
+import orderRoutes from './orders.js';
+import adminProductRoutes from './admin/products.js';
+import adminCategoryRoutes from './admin/categories.js';
+import adminCouponRoutes from './admin/coupons.js';
+import adminOrderRoutes from './admin/orders.js';
+import adminReturnRoutes from './admin/returns.js';
+import adminNotificationRoutes from './admin/notifications.js';
+import adminDashboardRoutes from './admin/dashboard.js';
+import adminMediaRoutes from './admin/media.js';
+
+const router = Router();
+
+router.use('/health', healthRoutes);
+router.use('/media', mediaRoutes);
+router.use('/homepage', homepageRoutes);
+router.use('/products', productRoutes);
+router.use('/categories', categoryRoutes);
+router.use('/reviews', reviewRoutes);
+router.use('/auth', authRoutes);
+router.use('/admin/auth', adminAuthRoutes);
+router.use('/coupons', couponRoutes);
+router.use('/orders', orderRoutes);
+router.use('/admin/products', adminProductRoutes);
+router.use('/admin/categories', adminCategoryRoutes);
+router.use('/admin/coupons', adminCouponRoutes);
+router.use('/admin/orders', adminOrderRoutes);
+router.use('/admin/returns', adminReturnRoutes);
+router.use('/admin/notifications', adminNotificationRoutes);
+router.use('/admin/dashboard', adminDashboardRoutes);
+router.use('/admin/media', adminMediaRoutes);
+
+export default router;

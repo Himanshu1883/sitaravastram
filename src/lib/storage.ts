@@ -2,6 +2,8 @@ const ADMIN_KEY = 'sitara_admin_data';
 const ORDERS_KEY = 'sitara_orders';
 const REVIEWS_KEY = 'sitara_reviews';
 const ABANDONED_KEY = 'sitara_abandoned_carts';
+const RECENT_PRODUCTS_KEY = 'sitara_recent_products';
+const MAX_RECENT_PRODUCTS = 8;
 
 export interface AdminData {
   products: import('../types').Product[];
@@ -71,4 +73,24 @@ export function loadAbandonedCarts(): { id: string; items: import('../types').Ca
   } catch {
     return [];
   }
+}
+
+export function loadRecentlyViewedSlugs(): string[] {
+  try {
+    const raw = localStorage.getItem(RECENT_PRODUCTS_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function addRecentlyViewed(slug: string) {
+  if (!slug) return;
+  const current = loadRecentlyViewedSlugs().filter(s => s !== slug);
+  current.unshift(slug);
+  localStorage.setItem(RECENT_PRODUCTS_KEY, JSON.stringify(current.slice(0, MAX_RECENT_PRODUCTS)));
+}
+
+export function clearRecentlyViewed() {
+  localStorage.removeItem(RECENT_PRODUCTS_KEY);
 }

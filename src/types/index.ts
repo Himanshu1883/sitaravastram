@@ -34,6 +34,7 @@ export interface Category {
   slug: string;
   image: string;
   count?: number;
+  featured?: boolean;
 }
 
 export interface Review {

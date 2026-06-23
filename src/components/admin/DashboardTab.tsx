@@ -1,5 +1,5 @@
 import { IndianRupee, ShoppingCart, Users, TrendingUp, ArrowUpRight, ArrowDownRight } from 'lucide-react';
-import type { AdminData } from '../../hooks/useAdminData';
+import type { AdminData } from '../../hooks/useAdminApi';
 
 export default function DashboardTab({ data }: { data: AdminData }) {
   const totalRevenue = data.orders.reduce((s, o) => s + o.total, 0);
@@ -8,10 +8,10 @@ export default function DashboardTab({ data }: { data: AdminData }) {
   const todaysSales = data.orders.filter(o => o.date === today).reduce((s, o) => s + o.total, 0);
 
   const metrics = [
-    { label: 'Total Revenue', value: `뿯₽${(totalRevenue / 100000).toFixed(1)}L`, change: '+23%', up: true, icon: IndianRupee, color: 'text-navy-700' },
+    { label: 'Total Revenue', value: `₹${(totalRevenue / 100000).toFixed(1)}L`, change: '+23%', up: true, icon: IndianRupee, color: 'text-navy-700' },
     { label: 'Total Orders', value: data.orders.length.toLocaleString('en-IN'), change: '+15%', up: true, icon: ShoppingCart, color: 'text-rosegold-500' },
     { label: 'Pending Orders', value: pendingOrders.toString(), change: `${pendingOrders} active`, up: pendingOrders < 5, icon: Users, color: 'text-amber-600' },
-    { label: "Today's Sales", value: `뿯₽${todaysSales.toLocaleString('en-IN')}`, change: today, up: true, icon: TrendingUp, color: 'text-emerald-600' },
+    { label: "Today's Sales", value: `₹${todaysSales.toLocaleString('en-IN')}`, change: today, up: true, icon: TrendingUp, color: 'text-emerald-600' },
   ];
 
   const statusCounts = {
@@ -33,15 +33,15 @@ export default function DashboardTab({ data }: { data: AdminData }) {
                 {metric.up ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}{metric.change}
               </span>
             </div>
-            <p className="font-playfair text-2xl font-bold text-navy-700">{metric.value}</p>
-            <p className="font-inter text-xs text-gray-500 mt-1">{metric.label}</p>
+            <p className="font-heading text-2xl font-bold text-navy-700">{metric.value}</p>
+            <p className="font-body text-xs text-gray-500 mt-1">{metric.label}</p>
           </div>
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 bg-white rounded-sm shadow-card p-5">
-          <h3 className="font-playfair text-base font-semibold text-navy-700 mb-5">Revenue Overview</h3>
+          <h3 className="font-heading text-base font-semibold text-navy-700 mb-5">Revenue Overview</h3>
           <div className="flex items-end gap-3 h-32">
             {[65, 80, 55, 95, 75, 88, 70, 92, 60, 85, 78, 96].map((h, i) => (
               <div key={i} className="flex-1"><div className="w-full rounded-sm bg-navy-700 hover:bg-rosegold-500 transition-colors" style={{ height: `${h}%` }} /></div>
@@ -49,7 +49,7 @@ export default function DashboardTab({ data }: { data: AdminData }) {
           </div>
         </div>
         <div className="bg-white rounded-sm shadow-card p-5">
-          <h3 className="font-playfair text-base font-semibold text-navy-700 mb-5">Order Status</h3>
+          <h3 className="font-heading text-base font-semibold text-navy-700 mb-5">Order Status</h3>
           {[
             { label: 'Delivered', count: statusCounts.delivered, color: 'bg-emerald-400' },
             { label: 'Shipped', count: statusCounts.shipped, color: 'bg-orange-400' },
@@ -65,17 +65,17 @@ export default function DashboardTab({ data }: { data: AdminData }) {
       </div>
 
       <div className="bg-white rounded-sm shadow-card p-5">
-        <h3 className="font-playfair text-base font-semibold text-navy-700 mb-5">Recent Orders</h3>
+        <h3 className="font-heading text-base font-semibold text-navy-700 mb-5">Recent Orders</h3>
         <div className="space-y-3">
           {data.orders.slice(0, 5).map(order => (
             <div key={order.id} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
               <div>
                 <p className="text-xs font-semibold text-navy-700">{order.customer}</p>
-                <p className="text-xs text-gray-500">#{order.id} 뿯½ {order.date}</p>
+                <p className="text-xs text-gray-500">#{order.id} · {order.date}</p>
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 capitalize">{order.status}</span>
-                <span className="text-xs font-semibold">뿯₽{order.total.toLocaleString('en-IN')}</span>
+                <span className="text-xs font-semibold">₹{order.total.toLocaleString('en-IN')}</span>
               </div>
             </div>
           ))}

@@ -10,15 +10,15 @@ export default function SectionHeading({ overline, title, subtitle, center = fal
   return (
     <div className={`mb-10 ${center ? 'text-center' : ''}`}>
       {overline && (
-        <p className={`font-inter text-xs tracking-[0.25em] uppercase font-semibold mb-3 ${light ? 'text-rosegold-300' : 'text-rosegold-500'}`}>
+        <p className={`type-overline mb-3 ${light ? 'text-rosegold-300' : 'text-rosegold-500'}`}>
           {overline}
         </p>
       )}
-      <h2 className={`font-playfair text-3xl md:text-4xl lg:text-5xl font-semibold leading-tight ${light ? 'text-white' : 'text-navy-700'}`}>
+      <h2 className={`type-heading-xl ${light ? 'text-white' : 'text-navy-700'}`}>
         {title}
       </h2>
       {subtitle && (
-        <p className={`font-inter text-base mt-4 max-w-xl leading-relaxed ${light ? 'text-white/70' : 'text-gray-500'} ${center ? 'mx-auto' : ''}`}>
+        <p className={`type-body-md mt-4 max-w-xl ${light ? 'text-white/70' : 'text-gray-500'} ${center ? 'mx-auto' : ''}`}>
           {subtitle}
         </p>
       )}

@@ -1,11 +1,15 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, ShoppingBag, Eye, Star } from 'lucide-react';
+import { Heart, Eye, Star } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToCart } from '../../store/cartSlice';
 import { toggleWishlist, selectIsWishlisted } from '../../store/wishlistSlice';
 import type { Product } from '../../types';
 import type { RootState } from '../../store';
+import { useFormatPrice } from '../../hooks/useFormatPrice';
+import { mediaUrl } from '../../lib/api';
+import ShopBagPlusIcon from './ShopBagPlusIcon';
 
 interface ProductCardProps {
   product: Product;
@@ -13,9 +17,11 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, className = '' }: ProductCardProps) {
+  const { t } = useTranslation();
   const [hovered, setHovered] = useState(false);
   const dispatch = useDispatch();
   const isWishlisted = useSelector((state: RootState) => selectIsWishlisted(product.id)(state));
+  const formatPrice = useFormatPrice();
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -42,29 +48,43 @@ export default function ProductCard({ product, className = '' }: ProductCardProp
       {/* Image */}
       <div className="relative overflow-hidden aspect-[3/4] bg-cream-200">
         <img
-          src={product.images[hovered && product.images.length > 1 ? 1 : 0]}
+          src={mediaUrl(product.images[hovered && product.images.length > 1 ? 1 : 0])}
           alt={product.name}
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
         />
 
-        {/* Overlay Actions */}
-        <div className={`absolute inset-0 bg-navy-700/20 flex items-center justify-center gap-3 transition-all duration-300 ${hovered ? 'opacity-100' : 'opacity-0'}`}>
+        <div
+          className={`pointer-events-none absolute inset-0 bg-gradient-to-t from-navy-900/45 via-navy-900/5 to-transparent transition-opacity duration-300 ${
+            hovered ? 'opacity-100' : 'opacity-0'
+          }`}
+        />
+
+        <div
+          className={`absolute inset-x-0 bottom-4 flex justify-center px-3 transition-all duration-300 ${
+            hovered ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-3 opacity-0'
+          }`}
+        >
           <button
+            type="button"
             onClick={handleAddToCart}
-            className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-navy-700 hover:bg-navy-700 hover:text-white transition-all duration-200 shadow-lg translate-y-2 group-hover:translate-y-0 transition-transform"
-            aria-label="Add to cart"
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-2.5 font-body text-[11px] font-semibold uppercase tracking-[0.14em] text-navy-900 shadow-[0_4px_20px_rgba(0,0,0,0.15)] transition-colors duration-300 hover:bg-navy-900 hover:text-white"
+            aria-label={t('product.addToBag')}
           >
-            <ShoppingBag size={16} />
+            <ShopBagPlusIcon />
+            <span>{t('product.addToBag')}</span>
           </button>
-          <Link
-            to={`/product/${product.slug}`}
-            onClick={e => e.stopPropagation()}
-            className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-navy-700 hover:bg-navy-700 hover:text-white transition-all duration-200 shadow-lg translate-y-2 group-hover:translate-y-0 transition-transform delay-75"
-            aria-label="Quick view"
-          >
-            <Eye size={16} />
-          </Link>
         </div>
+
+        <Link
+          to={`/product/${product.slug}`}
+          onClick={e => e.stopPropagation()}
+          className={`absolute right-3 top-12 flex h-8 w-8 items-center justify-center rounded-full bg-white/95 text-navy-700 shadow-card transition-all duration-300 hover:bg-navy-900 hover:text-white ${
+            hovered ? 'translate-y-0 opacity-100' : 'pointer-events-none -translate-y-1 opacity-0'
+          }`}
+          aria-label="Quick view"
+        >
+          <Eye size={14} />
+        </Link>
 
         {/* Wishlist Button */}
         <button
@@ -85,8 +105,8 @@ export default function ProductCard({ product, className = '' }: ProductCardProp
 
       {/* Info */}
       <div className="p-4">
-        <p className="text-xs font-inter text-rosegold-500 uppercase tracking-widest mb-1">{product.fabric}</p>
-        <h3 className="font-inter text-sm font-medium text-navy-700 leading-snug line-clamp-2 mb-2 group-hover:text-rosegold-500 transition-colors">
+        <p className="type-overline text-rosegold-500 mb-1">{product.fabric}</p>
+        <h3 className="type-body-sm font-medium text-navy-700 line-clamp-2 mb-2 group-hover:text-rosegold-500 transition-colors">
           {product.name}
         </h3>
 
@@ -101,17 +121,17 @@ export default function ProductCard({ product, className = '' }: ProductCardProp
               />
             ))}
           </div>
-          <span className="text-xs font-inter text-gray-500">({product.reviewCount})</span>
+          <span className="type-caption">({product.reviewCount})</span>
         </div>
 
         {/* Price */}
         <div className="flex items-baseline gap-2">
-          <span className="font-playfair text-base font-semibold text-navy-700">
-            ₹{product.price.toLocaleString('en-IN')}
+          <span className="type-price text-navy-700">
+            {formatPrice(product.price)}
           </span>
           {product.originalPrice && (
-            <span className="text-xs font-inter text-gray-400 line-through">
-              ₹{product.originalPrice.toLocaleString('en-IN')}
+            <span className="type-body-xs text-gray-400 line-through">
+              {formatPrice(product.originalPrice)}
             </span>
           )}
         </div>

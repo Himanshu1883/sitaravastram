@@ -4,6 +4,7 @@ import wishlistReducer from './wishlistSlice';
 import couponReducer from './couponSlice';
 import ordersReducer from './ordersSlice';
 import authReducer from './authSlice';
+import currencyReducer from './currencySlice';
 
 const CART_KEY = 'sitara_cart';
 const WISHLIST_KEY = 'sitara_wishlist';
@@ -43,6 +44,7 @@ export const store = configureStore({
     coupon: couponReducer,
     orders: ordersReducer,
     auth: authReducer,
+    currency: currencyReducer,
   },
   preloadedState: {
     cart: preloadedCart,

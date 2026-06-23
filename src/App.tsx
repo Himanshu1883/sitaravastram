@@ -1,9 +1,12 @@
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import Navbar from './components/layout/Navbar';
+import CategoryStrip from './components/layout/CategoryStrip';
 import Footer from './components/layout/Footer';
 import CartDrawer from './components/layout/CartDrawer';
 import BottomNav from './components/layout/BottomNav';
 import FloatingActions from './components/ui/FloatingActions';
+import AuthModal from './components/auth/AuthModal';
+import AdminProtected from './components/admin/AdminProtected';
 import HomePage from './pages/HomePage';
 import CollectionPage from './pages/CollectionPage';
 import ProductDetailPage from './pages/ProductDetailPage';
@@ -11,23 +14,38 @@ import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import AccountPage from './pages/AccountPage';
 import AdminPage from './pages/AdminPage';
+import AdminLoginPage from './pages/AdminLoginPage';
 
 function Layout() {
   const location = useLocation();
-  const isAdmin = location.pathname.startsWith('/admin');
-
-  if (isAdmin) {
-    return (
-      <Routes>
-        <Route path="/admin" element={<AdminPage />} />
-      </Routes>
-    );
-  }
+  const isAdminRoute = location.pathname.startsWith('/admin');
+  const isAdminLogin = location.pathname === '/admin/login';
+  const isStorefront = !isAdminRoute;
 
   return (
     <>
-      <Navbar />
+      {!isAdminLogin && <Navbar showCategoryStrip={location.pathname === '/' && !isAdminRoute} />}
+      {location.pathname === '/' && !isAdminRoute && <CategoryStrip />}
+
       <Routes>
+        <Route path="/admin/login" element={<AdminLoginPage />} />
+        <Route
+          path="/admin"
+          element={
+            <AdminProtected>
+              <Navigate to="/admin/dashboard" replace />
+            </AdminProtected>
+          }
+        />
+        <Route
+          path="/admin/:tab"
+          element={
+            <AdminProtected>
+              <AdminPage />
+            </AdminProtected>
+          }
+        />
+
         <Route path="/" element={<HomePage />} />
         <Route path="/collections" element={<CollectionPage />} />
         <Route path="/collections/:slug" element={<CollectionPage />} />
@@ -41,10 +59,16 @@ function Layout() {
         <Route path="/sale" element={<CollectionPage />} />
         <Route path="*" element={<HomePage />} />
       </Routes>
-      <Footer />
-      <CartDrawer />
-      <BottomNav />
-      <FloatingActions />
+
+      {isStorefront && (
+        <>
+          <Footer />
+          <CartDrawer />
+          <BottomNav />
+          <FloatingActions />
+          <AuthModal />
+        </>
+      )}
     </>
   );
 }

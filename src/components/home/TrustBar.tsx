@@ -1,14 +1,19 @@
 import { Truck, RefreshCw, Shield, Star, CreditCard } from 'lucide-react';
-
-const trustItems = [
-  { icon: Truck, label: 'Free Shipping', sublabel: 'Orders above ₹999' },
-  { icon: RefreshCw, label: 'Easy Returns', sublabel: '7-day hassle-free' },
-  { icon: Shield, label: 'Secure Payments', sublabel: 'SSL encrypted' },
-  { icon: Star, label: '50,000+ Women', sublabel: 'Trust Sitara Vastram' },
-  { icon: CreditCard, label: 'COD Available', sublabel: 'Pan India delivery' },
-];
+import { useTranslation } from 'react-i18next';
+import { useFormatPrice } from '../../hooks/useFormatPrice';
 
 export default function TrustBar() {
+  const { t } = useTranslation();
+  const formatPrice = useFormatPrice();
+
+  const trustItems = [
+    { icon: Truck, label: t('trust.freeShipping'), sublabel: t('trust.freeShippingSub', { amount: formatPrice(999) }) },
+    { icon: RefreshCw, label: t('trust.easyReturns'), sublabel: t('trust.easyReturnsSub') },
+    { icon: Shield, label: t('trust.securePayments'), sublabel: t('trust.securePaymentsSub') },
+    { icon: Star, label: t('trust.womenTrust'), sublabel: t('trust.womenTrustSub') },
+    { icon: CreditCard, label: t('trust.codAvailable'), sublabel: t('trust.codAvailableSub') },
+  ];
+
   return (
     <section className="bg-white border-y border-rosegold-200/40 shadow-sm">
       <div className="section-container">
@@ -22,8 +27,8 @@ export default function TrustBar() {
                 <Icon size={18} className="text-rosegold-500" />
               </div>
               <div>
-                <p className="font-inter text-xs font-semibold text-navy-700 leading-tight">{label}</p>
-                <p className="font-inter text-xs text-gray-500 mt-0.5">{sublabel}</p>
+                <p className="font-body text-xs font-semibold text-navy-700 leading-tight">{label}</p>
+                <p className="font-body text-xs text-gray-500 mt-0.5">{sublabel}</p>
               </div>
             </div>
           ))}

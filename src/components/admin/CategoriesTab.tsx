@@ -1,26 +1,27 @@
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
-import type { AdminData } from '../../hooks/useAdminData';
+import type { AdminData, AdminApi } from '../../hooks/useAdminApi';
 import type { Category } from '../../types';
+import { mediaUrl } from '../../lib/api';
 
-export default function CategoriesTab({ data, update }: { data: AdminData; update: (p: Partial<AdminData>) => void }) {
+export default function CategoriesTab({ data, api }: { data: AdminData; api: AdminApi }) {
   const [form, setForm] = useState<Partial<Category>>({});
 
-  const addCategory = () => {
+  const addCategory = async () => {
     if (!form.name || !form.slug) return;
     const cat: Category = { id: Date.now().toString(), name: form.name, slug: form.slug, image: form.image || '', count: 0 };
-    update({ categories: [...data.categories, cat] });
+    await api.saveCategory(cat);
     setForm({});
   };
 
-  const removeCategory = (id: string) => {
-    update({ categories: data.categories.filter(c => c.id !== id) });
+  const removeCategory = async (id: string) => {
+    await api.deleteCategory(id);
   };
 
   return (
     <div className="p-6 space-y-6">
       <div className="bg-white rounded-sm shadow-card p-5">
-        <h3 className="font-playfair text-lg font-semibold text-navy-700 mb-4">Add Category</h3>
+        <h3 className="font-heading text-lg font-semibold text-navy-700 mb-4">Add Category</h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <input placeholder="Name" value={form.name || ''} onChange={e => setForm({ ...form, name: e.target.value })} className="input-field" />
           <input placeholder="Slug" value={form.slug || ''} onChange={e => setForm({ ...form, slug: e.target.value })} className="input-field" />
@@ -31,7 +32,7 @@ export default function CategoriesTab({ data, update }: { data: AdminData; updat
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {data.categories.map(cat => (
           <div key={cat.id} className="bg-white rounded-sm shadow-card p-4 flex items-center gap-4">
-            {cat.image && <img src={cat.image} alt={cat.name} className="w-16 h-16 object-cover rounded-sm" />}
+            {cat.image && <img src={mediaUrl(cat.image)} alt={cat.name} className="w-16 h-16 object-cover rounded-sm" />}
             <div className="flex-1">
               <p className="font-semibold text-navy-700">{cat.name}</p>
               <p className="text-xs text-gray-500">/{cat.slug}</p>

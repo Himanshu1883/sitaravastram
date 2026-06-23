@@ -1,12 +1,19 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import SectionHeading from '../ui/SectionHeading';
-import { occasions } from '../../data/products';
+import { useContentTranslation } from '../../hooks/useContentTranslation';
+import { useHomepage } from '../../hooks/useCatalog';
+import { mediaUrl } from '../../lib/api';
 
 export default function ShopByOccasion() {
+  const { t } = useTranslation();
+  const { occasion } = useContentTranslation();
+  const { data } = useHomepage();
+  const occasions = data?.occasions ?? [];
+
   return (
     <section className="py-20 bg-navy-700 relative overflow-hidden">
-      {/* Background circles */}
       <div className="absolute inset-0 opacity-5 pointer-events-none">
         <div className="absolute top-10 left-10 w-64 h-64 border border-white rounded-full" />
         <div className="absolute bottom-10 right-10 w-96 h-96 border border-white rounded-full" />
@@ -15,9 +22,9 @@ export default function ShopByOccasion() {
 
       <div className="relative max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeading
-          overline="Every Moment, Every Woman"
-          title="Shop by Occasion"
-          subtitle="From the quiet grace of a workday to the dazzling joy of a wedding — Sitara Vastram has a look that's yours."
+          overline={t('home.everyMoment')}
+          title={t('home.shopByOccasion')}
+          subtitle={t('home.shopByOccasionSubtitle')}
           center
           light
         />
@@ -31,23 +38,23 @@ export default function ShopByOccasion() {
             >
               <div className="relative overflow-hidden aspect-[3/4]">
                 <img
-                  src={occ.image}
-                  alt={`Indian woman in ${occ.name.toLowerCase()} ethnic wear`}
+                  src={mediaUrl(occ.image)}
+                  alt={occasion(occ.name)}
                   className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-navy-900/90 via-navy-900/30 to-transparent" />
                 <div className="absolute inset-0 bg-rosegold-500/0 group-hover:bg-rosegold-500/15 transition-all duration-500" />
 
-                <div className="absolute bottom-0 left-0 right-0 p-4">
-                  <h3 className="font-playfair text-lg font-semibold text-white mb-0.5">
-                    {occ.name}
+                <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5">
+                  <h3 className="font-heading text-lg sm:text-xl font-semibold text-white mb-1">
+                    {occasion(occ.name)}
                   </h3>
-                  <p className="font-inter text-xs text-white/70">{occ.description}</p>
-                  <div className="mt-2 overflow-hidden h-0 group-hover:h-6 transition-all duration-300">
-                    <span className="flex items-center gap-1 text-xs font-inter font-semibold text-rosegold-300 tracking-wider uppercase">
-                      Shop Now <ArrowRight size={11} />
-                    </span>
-                  </div>
+                  <p className="font-body text-xs text-white/70 mb-3">
+                    {t(`occasionDesc.${occ.slug}`, { defaultValue: occ.description })}
+                  </p>
+                  <span className="inline-flex items-center gap-1.5 text-xs font-body font-medium text-rosegold-300 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+                    {t('home.shopNow')} <ArrowRight size={12} />
+                  </span>
                 </div>
               </div>
             </Link>
