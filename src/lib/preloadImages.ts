@@ -1,10 +1,11 @@
-import { mediaUrl } from './api';
+import type { Product } from '../types';
 import type { HomepageData } from './api';
+import { mediaUrl, type MediaVariant } from './media';
 
 const preloaded = new Set<string>();
+const linkPreloaded = new Set<string>();
 
-export function preloadImage(path: string | undefined) {
-  const url = mediaUrl(path);
+export function preloadImageUrl(url: string | undefined) {
   if (!url || preloaded.has(url)) return;
   preloaded.add(url);
   const img = new Image();
@@ -12,10 +13,73 @@ export function preloadImage(path: string | undefined) {
   img.src = url;
 }
 
+export function preloadImage(path: string | undefined, variant: MediaVariant = 'card') {
+  preloadImageUrl(mediaUrl(path, variant));
+}
+
+function preloadLinkHint(url: string) {
+  if (!url || linkPreloaded.has(url) || preloaded.has(url)) return;
+  linkPreloaded.add(url);
+  const link = document.createElement('link');
+  link.rel = 'preload';
+  link.as = 'image';
+  link.href = url;
+  document.head.appendChild(link);
+}
+
+function scheduleIdle(task: () => void) {
+  if (typeof requestIdleCallback !== 'undefined') {
+    requestIdleCallback(task, { timeout: 2500 });
+  } else {
+    window.setTimeout(task, 50);
+  }
+}
+
+/** Stagger background downloads so the main thread stays responsive. */
+export function preloadMany(urls: string[], batchSize = 6) {
+  const unique = [...new Set(urls.filter(Boolean))].filter(u => !preloaded.has(u));
+  if (!unique.length) return;
+
+  let index = 0;
+  const pump = () => {
+    const batch = unique.slice(index, index + batchSize);
+    index += batchSize;
+    batch.forEach(preloadImageUrl);
+    if (index < unique.length) scheduleIdle(pump);
+  };
+  scheduleIdle(pump);
+}
+
 export function preloadHomepageImages(data: HomepageData) {
-  data.heroSlides.slice(0, 2).forEach(s => preloadImage(s.image));
-  data.homepageCategories.slice(0, 6).forEach(c => preloadImage(c.image));
-  data.featuredCollections?.slice(0, 2).forEach(f => preloadImage(f.image));
-  data.newArrivals.slice(0, 4).forEach(p => preloadImage(p.images[0]));
-  data.bestSellers.slice(0, 4).forEach(p => preloadImage(p.images[0]));
+  const urls: string[] = [];
+  data.heroSlides.forEach((s, i) => urls.push(mediaUrl(s.image, i === 0 ? 'hero' : 'detail')));
+  data.homepageCategories.forEach(c => urls.push(mediaUrl(c.image, 'thumb')));
+  data.featuredCollections?.forEach(f => urls.push(mediaUrl(f.image, 'detail')));
+  data.newArrivals.forEach(p => urls.push(mediaUrl(p.images[0], 'card')));
+  data.bestSellers.forEach(p => urls.push(mediaUrl(p.images[0], 'card')));
+
+  urls.slice(0, 3).forEach(preloadLinkHint);
+  preloadMany(urls);
+}
+
+/** After full catalog JSON loads — warm every product card image in the background. */
+export function preloadProductCatalog(products: Product[]) {
+  const urls = products.flatMap(p => {
+    const first = mediaUrl(p.images[0], 'card');
+    const second = p.images[1] ? mediaUrl(p.images[1], 'card') : '';
+    return [first, second].filter(Boolean);
+  });
+  preloadMany(urls, 8);
+}
+
+/** PDP / hover — all gallery images at appropriate sizes. */
+export function preloadProductGallery(images: string[]) {
+  const urls = images.map((img, i) => mediaUrl(img, i === 0 ? 'detail' : 'thumb'));
+  urls.slice(0, 1).forEach(preloadLinkHint);
+  preloadMany(urls, 4);
+}
+
+export function preloadProductDetail(product: Product) {
+  preloadProductGallery(product.images);
+  if (product.video) preloadImageUrl(mediaUrl(product.video, 'full'));
 }

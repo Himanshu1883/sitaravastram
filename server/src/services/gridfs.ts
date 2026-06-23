@@ -110,6 +110,15 @@ export async function streamFile(fileId: string): Promise<{
   return { stream: bucket.openDownloadStream(_id), contentType };
 }
 
+export async function readFileBuffer(fileId: string): Promise<{ buffer: Buffer; contentType: string }> {
+  const { stream, contentType } = await streamFile(fileId);
+  const chunks: Buffer[] = [];
+  for await (const chunk of stream) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  }
+  return { buffer: Buffer.concat(chunks), contentType };
+}
+
 export async function deleteFile(fileId: string): Promise<void> {
   const bucket = getGridFSBucket();
   await bucket.delete(new mongoose.Types.ObjectId(fileId));

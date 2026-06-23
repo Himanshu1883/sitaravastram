@@ -35,6 +35,7 @@ export default function CategoryStrip() {
                     src={cat.image}
                     alt={name}
                     priority
+                    variant="thumb"
                     className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
                   />
                 </div>

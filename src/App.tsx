@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import Navbar from './components/layout/Navbar';
-import CategoryStrip from './components/layout/CategoryStrip';
 import Footer from './components/layout/Footer';
 import CartDrawer from './components/layout/CartDrawer';
 import BottomNav from './components/layout/BottomNav';
@@ -25,7 +24,6 @@ function Layout() {
   return (
     <>
       {!isAdminLogin && <Navbar showCategoryStrip={location.pathname === '/' && !isAdminRoute} />}
-      {location.pathname === '/' && !isAdminRoute && <CategoryStrip />}
 
       <Routes>
         <Route path="/admin/login" element={<AdminLoginPage />} />

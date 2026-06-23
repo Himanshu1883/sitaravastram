@@ -55,6 +55,7 @@ For local dev, Vite proxies `/api` to `http://localhost:5000` — leave `VITE_AP
 | `GET /api/products` | Product catalog with filters |
 | `GET /api/products/:slug` | Single product |
 | `GET /api/media/:fileId` | GridFS media stream |
+| `GET /api/media/:fileId?w=640&fmt=webp&q=82` | Optimized WebP (CDN-cacheable) |
 | `POST /api/auth/otp/send` | Send mock OTP |
 | `POST /api/auth/otp/verify` | Verify OTP (demo: `123456`) |
 | `POST /api/admin/auth/login` | Admin login |

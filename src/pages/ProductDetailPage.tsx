@@ -9,9 +9,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { addToCart, toggleCart } from '../store/cartSlice';
 import { toggleWishlist, selectIsWishlisted } from '../store/wishlistSlice';
 import { saveReview, addRecentlyViewed } from '../lib/storage';
-import { fetchReviews, submitReview, mediaUrl } from '../lib/api';
+import { fetchReviews, submitReview } from '../lib/api';
+import { mediaUrl } from '../lib/media';
 import { useProduct, useProducts } from '../hooks/useCatalog';
 import ProductCard from '../components/ui/ProductCard';
+import CatalogImage from '../components/ui/CatalogImage';
+import { preloadProductDetail } from '../lib/preloadImages';
 import type { RootState } from '../store';
 import type { Review } from '../types';
 import { useFormatPrice } from '../hooks/useFormatPrice';
@@ -127,9 +130,12 @@ function ProductImageMosaic({
                   className="group relative cursor-zoom-in overflow-hidden bg-cream-200"
                   onClick={() => onImageClick(imageIndex)}
                 >
-                  <img
-                    src={mediaUrl(img)}
+                  <CatalogImage
+                    src={img}
                     alt={`${productName} — view ${imageIndex + 1}`}
+                    variant={imageIndex === 0 ? 'detail' : 'thumb'}
+                    priority={imageIndex === 0}
+                    loading={imageIndex === 0 ? 'eager' : 'lazy'}
                     className={`block w-full object-cover object-top ${
                       cols === 1 ? 'min-h-[70vh] aspect-[3/4]' : cols === 3 ? 'aspect-[4/5]' : 'aspect-square'
                     }`}
@@ -195,9 +201,10 @@ export default function ProductDetailPage() {
   }, [product?.id]);
 
   useEffect(() => {
-    if (!product?.id) return;
+    if (!product) return;
     fetchReviews(product.id).then(setApiReviews).catch(() => setApiReviews([]));
-  }, [product?.id]);
+    preloadProductDetail(product);
+  }, [product]);
 
   if (loading || !product) {
     return (
@@ -273,12 +280,16 @@ export default function ProductDetailPage() {
         {/* LEFT — scrollable mosaic gallery, edge-to-edge */}
         <div className="min-w-0 bg-neutral-100">
           <div className="lg:hidden">
-            <div className="aspect-[3/4] overflow-hidden bg-cream-200">
-              <img
-                src={mediaUrl(product.images[selectedImage])}
+            <div
+              className="aspect-[3/4] overflow-hidden bg-cream-200 cursor-zoom-in"
+              onClick={() => setZoomOpen(true)}
+            >
+              <CatalogImage
+                src={product.images[selectedImage]}
                 alt={product.name}
+                variant="detail"
+                priority
                 className="h-full w-full object-cover object-top"
-                onClick={() => setZoomOpen(true)}
               />
             </div>
             <div className="flex gap-2 overflow-x-auto border-b border-rosegold-100 bg-white p-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -288,7 +299,7 @@ export default function ProductDetailPage() {
                   onClick={() => { setSelectedImage(i); setShowVideo(false); }}
                   className={`h-18 w-14 flex-shrink-0 overflow-hidden rounded-sm border-2 transition-all ${selectedImage === i && !showVideo ? 'border-rosegold-500' : 'border-transparent'}`}
                 >
-                  <img src={mediaUrl(img)} alt="" className="h-full w-full object-cover" />
+                  <CatalogImage src={img} alt="" variant="thumb" className="h-full w-full object-cover" />
                 </button>
               ))}
               {product.video && (
@@ -590,7 +601,14 @@ export default function ProductDetailPage() {
       {zoomOpen && (
         <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setZoomOpen(false)}>
           <button className="absolute top-4 right-4 text-white p-2" onClick={() => setZoomOpen(false)}><X size={24} /></button>
-          <img src={mediaUrl(product.images[selectedImage])} alt={product.name} className="max-w-full max-h-[90vh] object-contain" onClick={e => e.stopPropagation()} />
+          <CatalogImage
+            src={product.images[selectedImage]}
+            alt={product.name}
+            variant="zoom"
+            priority
+            className="max-h-[90vh] max-w-full object-contain"
+            onClick={e => e.stopPropagation()}
+          />
         </div>
       )}
     </div>

@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { Product, Category } from '../types';
 import { API_BASE, type HomepageData } from '../lib/api';
-import { preloadHomepageImages } from '../lib/preloadImages';
+import { preloadHomepageImages, preloadProductCatalog, preloadProductDetail } from '../lib/preloadImages';
 
 export const catalogApi = createApi({
   reducerPath: 'catalogApi',
@@ -28,10 +28,26 @@ export const catalogApi = createApi({
         return `/api/products${qs}`;
       },
       providesTags: ['Products'],
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          preloadProductCatalog(data);
+        } catch {
+          /* ignore */
+        }
+      },
     }),
     getProduct: builder.query<Product, string>({
       query: slug => `/api/products/${slug}`,
       providesTags: (_result, _err, slug) => [{ type: 'Product', id: slug }],
+      async onQueryStarted(_arg, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          preloadProductDetail(data);
+        } catch {
+          /* ignore */
+        }
+      },
     }),
     getCategories: builder.query<Category[], boolean | void>({
       query: featured => `/api/categories${featured === true ? '?featured=true' : ''}`,

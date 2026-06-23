@@ -46,7 +46,8 @@ export default function HeroSection() {
                   src={slide.image}
                   alt={hero(slide.id, 'title', slide.title)}
                   priority={index === 0}
-                  className="w-full h-full object-cover object-top"
+                  variant="hero"
+                  className="w-full h-full object-cover object-center"
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-navy-700/85 via-navy-700/50 to-transparent" />
                 <div className="absolute inset-0 bg-gradient-to-t from-navy-900/40 via-transparent to-transparent" />
@@ -57,10 +58,7 @@ export default function HeroSection() {
               <div className="absolute top-1/3 right-1/3 w-64 h-64 rounded-full border border-rosegold-400/15 float-slow hidden lg:block" style={{ animationDelay: '2s' }} />
 
               {/* Content */}
-              <div
-                className="relative h-full flex items-center"
-                style={{ paddingTop: 'calc(var(--announcement-h) + var(--navbar-h))' }}
-              >
+              <div className="relative h-full flex items-center">
                 <div className="section-container">
                   <div className="max-w-xl">
                     {/* Badge */}

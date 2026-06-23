@@ -1,5 +1,7 @@
 export const API_BASE = import.meta.env.VITE_API_URL || '';
 
+export { mediaUrl, mediaUrls, MEDIA_BASE, type MediaVariant } from './media';
+
 const TOKEN_KEY = 'sitara_token';
 const ADMIN_TOKEN_KEY = 'sitara_admin_token';
 
@@ -11,13 +13,6 @@ export function setToken(token: string | null, role: 'customer' | 'admin' = 'cus
   const key = role === 'admin' ? ADMIN_TOKEN_KEY : TOKEN_KEY;
   if (token) localStorage.setItem(key, token);
   else localStorage.removeItem(key);
-}
-
-export function mediaUrl(path: string | undefined): string {
-  if (!path) return '';
-  if (path.startsWith('http://') || path.startsWith('https://')) return path;
-  if (path.startsWith('/api/')) return `${API_BASE}${path}`;
-  return path;
 }
 
 export class ApiError extends Error {

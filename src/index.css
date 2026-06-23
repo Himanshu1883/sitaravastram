@@ -175,10 +175,11 @@
   .hero-fullscreen {
     position: relative;
     overflow: hidden;
-    width: 100%;
-    /* Fixed overlap — strip height never changes on scroll (no vertical jump) */
-    height: calc(100svh - var(--navbar-h));
-    margin-top: calc(-1 * var(--category-strip-h));
+    width: 100vw;
+    max-width: 100%;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+    height: 100svh;
     min-height: 480px;
     transform: translateZ(0);
     backface-visibility: hidden;

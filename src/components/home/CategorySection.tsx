@@ -39,6 +39,7 @@ function CollagePanel({
         src={category.image}
         alt={categoryName}
         priority={hero}
+        variant={hero ? 'detail' : 'card'}
         className="absolute inset-0 h-full w-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-[1.05]"
       />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-navy-950/85 via-navy-950/30 to-navy-950/10 transition-opacity duration-500 group-hover:from-navy-950/90" />

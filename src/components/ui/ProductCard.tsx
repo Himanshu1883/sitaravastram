@@ -10,6 +10,9 @@ import type { RootState } from '../../store';
 import { useFormatPrice } from '../../hooks/useFormatPrice';
 import CatalogImage from './CatalogImage';
 import ShopBagPlusIcon from './ShopBagPlusIcon';
+import { store } from '../../store';
+import { catalogApi } from '../../store/catalogApi';
+import { preloadProductGallery } from '../../lib/preloadImages';
 
 interface ProductCardProps {
   product: Product;
@@ -38,11 +41,21 @@ export default function ProductCard({ product, className = '' }: ProductCardProp
     dispatch(toggleWishlist(product.id));
   };
 
+  const warmProduct = () => {
+    store.dispatch(catalogApi.endpoints.getProduct.initiate(product.slug, { forceRefetch: false }));
+    preloadProductGallery(product.images);
+  };
+
   return (
     <Link
       to={`/product/${product.slug}`}
       className={`group block luxury-card overflow-hidden ${className}`}
-      onMouseEnter={() => setHovered(true)}
+      onMouseEnter={() => {
+        setHovered(true);
+        warmProduct();
+      }}
+      onFocus={warmProduct}
+      onTouchStart={warmProduct}
       onMouseLeave={() => setHovered(false)}
     >
       {/* Image */}
@@ -50,6 +63,7 @@ export default function ProductCard({ product, className = '' }: ProductCardProp
         <CatalogImage
           src={product.images[hovered && product.images.length > 1 ? 1 : 0]}
           alt={product.name}
+          variant="card"
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
         />
 
