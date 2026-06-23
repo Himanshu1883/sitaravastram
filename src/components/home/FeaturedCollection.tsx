@@ -47,9 +47,9 @@ export default function FeaturedCollection() {
           </div>
         </div>
 
-        {loading || features.length === 0 ? (
+        {loading ? (
           <FeaturedSkeleton />
-        ) : (
+        ) : features.length === 0 ? null : (
           <div className="space-y-16 sm:space-y-20 lg:space-y-24">
             {features.map(feature => (
               <div

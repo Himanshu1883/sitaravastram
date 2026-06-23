@@ -13,6 +13,7 @@ cd server
 npm install
 npm run seed        # first time
 npm run seed:force  # reset database
+npm run seed:featured  # only upsert featured collections block (safe, no wipe)
 ```
 
 4. Start the API:

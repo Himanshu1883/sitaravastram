@@ -4,18 +4,24 @@ import { HomepageBlock } from '../models/Homepage.js';
 import { Category, toCategoryDto } from '../models/Category.js';
 import { Review, toReviewDto } from '../models/Review.js';
 import { Product, toProductDto } from '../models/Product.js';
+import {
+  featuredCollectionSlugs,
+  resolveFeaturedCollections,
+} from '../lib/featuredCollections.js';
 
 const router = Router();
 
 router.get('/', async (_req, res, next) => {
   try {
-    const [heroSlides, homepageCategories, blocks, reviews, newArrivals, bestSellers] = await Promise.all([
+    const [heroSlides, homepageCategories, blocks, reviews, newArrivals, bestSellers, featuredCategories] =
+      await Promise.all([
       HeroSlide.find().sort({ sortOrder: 1 }).lean(),
       Category.find({ featured: true }).lean(),
       HomepageBlock.find().lean(),
       Review.find().sort({ date: -1 }).limit(6).lean(),
       Product.find({ newArrival: true, inStock: true }).limit(8).lean(),
       Product.find({ isBestSeller: true, inStock: true }).limit(8).lean(),
+      Category.find({ slug: { $in: featuredCollectionSlugs } }).lean(),
     ]);
 
     const blockMap = Object.fromEntries(blocks.map(b => [b.key, b.data]));
@@ -41,7 +47,10 @@ router.get('/', async (_req, res, next) => {
       bestSellers: bestSellers.map(p => toProductDto(p as never)),
       occasionSlugMap: blockMap.occasionSlugMap || {},
       allColors: blockMap.allColors || [],
-      featuredCollections: blockMap.featuredCollections || [],
+      featuredCollections: resolveFeaturedCollections(
+        blockMap.featuredCollections,
+        featuredCategories,
+      ),
     });
   } catch (err) {
     next(err);
