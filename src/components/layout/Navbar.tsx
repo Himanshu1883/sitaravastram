@@ -105,7 +105,7 @@ export default function Navbar({ showCategoryStrip = false }: { showCategoryStri
       {/* Sticky header: navbar + category strip + megamenu */}
       <header
         ref={headerRef}
-        className={`site-header sticky top-0 z-[95] bg-white transition-shadow duration-300 ${
+        className={`site-header sticky top-0 z-40 bg-white transition-shadow duration-300 ${
           scrolled || activeMega || searchOpen ? 'shadow-luxury' : ''
         }`}
         onMouseLeave={() => setActiveMega(null)}

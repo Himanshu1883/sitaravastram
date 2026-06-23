@@ -20,7 +20,7 @@ export default function CartDrawer() {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50">
+    <div className="fixed inset-0 z-[100]">
       <div className="absolute inset-0 bg-navy-900/60 backdrop-blur-sm" onClick={() => dispatch(closeCart())} />
       <div className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-luxury-xl flex flex-col">
         {/* Header */}

@@ -599,7 +599,7 @@ export default function ProductDetailPage() {
 
       {/* ── ZOOM MODAL ── */}
       {zoomOpen && (
-        <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setZoomOpen(false)}>
+        <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4" onClick={() => setZoomOpen(false)}>
           <button className="absolute top-4 right-4 text-white p-2" onClick={() => setZoomOpen(false)}><X size={24} /></button>
           <CatalogImage
             src={product.images[selectedImage]}

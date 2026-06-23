@@ -123,7 +123,7 @@ export default function AuthModal() {
   return createPortal(
     <AnimatePresence>
       {authModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-6">
           <motion.button
             type="button"
             aria-label={t('auth.close')}
