@@ -18,10 +18,17 @@ app.use('/api', apiRoutes);
 app.use(errorHandler);
 
 async function start() {
-  await connectDb();
-  app.listen(env.port, () => {
-    console.log(`Sitara API running on http://localhost:${env.port}`);
+  app.listen(env.port, '0.0.0.0', () => {
+    console.log(`Sitara API listening on port ${env.port}`);
   });
+
+  try {
+    await connectDb();
+    console.log('MongoDB connected');
+  } catch (err) {
+    console.warn('MongoDB not available — API running without database. Set MONGODB_URI to enable data routes.');
+    console.warn(err instanceof Error ? err.message : err);
+  }
 }
 
 start().catch(err => {

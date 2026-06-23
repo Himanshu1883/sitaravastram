@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useContentTranslation } from '../../hooks/useContentTranslation';
-import { useCategories } from '../../hooks/useCatalog';
+import { useCategories, useHomepage } from '../../hooks/useCatalog';
 import { mediaUrl } from '../../lib/api';
 import type { Category } from '../../types';
 
