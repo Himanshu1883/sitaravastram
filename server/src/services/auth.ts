@@ -1,7 +1,7 @@
 import { User, toUserDto, type IUser } from '../models/User.js';
 import { Admin } from '../models/Admin.js';
 import { OtpSession } from '../models/OtpSession.js';
-import { hashPassword, comparePassword, signToken } from '../middleware/auth.js';
+import { hashPassword, comparePassword, signToken, type JwtPayload } from '../middleware/auth.js';
 import { env } from '../config/env.js';
 
 export function normalizeIndianMobile(input: string): string {
@@ -104,7 +104,7 @@ export type AdminSettingsDto = {
   canChangePassword: boolean;
 };
 
-export async function getAdminSettings(payload: { sub: string; role: 'admin' }): Promise<AdminSettingsDto> {
+export async function getAdminSettings(payload: JwtPayload): Promise<AdminSettingsDto> {
   const user = await resolveAuthUser(payload);
   if (!user || user.role !== 'admin') throw new Error('Admin not found');
 
@@ -125,7 +125,7 @@ export async function getAdminSettings(payload: { sub: string; role: 'admin' }):
 }
 
 export async function updateAdminProfile(
-  payload: { sub: string; role: 'admin' },
+  payload: JwtPayload,
   data: { name?: string; email?: string },
 ) {
   if (!data.name?.trim() && !data.email?.trim()) {
