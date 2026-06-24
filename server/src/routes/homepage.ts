@@ -8,6 +8,7 @@ import {
   featuredCollectionSlugs,
   resolveFeaturedCollections,
 } from '../lib/featuredCollections.js';
+import { toHeroSlideDto } from '../lib/heroSlides.js';
 
 const router = Router();
 
@@ -27,17 +28,7 @@ router.get('/', async (_req, res, next) => {
     const blockMap = Object.fromEntries(blocks.map(b => [b.key, b.data]));
 
     res.json({
-      heroSlides: heroSlides.map(s => ({
-        id: s.legacyId,
-        title: s.title,
-        subtitle: s.subtitle,
-        description: s.description,
-        image: s.image,
-        cta1: s.cta1,
-        cta2: s.cta2,
-        ctaLink: s.ctaLink,
-        badge: s.badge,
-      })),
+      heroSlides: heroSlides.map(s => toHeroSlideDto(s as never)),
       homepageCategories: homepageCategories.map(c => toCategoryDto(c as never)),
       fabrics: blockMap.fabrics || [],
       occasions: blockMap.occasions || [],

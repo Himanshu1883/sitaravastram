@@ -16,7 +16,7 @@ import { hashPassword } from '../middleware/auth.js';
 import { uploadUrls, uploadLocalFiles, uploadLocalFile, clearUrlCache } from '../services/gridfs.js';
 import { seedProducts } from '../seed/products.js';
 import { groupProductImages, resolveImagePath } from '../seed/localImages.js';
-import { HERO_BANNER_FILES, CATEGORY_IMAGE_FILES, featuredCollectionsSeed } from '../seed/marketing.js';
+import { HERO_BANNER_FILES, CATEGORY_IMAGE_FILES, featuredCollectionsSeed, heroSlideHotspotsSeed } from '../seed/marketing.js';
 import mongoose from 'mongoose';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -120,6 +120,7 @@ async function seed(force: boolean) {
       cta2: slide.cta2,
       ctaLink: slide.ctaLink,
       badge: slide.badge,
+      hotspots: heroSlideHotspotsSeed[slide.id] ?? [],
       sortOrder: slide.id,
     });
   }
@@ -150,6 +151,7 @@ async function seed(force: boolean) {
       imageAlt: f.imageAlt,
       reverse: f.reverse,
       image: (await uploadMarketingFile(f.imageFile, `featured-${f.id}`)) || '',
+      hotspots: f.hotspots ?? [],
     })),
   );
 

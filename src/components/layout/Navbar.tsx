@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ShoppingBag, Heart, Search, Menu, X, ChevronDown, Globe, Phone } from 'lucide-react';
+import { ShoppingBag, Heart, Search, Menu, ChevronDown, Globe } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { selectCartCount, toggleCart } from '../../store/cartSlice';
@@ -11,6 +11,7 @@ import MegaMenu from './MegaMenu';
 import Logo from '../ui/Logo';
 import CurrencySelector from '../ui/CurrencySelector';
 import SearchOverlay from './SearchOverlay';
+import MobileMenu from './MobileMenu';
 import { openAuthModal, selectAuth } from '../../store/authSlice';
 
 function DesktopNavLinks({
@@ -182,10 +183,10 @@ export default function Navbar({ showCategoryStrip = false }: { showCategoryStri
           <div className="relative flex lg:hidden items-center justify-between h-[4.25rem] gap-3 w-full px-4 sm:px-6">
               <button
                 className="p-2 text-navy-700 hover:text-rosegold-500 transition-colors"
-                onClick={() => setMobileOpen(!mobileOpen)}
-                aria-label="Toggle menu"
+                onClick={() => setMobileOpen(true)}
+                aria-label="Open menu"
               >
-                {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+                <Menu size={22} />
               </button>
 
               <Logo
@@ -226,76 +227,14 @@ export default function Navbar({ showCategoryStrip = false }: { showCategoryStri
 
       <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} anchorRef={headerRef} />
 
-      {mobileOpen && (
-        <div className="fixed inset-0 z-[60] lg:hidden">
-          <div className="absolute inset-0 bg-navy-900/60 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
-          <div className="absolute left-0 top-0 h-full w-[min(100vw-3rem,22rem)] bg-white shadow-luxury-xl flex flex-col">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-rosegold-200/40">
-              <span className="type-heading-sm text-navy-700">{t('nav.menu')}</span>
-              <button onClick={() => setMobileOpen(false)} className="p-2 text-navy-700 hover:text-rosegold-500">
-                <X size={20} />
-              </button>
-            </div>
-            <div className="flex-1 overflow-y-auto py-3 px-3">
-              {navItems.map(item => (
-                <div key={item.label} className="mb-3">
-                  <Link
-                    to={item.href}
-                    onClick={() => setMobileOpen(false)}
-                    className={`flex items-center justify-between px-3 py-2.5 rounded-sm text-sm font-body font-semibold ${
-                      item.href === '/sale' ? 'text-red-500' : 'text-navy-700'
-                    } hover:bg-cream-100`}
-                  >
-                    {item.label}
-                  </Link>
-                  {item.columns.map(column => (
-                    <div key={column.heading} className="px-3 mt-2 mb-3">
-                      <p className="text-[10px] font-semibold tracking-[0.15em] uppercase text-gray-500 mb-2">
-                        {column.heading}
-                      </p>
-                      {column.links.map(link => (
-                        <Link
-                          key={link.href + link.label}
-                          to={link.href}
-                          onClick={() => setMobileOpen(false)}
-                          className="block py-1.5 text-sm text-navy-700 hover:text-rosegold-500"
-                        >
-                          {link.label}
-                        </Link>
-                      ))}
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
-            <div className="px-5 pb-6 pt-3 border-t border-rosegold-200/40 space-y-2">
-              <div className="flex gap-2">
-                <CurrencySelector variant="menu" className="flex-1 min-w-0" />
-                <button
-                  onClick={toggleLanguage}
-                  className="flex-1 py-2 text-xs font-body font-medium border border-rosegold-200 rounded-sm text-navy-700"
-                >
-                  {i18n.language === 'en' ? t('common.hindi') : t('common.english')}
-                </button>
-              </div>
-              <button
-                type="button"
-                className="btn-primary w-full text-center block"
-                onClick={() => {
-                  setMobileOpen(false);
-                  handleAccountClick();
-                }}
-              >
-                {t('nav.myAccount')}
-              </button>
-              <a href="tel:+919876543210" className="flex items-center gap-2 text-sm font-body text-navy-700 justify-center hover:text-rosegold-500 transition-colors">
-                <Phone size={16} />
-                +91 98765 43210
-              </a>
-            </div>
-          </div>
-        </div>
-      )}
+      <MobileMenu
+        open={mobileOpen}
+        items={navItems}
+        onClose={() => setMobileOpen(false)}
+        onAccount={handleAccountClick}
+        onToggleLanguage={toggleLanguage}
+        languageLabel={i18n.language === 'en' ? t('common.hindi') : t('common.english')}
+      />
     </>
   );
 }

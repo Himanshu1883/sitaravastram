@@ -117,7 +117,11 @@
     "exploreCollection": "Explore collection",
     "storiesOfCraft": "Stories of Craft",
     "featuredCollections": "Featured Collections",
-    "featuredCollectionsSubtitle": "Every collection at Sitara Vastram tells a story rooted in India's rich textile heritage — worn by women who carry grace in every step."
+    "featuredCollectionsSubtitle": "Every collection at Sitara Vastram tells a story rooted in India's rich textile heritage — worn by women who carry grace in every step.",
+    "shopTheLook": {
+      "viewProduct": "View product",
+      "hotspot": "Shop this product"
+    }
   },
   "trust": {
     "freeShipping": "Free Shipping",

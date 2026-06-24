@@ -26,6 +26,12 @@ export const CATEGORY_IMAGE_FILES: Record<string, string> = {
   'combo-sets': 'single_main (4).png',
 };
 
+export type FeaturedHotspotSeed = {
+  productSlug: string;
+  x: number;
+  y: number;
+};
+
 export const featuredCollectionsSeed = [
   {
     id: 1,
@@ -33,6 +39,10 @@ export const featuredCollectionsSeed = [
     href: '/collections/premium-collection',
     imageAlt: 'Sitara Vastram premium silk collection',
     reverse: false,
+    hotspots: [
+      { productSlug: 'kavya-chanderi-silk-party', x: 58, y: 42 },
+      { productSlug: 'isha-festive-silk-suit', x: 32, y: 68 },
+    ] satisfies FeaturedHotspotSeed[],
   },
   {
     id: 2,
@@ -40,6 +50,10 @@ export const featuredCollectionsSeed = [
     href: '/collections/wedding',
     imageAlt: 'Sitara Vastram wedding collection',
     reverse: true,
+    hotspots: [
+      { productSlug: 'radha-banarasi-bridal-lehenga', x: 52, y: 38 },
+      { productSlug: 'gulmohar-banarasi-dupatta', x: 28, y: 55 },
+    ] satisfies FeaturedHotspotSeed[],
   },
   {
     id: 3,
@@ -47,5 +61,21 @@ export const featuredCollectionsSeed = [
     href: '/collections/cotton-suits',
     imageAlt: 'Sitara Vastram cotton suit collection',
     reverse: false,
+    hotspots: [
+      { productSlug: 'aanya-cotton-floral-suit', x: 62, y: 36 },
+      { productSlug: 'noor-linen-everyday-suit', x: 38, y: 72 },
+    ] satisfies FeaturedHotspotSeed[],
   },
 ] as const;
+
+/** Hero banner id → product hotspots (banners 1 & 2 only) */
+export const heroSlideHotspotsSeed: Record<number, FeaturedHotspotSeed[]> = {
+  1: [
+    { productSlug: 'aanya-cotton-floral-suit', x: 72, y: 42 },
+    { productSlug: 'tara-kurta-palazzo-duo', x: 68, y: 68 },
+  ],
+  2: [
+    { productSlug: 'sonal-chiffon-festive-anarkali', x: 70, y: 38 },
+    { productSlug: 'isha-festive-silk-suit', x: 62, y: 62 },
+  ],
+};

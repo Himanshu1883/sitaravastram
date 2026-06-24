@@ -1,12 +1,23 @@
 import { featuredCollectionsSeed } from '../seed/marketing.js';
 
+export interface ProductHotspotDto {
+  productSlug: string;
+  x: number;
+  y: number;
+}
+
 export interface FeaturedCollectionDto {
   id: number;
   href: string;
   imageAlt: string;
   reverse: boolean;
   image: string;
+  hotspots?: ProductHotspotDto[];
 }
+
+const seedHotspotsById = Object.fromEntries(
+  featuredCollectionsSeed.map(f => [f.id, f.hotspots ?? []]),
+);
 
 type CategoryImage = { slug: string; image?: string };
 
@@ -16,7 +27,10 @@ export function resolveFeaturedCollections(
   categories: CategoryImage[],
 ): FeaturedCollectionDto[] {
   if (Array.isArray(blockData) && blockData.length > 0) {
-    return blockData as FeaturedCollectionDto[];
+    return (blockData as FeaturedCollectionDto[]).map(item => ({
+      ...item,
+      hotspots: item.hotspots?.length ? item.hotspots : seedHotspotsById[item.id] ?? [],
+    }));
   }
 
   const catBySlug = Object.fromEntries(categories.map(c => [c.slug, c]));
@@ -33,6 +47,7 @@ export function resolveFeaturedCollections(
       imageAlt: f.imageAlt,
       reverse: f.reverse,
       image,
+      hotspots: f.hotspots ?? [],
     });
   }
 

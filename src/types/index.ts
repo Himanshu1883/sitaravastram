@@ -81,6 +81,7 @@ export interface HeroSlide {
   cta2: string;
   ctaLink: string;
   badge?: string;
+  hotspots?: { productSlug: string; x: number; y: number }[];
 }
 
 export interface NavItem {

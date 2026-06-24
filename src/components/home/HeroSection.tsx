@@ -1,6 +1,5 @@
 ﻿import { useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay, EffectFade } from 'swiper/modules';
 import { ArrowRight, ChevronRight } from 'lucide-react';
@@ -14,7 +13,6 @@ import 'swiper/css/pagination';
 import 'swiper/css/effect-fade';
 
 export default function HeroSection() {
-  const { t } = useTranslation();
   const { hero } = useContentTranslation();
   const { data, loading } = useHomepage();
   const swiperRef = useRef(null);
@@ -112,10 +110,10 @@ export default function HeroSection() {
       </Swiper>
 
       {/* Scroll Indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2 animate-pulse-soft">
+      {/* <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2 animate-pulse-soft">
         <div className="w-px h-8 bg-white/40" />
         <span className="text-white/60 text-xs font-inter tracking-widest uppercase">{t('home.scroll')}</span>
-      </div>
+      </div> */}
     </section>
   );
 }

@@ -50,6 +50,7 @@ async function main() {
         imageAlt: f.imageAlt,
         reverse: f.reverse,
         image,
+        hotspots: f.hotspots ?? [],
       };
     }),
   );

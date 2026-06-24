@@ -85,12 +85,19 @@ export const fetchHomepage = () => api<HomepageData>('/api/homepage');
 export const fetchReviews = (productId?: string) =>
   api<import('../types').Review[]>(`/api/reviews${productId ? `?productId=${productId}` : ''}`);
 
+export interface ProductHotspotItem {
+  productSlug: string;
+  x: number;
+  y: number;
+}
+
 export interface FeaturedCollectionItem {
   id: number;
   image: string;
   imageAlt: string;
   href: string;
   reverse: boolean;
+  hotspots?: ProductHotspotItem[];
 }
 
 export interface HomepageData {

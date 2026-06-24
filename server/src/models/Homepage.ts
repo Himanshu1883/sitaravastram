@@ -10,6 +10,7 @@ export interface IHeroSlide extends Document {
   cta2: string;
   ctaLink: string;
   badge?: string;
+  hotspots?: { productSlug: string; x: number; y: number }[];
   sortOrder: number;
 }
 
@@ -24,6 +25,13 @@ const heroSlideSchema = new Schema<IHeroSlide>(
     cta2: String,
     ctaLink: String,
     badge: String,
+    hotspots: [
+      {
+        productSlug: String,
+        x: Number,
+        y: Number,
+      },
+    ],
     sortOrder: { type: Number, default: 0 },
   },
   { timestamps: true },

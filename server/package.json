@@ -12,7 +12,8 @@
     "start": "node dist/index.js",
     "seed": "tsx src/scripts/seed.ts",
     "seed:force": "tsx src/scripts/seed.ts --force",
-    "seed:featured": "tsx src/scripts/seedFeaturedCollections.ts"
+    "seed:featured": "tsx src/scripts/seedFeaturedCollections.ts",
+    "seed:hero-hotspots": "tsx src/scripts/seedHeroHotspots.ts"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

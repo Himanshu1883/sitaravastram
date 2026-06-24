@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHomepage } from '../../hooks/useCatalog';
-import CatalogImage from '../ui/CatalogImage';
+import { useGetProductsQuery } from '../../store/catalogApi';
+import ShoppableImage from '../ui/ShoppableImage';
 
 function FeaturedSkeleton() {
   return (
@@ -25,7 +27,13 @@ function FeaturedSkeleton() {
 export default function FeaturedCollection() {
   const { t } = useTranslation();
   const { data, loading } = useHomepage();
+  const { data: products = [] } = useGetProductsQuery();
   const features = data?.featuredCollections ?? [];
+
+  const productsBySlug = useMemo(
+    () => Object.fromEntries(products.map(p => [p.slug, p])),
+    [products],
+  );
 
   return (
     <section className="py-12 sm:py-16 lg:py-20 bg-cream-100">
@@ -56,27 +64,28 @@ export default function FeaturedCollection() {
                 key={feature.id}
                 className={`grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-16 items-center ${feature.reverse ? 'lg:[&>*:first-child]:order-2' : ''}`}
               >
-                <div className="relative group overflow-hidden rounded-sm shadow-luxury-lg">
-                  <div className="aspect-[4/5] lg:aspect-[5/6]">
-                    <CatalogImage
-                      src={feature.image}
-                      alt={feature.imageAlt}
-                      variant="detail"
-                      className="w-full h-full object-cover object-top transition-transform duration-1000 group-hover:scale-105"
-                    />
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-navy-900/30 via-transparent to-transparent pointer-events-none" />
-                  <div className="absolute top-4 sm:top-6 left-4 sm:left-6">
-                    <span className="inline-block bg-white/90 backdrop-blur-sm text-navy-700 text-[10px] sm:text-xs font-body font-semibold px-3 sm:px-4 py-1.5 sm:py-2 rounded-sm tracking-widest uppercase shadow-card">
-                      {t(`featured.${feature.id}.tag`)}
-                    </span>
-                  </div>
-                  <div className="absolute bottom-4 sm:bottom-6 right-4 sm:right-6">
-                    <span className="inline-block bg-rosegold-500/90 backdrop-blur-sm text-white text-[10px] sm:text-xs font-body font-medium px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-sm">
-                      {t(`featured.${feature.id}.stat`)}
-                    </span>
-                  </div>
-                  <div className="absolute bottom-0 right-0 w-12 sm:w-16 h-12 sm:h-16 bg-rosegold-500/20" />
+                <div className="relative group rounded-sm shadow-luxury-lg">
+                  <ShoppableImage
+                    src={feature.image}
+                    alt={feature.imageAlt}
+                    hotspots={feature.hotspots}
+                    productsBySlug={productsBySlug}
+                    className="transition-transform duration-1000 group-hover:scale-105"
+                    imageClassName="transition-transform duration-1000 group-hover:scale-105"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-t from-navy-900/30 via-transparent to-transparent pointer-events-none" />
+                    <div className="absolute top-4 sm:top-6 left-4 sm:left-6 pointer-events-none">
+                      <span className="inline-block bg-white/90 backdrop-blur-sm text-navy-700 text-[10px] sm:text-xs font-body font-semibold px-3 sm:px-4 py-1.5 sm:py-2 rounded-sm tracking-widest uppercase shadow-card">
+                        {t(`featured.${feature.id}.tag`)}
+                      </span>
+                    </div>
+                    <div className="absolute bottom-4 sm:bottom-6 right-4 sm:right-6 pointer-events-none">
+                      <span className="inline-block bg-rosegold-500/90 backdrop-blur-sm text-white text-[10px] sm:text-xs font-body font-medium px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-sm">
+                        {t(`featured.${feature.id}.stat`)}
+                      </span>
+                    </div>
+                    <div className="absolute bottom-0 right-0 w-12 sm:w-16 h-12 sm:h-16 bg-rosegold-500/20 pointer-events-none" />
+                  </ShoppableImage>
                 </div>
 
                 <div className="flex flex-col justify-center px-1 sm:px-0 lg:px-6">
