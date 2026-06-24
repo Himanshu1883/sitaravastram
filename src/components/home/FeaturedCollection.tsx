@@ -8,6 +8,65 @@ import type { FeaturedCollectionItem } from '../../lib/api';
 import type { Product } from '../../types';
 import ShoppableImage from '../ui/ShoppableImage';
 
+const FEATURED_CRAFT_VIDEO =
+  '/assets/images/Models_in_embroidered_attire_202606241720.mp4';
+
+function useAutoplayVideo() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const play = () => {
+      void video.play().catch(() => undefined);
+    };
+
+    play();
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) play();
+      },
+      { threshold: 0.15 },
+    );
+    observer.observe(video);
+
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') play();
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+
+    return () => {
+      observer.disconnect();
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, []);
+
+  return videoRef;
+}
+
+function FeaturedVideoIntro() {
+  const videoRef = useAutoplayVideo();
+
+  return (
+    <div className="relative mb-12 w-full sm:mb-16">
+      <video
+        ref={videoRef}
+        className="block h-auto w-full"
+        src={FEATURED_CRAFT_VIDEO}
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="auto"
+        aria-label="Sitara Vastram embroidered collection"
+      />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-navy-950/40 via-transparent to-navy-950/10" />
+    </div>
+  );
+}
+
 function useInView(options?: IntersectionObserverInit) {
   const ref = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(false);
@@ -271,6 +330,8 @@ export default function FeaturedCollection() {
           subtitle={sectionCopy?.subtitle}
         />
       </div>
+
+      <FeaturedVideoIntro />
 
       {loading ? (
         <FeaturedSkeleton />

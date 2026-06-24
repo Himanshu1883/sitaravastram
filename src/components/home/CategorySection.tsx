@@ -1,11 +1,15 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
+import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useContentTranslation } from '../../hooks/useContentTranslation';
 import { useCategories, useHomepage } from '../../hooks/useCatalog';
 import CatalogImage from '../ui/CatalogImage';
 import NewArrivals from './NewArrivals';
 import type { Category } from '../../types';
+
+const CATEGORY_EDITORIAL_VIDEO =
+  '/assets/images/A_high-end_cinematic_fashion_editorial_202606241407.mp4';
 
 function bySlug(slug: string, categories: Category[], fallback: Category): Category {
   return categories.find(c => c.slug === slug) ?? fallback;
@@ -105,7 +109,59 @@ function ExploreFooter() {
   );
 }
 
-function CategoryCollage({ part }: { part: 'first' | 'second' }) {
+function CategoryVideoBanner() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const play = () => {
+      void video.play().catch(() => {
+        /* autoplay may be blocked until user gesture; muted usually works */
+      });
+    };
+
+    play();
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) play();
+      },
+      { threshold: 0.15 },
+    );
+    observer.observe(video);
+
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') play();
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+
+    return () => {
+      observer.disconnect();
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, []);
+
+  return (
+    <Banner>
+      <video
+        ref={videoRef}
+        className="absolute inset-0 h-full w-full object-cover"
+        src={CATEGORY_EDITORIAL_VIDEO}
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="auto"
+        aria-label="Sitara Vastram fashion editorial"
+      />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-navy-950/40 via-transparent to-navy-950/15" />
+    </Banner>
+  );
+}
+
+function CategoryCollage() {
   const { t } = useTranslation();
   const { category: categoryLabel } = useContentTranslation();
   const { categories } = useCategories();
@@ -115,10 +171,7 @@ function CategoryCollage({ part }: { part: 'first' | 'second' }) {
   if (!fallback) return null;
 
   const wedding = bySlug('wedding', categories, fallback);
-  const office = bySlug('office-wear', categories, fallback);
   const premium = bySlug('premium-collection', categories, fallback);
-  const everyday = bySlug('everyday-wear', categories, fallback);
-  const designer = bySlug('designer-suits', categories, fallback);
 
   const panel = (cat: Category, tagKey?: string, hero = false, className = '') => (
     <CollagePanel
@@ -133,60 +186,27 @@ function CategoryCollage({ part }: { part: 'first' | 'second' }) {
     />
   );
 
-  if (part === 'first') {
-    return (
-      <>
-        <Banner>
-          <div className="grid h-full w-full grid-cols-2 gap-1">
-            {panel(h[0], 'bestseller')}
-            {panel(h[1], 'partyEdit')}
-          </div>
-        </Banner>
-        <Banner>
-          <div className="grid h-full w-full grid-cols-1 gap-1 sm:grid-cols-3">
-            {panel(h[2], 'prints')}
-            {panel(h[3], 'festive')}
-            {panel(h[4])}
-          </div>
-        </Banner>
-        <Banner>
-          <div className="grid h-full w-full grid-cols-1 gap-1 md:grid-cols-2">
-            {panel(h[5], 'accessories', true)}
-            <div className="grid min-h-0 grid-rows-2 gap-1">
-              {panel(wedding, 'bridal')}
-              {panel(premium, 'premium')}
-            </div>
-          </div>
-        </Banner>
-      </>
-    );
-  }
-
   return (
     <>
       <Banner>
-        <div className="grid h-full w-full grid-cols-2 grid-rows-2 gap-1">
-          {panel(everyday, 'everyday')}
-          {panel(h[2], 'new')}
-          {panel(office)}
-          {panel(designer, 'designer')}
+        <div className="grid h-full w-full grid-cols-2 gap-1">
+          {panel(h[0], 'bestseller')}
+          {panel(h[1], 'partyEdit')}
         </div>
       </Banner>
       <Banner>
-        <div className="grid h-full w-full grid-cols-1 gap-1 md:grid-cols-[2fr_3fr]">
-          <div className="grid min-h-0 grid-rows-2 gap-1">
-            {panel(h[1], 'evening')}
-            {panel(h[4], 'kurtaSets')}
-          </div>
-          {panel(h[3], 'celebration', true)}
+        <div className="grid h-full w-full grid-cols-1 gap-1 sm:grid-cols-3">
+          {panel(h[2], 'prints')}
+          {panel(h[3], 'festive')}
+          {panel(h[4])}
         </div>
       </Banner>
       <Banner>
-        <div className="grid h-full w-full grid-cols-1 gap-1 lg:grid-cols-[3fr_2fr]">
-          {panel(wedding, 'weddingCollection', true)}
+        <div className="grid h-full w-full grid-cols-1 gap-1 md:grid-cols-2">
+          {panel(h[5], 'accessories', true)}
           <div className="grid min-h-0 grid-rows-2 gap-1">
-            {panel(h[0])}
-            {panel(h[5])}
+            {panel(wedding, 'bridal')}
+            {panel(premium, 'premium')}
           </div>
         </div>
       </Banner>
@@ -199,13 +219,13 @@ export default function CategoryShowcase() {
   return (
     <>
       <section className="w-full overflow-hidden bg-navy-950">
-        <CategoryCollage part="first" />
+        <CategoryCollage />
       </section>
 
       <NewArrivals embedded />
 
       <section className="w-full overflow-hidden bg-navy-950">
-        <CategoryCollage part="second" />
+        <CategoryVideoBanner />
         <ExploreFooter />
       </section>
     </>
