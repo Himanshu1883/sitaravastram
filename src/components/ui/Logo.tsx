@@ -17,6 +17,7 @@ const EMBLEM_SIZES = {
   lg: 'h-16 w-16',
   xl: 'h-20 w-20',
   '2xl': 'h-24 w-24',
+  '3xl': 'h-32 w-32 sm:h-40 sm:w-40',
 } as const;
 
 type LogoSize = keyof typeof FULL_SIZES | keyof typeof EMBLEM_SIZES;
@@ -27,6 +28,7 @@ interface LogoProps {
   variant?: LogoVariant;
   className?: string;
   imageClassName?: string;
+  src?: string;
   to?: string;
 }
 
@@ -35,24 +37,31 @@ export default function Logo({
   variant = 'full',
   className = '',
   imageClassName = '',
+  src,
   to,
 }: LogoProps) {
+  const logoSrc = src ?? BRAND_LOGO;
+
   const image =
     variant === 'emblem' ? (
       <span
-        className={`brand-logo-emblem relative inline-flex items-center justify-center rounded-full overflow-hidden bg-navy-700 ${
-          EMBLEM_SIZES[size as keyof typeof EMBLEM_SIZES] ?? EMBLEM_SIZES.md
-        }`}
+        className={`brand-logo-emblem relative inline-flex items-center justify-center overflow-hidden ${
+          src ? '' : 'rounded-full bg-navy-700'
+        } ${EMBLEM_SIZES[size as keyof typeof EMBLEM_SIZES] ?? EMBLEM_SIZES.md}`}
       >
         <img
-          src={BRAND_LOGO}
+          src={logoSrc}
           alt={BRAND_NAME}
-          className={`absolute inset-0 h-full w-full object-cover object-[center_20%] scale-[2.7] ${imageClassName}`}
+          className={
+            src
+              ? `h-full w-full object-contain ${imageClassName}`
+              : `absolute inset-0 h-full w-full object-cover object-[center_20%] scale-[2.7] ${imageClassName}`
+          }
         />
       </span>
     ) : (
       <img
-        src={BRAND_LOGO}
+        src={logoSrc}
         alt={BRAND_NAME}
         className={`brand-logo w-auto object-contain ${
           FULL_SIZES[size as keyof typeof FULL_SIZES] ?? FULL_SIZES.md

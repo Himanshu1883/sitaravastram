@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
+import ScrollToTop from './components/layout/ScrollToTop';
 import CartDrawer from './components/layout/CartDrawer';
 import BottomNav from './components/layout/BottomNav';
 import FloatingActions from './components/ui/FloatingActions';
@@ -81,6 +82,7 @@ function Layout() {
 export default function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Layout />
     </BrowserRouter>
   );

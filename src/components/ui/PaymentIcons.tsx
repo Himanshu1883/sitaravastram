@@ -1,7 +1,5 @@
-import type { ReactNode } from 'react';
 import { VisaFlatRoundedIcon, MastercardFlatRoundedIcon } from 'react-svg-credit-card-payment-icons';
 
-/* ── UPI (NPCI official brand: deep green #097939 + orange #F26522) ──────── */
 function UpiIcon({ width = 60 }: { width?: number }) {
   const h = Math.round((width / 780) * 500);
   return (
@@ -62,7 +60,6 @@ function UpiIcon({ width = 60 }: { width?: number }) {
   );
 }
 
-/* ── Razorpay (official: #072654 navy + #2DB8C5 teal) ────────────────────── */
 function RazorpayIcon({ width = 60 }: { width?: number }) {
   const h = Math.round((width / 780) * 500);
   return (
@@ -97,7 +94,6 @@ function RazorpayIcon({ width = 60 }: { width?: number }) {
   );
 }
 
-/* ── Cash on Delivery ─────────────────────────────────────────────────────── */
 function CodIcon({ width = 60 }: { width?: number }) {
   const h = Math.round((width / 780) * 500);
   return (
@@ -151,23 +147,6 @@ function CodIcon({ width = 60 }: { width?: number }) {
   );
 }
 
-interface PaymentBadgeProps {
-  label: string;
-  children: ReactNode;
-}
-
-function PaymentBadge({ label, children }: PaymentBadgeProps) {
-  return (
-    <div
-      className="flex items-center justify-center rounded-lg border border-gray-200 bg-white px-2 py-1.5 transition-all duration-200 hover:border-gray-300 hover:shadow-sm"
-      aria-label={label}
-      title={label}
-    >
-      {children}
-    </div>
-  );
-}
-
 interface PaymentIconsProps {
   iconWidth?: number;
   showLabels?: boolean;
@@ -180,35 +159,26 @@ export default function PaymentIcons({
   className = '',
 }: PaymentIconsProps) {
   const icons = [
-    {
-      label: 'Visa',
-      node: <VisaFlatRoundedIcon width={iconWidth} />,
-    },
-    {
-      label: 'Mastercard',
-      node: <MastercardFlatRoundedIcon width={iconWidth} />,
-    },
-    {
-      label: 'UPI',
-      node: <UpiIcon width={iconWidth} />,
-    },
-    {
-      label: 'Razorpay',
-      node: <RazorpayIcon width={iconWidth} />,
-    },
-    {
-      label: 'Cash on Delivery',
-      node: <CodIcon width={iconWidth} />,
-    },
+    { label: 'Visa', node: <VisaFlatRoundedIcon width={iconWidth} /> },
+    { label: 'Mastercard', node: <MastercardFlatRoundedIcon width={iconWidth} /> },
+    { label: 'UPI', node: <UpiIcon width={iconWidth} /> },
+    { label: 'Razorpay', node: <RazorpayIcon width={iconWidth} /> },
+    { label: 'Cash on Delivery', node: <CodIcon width={iconWidth} /> },
   ];
 
   return (
-    <div className={`flex flex-wrap items-center justify-center gap-2 ${className}`}>
+    <div className={`flex flex-wrap items-center justify-center gap-2 sm:gap-3 ${className}`}>
       {icons.map(({ label, node }) => (
         <div key={label} className="flex flex-col items-center gap-1">
-          <PaymentBadge label={label}>{node}</PaymentBadge>
+          <span
+            aria-label={label}
+            title={label}
+            className="inline-flex items-center transition-opacity hover:opacity-90"
+          >
+            {node}
+          </span>
           {showLabels && (
-            <span className="font-body text-[9px] tracking-wide text-gray-400">{label}</span>
+            <span className="font-body text-[9px] tracking-wide text-white/40">{label}</span>
           )}
         </div>
       ))}
