@@ -70,10 +70,13 @@ const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 export const store = configureStore({
   reducer: persistedReducer,
+  // Partial cart/wishlist hydration from legacy localStorage keys
+  // @ts-expect-error redux-persist PersistPartial vs partial preloadedState
   preloadedState: {
     cart: preloadedCart,
     wishlist: preloadedWishlist,
   },
+  // @ts-expect-error RTK middleware tuple with persistReducer + catalogApi
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware({
       serializableCheck: {

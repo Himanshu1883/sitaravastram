@@ -23,7 +23,7 @@ export default function HomePage() {
       <FeaturedCollection />
       <CustomerReviews />
       <InstagramFeed />
-      <Newsletter />
+      {/* <Newsletter /> */}
     </main>
   );
 }

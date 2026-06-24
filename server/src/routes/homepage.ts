@@ -9,6 +9,7 @@ import {
   resolveFeaturedCollections,
 } from '../lib/featuredCollections.js';
 import { toHeroSlideDto } from '../lib/heroSlides.js';
+import { defaultInstagramMeta, defaultSectionCopy } from '../lib/sectionCopySeed.js';
 
 const router = Router();
 
@@ -42,6 +43,8 @@ router.get('/', async (_req, res, next) => {
         blockMap.featuredCollections,
         featuredCategories,
       ),
+      sectionCopy: blockMap.sectionCopy ?? defaultSectionCopy,
+      instagramMeta: blockMap.instagramMeta ?? defaultInstagramMeta,
     });
   } catch (err) {
     next(err);

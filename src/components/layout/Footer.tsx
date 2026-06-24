@@ -1,10 +1,39 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Instagram, Facebook, Youtube, Twitter, MapPin, Phone, Mail, Heart } from 'lucide-react';
+import {
+  Instagram,
+  Facebook,
+  Mail,
+  MapPin,
+  Phone,
+  Heart,
+  Sparkles,
+  Diamond,
+  ArrowRight,
+  Gift,
+  Shield,
+  CreditCard,
+  RefreshCw,
+  Truck,
+  Award,
+} from 'lucide-react';
 import Logo from '../ui/Logo';
+import PaymentIcons from '../ui/PaymentIcons';
+
+function PinterestIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.403.042-3.441.219-.937 1.406-5.965 1.406-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 0 1 .083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0z" />
+    </svg>
+  );
+}
 
 export default function Footer() {
   const { t } = useTranslation();
+  const [email, setEmail] = useState('');
+  const [miniEmail, setMiniEmail] = useState('');
+  const [subscribed, setSubscribed] = useState(false);
 
   const shopLinks = [
     { labelKey: 'categories.new-arrivals', href: '/collections/new-arrivals', fallback: 'New Arrivals' },
@@ -35,61 +64,160 @@ export default function Footer() {
   ];
 
   const trustBadges = [
-    'footer.authentic',
-    'footer.securePayments',
-    'footer.easyReturns',
-    'footer.codAvailable',
-    'footer.premiumQuality',
+    { key: 'footer.authentic', icon: Shield },
+    { key: 'footer.securePayments', icon: CreditCard },
+    { key: 'footer.easyReturns', icon: RefreshCw },
+    { key: 'footer.codAvailable', icon: Truck },
+    { key: 'footer.premiumQuality', icon: Award },
   ];
 
+  const perks = ['perk1', 'perk2', 'perk3'] as const;
+
+  const handleSubscribe = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (email.trim()) setSubscribed(true);
+  };
+
   return (
-    <footer className="bg-navy-700 text-white">
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-10">
-          <div className="lg:col-span-2">
-            <Logo to="/" size="xl" variant="emblem" className="mb-5" />
-            <p className="font-body text-sm text-white/70 leading-relaxed mb-6 max-w-xs">
+    <footer className="bg-[#0a0f1f] text-white">
+      {/* Newsletter banner */}
+      <div className="section-container py-10 lg:py-12">
+        <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.07] to-white/[0.02] p-6 sm:p-8 lg:p-10">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)_minmax(0,0.95fr)] lg:gap-10 lg:items-center">
+            <div className="flex items-start gap-4">
+              <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full border border-rosegold-400/30 bg-rosegold-500/15">
+                <Sparkles size={24} className="text-rosegold-400" />
+              </div>
+              <div>
+                <p className="mb-2 font-body text-[11px] font-semibold uppercase tracking-[0.22em] text-rosegold-400">
+                  {t('home.joinFamily')}
+                </p>
+                <h2 className="font-heading text-2xl font-semibold leading-tight text-white sm:text-3xl">
+                  {t('home.newsletterTitle1')}{' '}
+                  <span className="text-rosegold-300">{t('home.newsletterTitle2')}</span>
+                </h2>
+              </div>
+            </div>
+
+            <div>
+              <p className="mb-5 font-body text-sm leading-relaxed text-white/65">
+                {t('home.newsletterSubtitle')}
+              </p>
+              <ul className="space-y-2.5">
+                {perks.map(key => (
+                  <li key={key} className="flex items-center gap-2.5 font-body text-sm text-white/80">
+                    <Diamond size={12} className="flex-shrink-0 text-rosegold-400" fill="currentColor" />
+                    {t(`home.${key}`)}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              {subscribed ? (
+                <div className="rounded-xl border border-rosegold-400/30 bg-rosegold-500/10 px-5 py-6 text-center">
+                  <p className="font-heading text-lg font-semibold text-white">{t('home.subscribedTitle')}</p>
+                  <p className="mt-2 font-body text-sm text-white/70">
+                    {t('home.subscribedBody')} {email}
+                  </p>
+                </div>
+              ) : (
+                <form onSubmit={handleSubscribe} className="space-y-3">
+                  <div className="relative">
+                    <Mail
+                      size={16}
+                      className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/35"
+                    />
+                    <input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={e => setEmail(e.target.value)}
+                      placeholder={t('home.emailPlaceholder')}
+                      className="w-full rounded-lg border border-white/15 bg-white/5 py-3.5 pl-11 pr-4 font-body text-sm text-white placeholder:text-white/35 focus:border-rosegold-400 focus:outline-none focus:ring-1 focus:ring-rosegold-400/40"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="flex w-full items-center justify-center gap-2 rounded-lg bg-rosegold-500 px-5 py-3.5 font-body text-xs font-bold uppercase tracking-[0.18em] text-white transition-colors hover:bg-rosegold-400"
+                  >
+                    {t('home.subscribe')}
+                    <ArrowRight size={16} />
+                  </button>
+                  <p className="text-center font-body text-[11px] leading-relaxed text-white/40">
+                    {t('home.newsletterDisclaimer')}
+                  </p>
+                </form>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main links */}
+      <div className="section-container pb-12">
+        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-12 lg:gap-8">
+          <div className="lg:col-span-3">
+            <Logo
+              to="/"
+              size="lg"
+              variant="full"
+              className="mb-5"
+              imageClassName="brightness-0 invert opacity-95"
+            />
+            <p className="mb-6 max-w-xs font-body text-sm leading-relaxed text-white/65">
               {t('footer.tagline')}
             </p>
-            <div className="flex items-center gap-3 mb-6">
+            <div className="mb-6 flex items-center gap-2.5">
               {[
-                { icon: Instagram, href: '#', label: 'Instagram' },
+                { icon: Instagram, href: 'https://instagram.com/sitaravastram', label: 'Instagram' },
                 { icon: Facebook, href: '#', label: 'Facebook' },
-                { icon: Youtube, href: '#', label: 'YouTube' },
-                { icon: Twitter, href: '#', label: 'Twitter' },
+                { icon: PinterestIcon, href: '#', label: 'Pinterest' },
+                { icon: Mail, href: 'mailto:care@sitaravastram.com', label: 'Email' },
               ].map(({ icon: Icon, href, label }) => (
                 <a
                   key={label}
                   href={href}
                   aria-label={label}
-                  className="w-9 h-9 rounded-sm bg-white/10 hover:bg-rosegold-500 flex items-center justify-center transition-all duration-300 hover:scale-110"
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/80 transition-all duration-300 hover:border-rosegold-400/50 hover:bg-rosegold-500/20 hover:text-rosegold-300"
                 >
                   <Icon size={16} />
                 </a>
               ))}
             </div>
-            <div className="space-y-2">
-              <a href="tel:+919876543210" className="flex items-center gap-2.5 text-sm font-body text-white/70 hover:text-rosegold-300 transition-colors">
-                <Phone size={14} className="text-rosegold-400 flex-shrink-0" />
+            <div className="space-y-2.5">
+              <a
+                href="tel:+919876543210"
+                className="flex items-center gap-2.5 font-body text-sm text-white/65 transition-colors hover:text-rosegold-300"
+              >
+                <Phone size={14} className="flex-shrink-0 text-rosegold-400" />
                 +91 98765 43210
               </a>
-              <a href="mailto:care@sitaravastram.com" className="flex items-center gap-2.5 text-sm font-body text-white/70 hover:text-rosegold-300 transition-colors">
-                <Mail size={14} className="text-rosegold-400 flex-shrink-0" />
+              <a
+                href="mailto:care@sitaravastram.com"
+                className="flex items-center gap-2.5 font-body text-sm text-white/65 transition-colors hover:text-rosegold-300"
+              >
+                <Mail size={14} className="flex-shrink-0 text-rosegold-400" />
                 care@sitaravastram.com
               </a>
-              <p className="flex items-start gap-2.5 text-sm font-body text-white/70">
-                <MapPin size={14} className="text-rosegold-400 flex-shrink-0 mt-0.5" />
+              <p className="flex items-start gap-2.5 font-body text-sm text-white/65">
+                <MapPin size={14} className="mt-0.5 flex-shrink-0 text-rosegold-400" />
                 123, Textile Hub, Jaipur, Rajasthan — 302001
               </p>
             </div>
           </div>
 
-          <div>
-            <h4 className="font-heading text-base font-semibold text-white mb-5 after:content-[''] after:block after:w-8 after:h-0.5 after:bg-rosegold-500 after:mt-2">{t('footer.shop')}</h4>
+          <div className="lg:col-span-2">
+            <h4 className="mb-5 font-heading text-sm font-semibold uppercase tracking-[0.12em] text-rosegold-400">
+              {t('footer.shop')}
+            </h4>
             <ul className="space-y-2.5">
               {shopLinks.map(link => (
                 <li key={link.href}>
-                  <Link to={link.href} className="text-sm font-body text-white/70 hover:text-rosegold-300 transition-colors duration-200">
+                  <Link
+                    to={link.href}
+                    className="font-body text-sm text-white/65 transition-colors hover:text-rosegold-300"
+                  >
                     {t(link.labelKey, { defaultValue: link.fallback })}
                   </Link>
                 </li>
@@ -97,17 +225,27 @@ export default function Footer() {
             </ul>
           </div>
 
-          <div>
-            <h4 className="font-heading text-base font-semibold text-white mb-5 after:content-[''] after:block after:w-8 after:h-0.5 after:bg-rosegold-500 after:mt-2">{t('footer.support')}</h4>
+          <div className="lg:col-span-2">
+            <h4 className="mb-5 font-heading text-sm font-semibold uppercase tracking-[0.12em] text-rosegold-400">
+              {t('footer.support')}
+            </h4>
             <ul className="space-y-2.5">
               {supportLinks.map(link => (
                 <li key={link.labelKey}>
                   {link.href.startsWith('http') ? (
-                    <a href={link.href} target="_blank" rel="noopener noreferrer" className="text-sm font-body text-white/70 hover:text-rosegold-300 transition-colors duration-200">
+                    <a
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-body text-sm text-white/65 transition-colors hover:text-rosegold-300"
+                    >
                       {t(link.labelKey)}
                     </a>
                   ) : (
-                    <Link to={link.href} className="text-sm font-body text-white/70 hover:text-rosegold-300 transition-colors duration-200">
+                    <Link
+                      to={link.href}
+                      className="font-body text-sm text-white/65 transition-colors hover:text-rosegold-300"
+                    >
                       {t(link.labelKey)}
                     </Link>
                   )}
@@ -116,29 +254,45 @@ export default function Footer() {
             </ul>
           </div>
 
-          <div>
-            <h4 className="font-heading text-base font-semibold text-white mb-5 after:content-[''] after:block after:w-8 after:h-0.5 after:bg-rosegold-500 after:mt-2">{t('footer.policies')}</h4>
-            <ul className="space-y-2.5 mb-8">
+          <div className="lg:col-span-2">
+            <h4 className="mb-5 font-heading text-sm font-semibold uppercase tracking-[0.12em] text-rosegold-400">
+              {t('footer.policies')}
+            </h4>
+            <ul className="space-y-2.5">
               {policyLinks.map(link => (
                 <li key={link.labelKey}>
-                  <Link to={link.href} className="text-sm font-body text-white/70 hover:text-rosegold-300 transition-colors duration-200">
+                  <Link
+                    to={link.href}
+                    className="font-body text-sm text-white/65 transition-colors hover:text-rosegold-300"
+                  >
                     {t(link.labelKey)}
                   </Link>
                 </li>
               ))}
             </ul>
+          </div>
 
-            <div className="bg-white/5 rounded-sm p-4 border border-white/10">
-              <p className="font-heading text-sm font-semibold text-white mb-1">{t('footer.get10Off')}</p>
-              <p className="text-xs font-body text-white/60 mb-3">{t('footer.subscribeOffers')}</p>
+          <div className="lg:col-span-3">
+            <div className="rounded-xl border border-white/10 bg-white/[0.04] p-5">
+              <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-rosegold-500/15">
+                <Gift size={20} className="text-rosegold-400" />
+              </div>
+              <p className="font-heading text-lg font-semibold text-white">{t('footer.get10Off')}</p>
+              <p className="mb-4 font-body text-xs text-white/55">{t('footer.subscribeOffers')}</p>
               <div className="flex gap-2">
                 <input
                   type="email"
+                  value={miniEmail}
+                  onChange={e => setMiniEmail(e.target.value)}
                   placeholder={t('footer.emailPlaceholder')}
-                  className="flex-1 bg-white/10 border border-white/20 rounded-sm px-3 py-2 text-xs text-white placeholder:text-white/40 focus:outline-none focus:border-rosegold-400"
+                  className="min-w-0 flex-1 rounded-lg border border-white/15 bg-white/5 px-3 py-2.5 font-body text-xs text-white placeholder:text-white/35 focus:border-rosegold-400 focus:outline-none"
                 />
-                <button className="px-3 py-2 bg-rosegold-500 text-white text-xs font-medium rounded-sm hover:bg-rosegold-600 transition-colors whitespace-nowrap">
-                  {t('footer.join')}
+                <button
+                  type="button"
+                  aria-label={t('footer.join')}
+                  className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-rosegold-500 text-white transition-colors hover:bg-rosegold-400"
+                >
+                  <ArrowRight size={16} />
                 </button>
               </div>
             </div>
@@ -146,34 +300,35 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-white/10">
-        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-wrap items-center justify-center gap-6 lg:gap-10">
-            {trustBadges.map(key => (
-              <div key={key} className="flex items-center gap-2 text-xs font-body text-white/60">
-                <div className="w-1.5 h-1.5 rounded-full bg-rosegold-400" />
-                {t(key)}
+      {/* Trust badges */}
+      <div className="border-y border-white/10 bg-white/[0.02]">
+        <div className="section-container py-5">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5 lg:divide-x lg:divide-white/10">
+            {trustBadges.map(({ key, icon: Icon }) => (
+              <div
+                key={key}
+                className="flex items-center justify-center gap-2.5 px-2 text-center lg:px-4"
+              >
+                <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-rosegold-400/25 bg-rosegold-500/10">
+                  <Icon size={16} className="text-rosegold-400" strokeWidth={1.75} />
+                </span>
+                <span className="font-body text-xs font-medium text-white/75 sm:text-sm">{t(key)}</span>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      <div className="border-t border-white/10 bg-navy-950">
-        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-xs font-body text-white/50">{t('footer.copyright')}</p>
-          <p className="flex items-center gap-1.5 text-xs font-body text-white/50">
+      {/* Bottom bar */}
+      <div className="border-t border-white/10 bg-[#060a14]">
+        <div className="section-container flex flex-col items-center justify-between gap-4 py-5 sm:flex-row">
+          <p className="font-body text-xs text-white/45">{t('footer.copyright')}</p>
+          <p className="flex items-center gap-1.5 font-body text-xs text-white/45">
             {t('footer.madeInIndiaPrefix')}
-            <Heart size={11} className="text-rosegold-400 fill-rosegold-400" />
+            <Heart size={11} className="fill-rosegold-400 text-rosegold-400" />
             {t('footer.madeInIndiaSuffix')}
           </p>
-          <div className="flex items-center gap-3">
-            {['Visa', 'Mastercard', 'UPI', 'RazorPay', 'COD'].map(method => (
-              <span key={method} className="text-xs font-body text-white/50 bg-white/10 px-2 py-0.5 rounded-sm">
-                {method}
-              </span>
-            ))}
-          </div>
+          <PaymentIcons iconWidth={48} />
         </div>
       </div>
     </footer>

@@ -36,6 +36,8 @@ router.post('/', async (req, res, next) => {
       occasion: body.occasion || [],
       colors: body.colors || [],
       sizes: body.sizes || [],
+      showColorSelector: body.showColorSelector ?? false,
+      showSizeSelector: body.showSizeSelector ?? false,
       rating: body.rating ?? 4.5,
       reviewCount: body.reviewCount ?? 0,
       description: body.description || '',

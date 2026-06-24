@@ -72,6 +72,9 @@ export async function updateUserProfile(
 
 export async function resolveAuthUser(payload: { sub: string; role: 'user' | 'admin' }) {
   if (payload.role === 'admin') {
+    const phoneAdmin = await User.findById(payload.sub);
+    if (phoneAdmin?.role === 'admin') return toUserDto(phoneAdmin);
+
     const admin = await Admin.findById(payload.sub);
     if (!admin) return null;
     return {
@@ -86,6 +89,96 @@ export async function resolveAuthUser(payload: { sub: string; role: 'user' | 'ad
   const user = await User.findById(payload.sub);
   if (!user) return null;
   return toUserDto(user);
+}
+
+export type AdminSettingsDto = {
+  user: ReturnType<typeof toUserDto> | {
+    id: string;
+    role: 'admin';
+    email?: string;
+    name?: string;
+    phone?: string;
+    authProviders: ('email' | 'phone')[];
+  };
+  loginMethod: 'email' | 'phone';
+  canChangePassword: boolean;
+};
+
+export async function getAdminSettings(payload: { sub: string; role: 'admin' }): Promise<AdminSettingsDto> {
+  const user = await resolveAuthUser(payload);
+  if (!user || user.role !== 'admin') throw new Error('Admin not found');
+
+  const phoneAdmin = await User.findById(payload.sub);
+  if (phoneAdmin?.role === 'admin') {
+    return {
+      user,
+      loginMethod: 'phone',
+      canChangePassword: false,
+    };
+  }
+
+  return {
+    user,
+    loginMethod: 'email',
+    canChangePassword: true,
+  };
+}
+
+export async function updateAdminProfile(
+  payload: { sub: string; role: 'admin' },
+  data: { name?: string; email?: string },
+) {
+  if (!data.name?.trim() && !data.email?.trim()) {
+    throw new Error('Nothing to update');
+  }
+
+  const phoneAdmin = await User.findById(payload.sub);
+  if (phoneAdmin?.role === 'admin') {
+    const updated = await updateUserProfile(payload.sub, {
+      name: data.name?.trim() || phoneAdmin.name,
+      email: data.email,
+    });
+    return toUserDto(updated);
+  }
+
+  const admin = await Admin.findById(payload.sub);
+  if (!admin) throw new Error('Admin not found');
+
+  if (data.name?.trim()) admin.name = data.name.trim();
+  if (data.email?.trim()) {
+    const email = data.email.trim().toLowerCase();
+    const exists = await Admin.findOne({ email, _id: { $ne: admin._id } });
+    if (exists) throw new Error('Email already in use');
+    admin.email = email;
+  }
+  await admin.save();
+
+  return {
+    id: admin._id.toString(),
+    role: 'admin' as const,
+    email: admin.email,
+    name: admin.name,
+    authProviders: ['email' as const],
+  };
+}
+
+export async function changeAdminPassword(
+  sub: string,
+  currentPassword: string,
+  newPassword: string,
+): Promise<void> {
+  if (!newPassword || newPassword.length < 6) {
+    throw new Error('New password must be at least 6 characters');
+  }
+
+  const admin = await Admin.findById(sub);
+  if (!admin) throw new Error('Password change is only available for email login accounts');
+
+  const valid = await comparePassword(currentPassword, admin.passwordHash);
+  if (!valid) throw new Error('Current password is incorrect');
+
+  admin.passwordHash = await hashPassword(newPassword);
+  await admin.save();
 }
 
 export async function adminLogin(email: string, password: string) {

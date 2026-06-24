@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useHomepage } from '../../hooks/useCatalog';
 
 export default function Newsletter() {
   const { t } = useTranslation();
+  const { data } = useHomepage();
+  const copy = data?.sectionCopy?.newsletter;
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
@@ -28,16 +31,16 @@ export default function Newsletter() {
           </div>
 
           <p className="font-body text-xs tracking-[0.3em] uppercase font-semibold text-rosegold-400 mb-4">
-            {t('home.joinFamily')}
+            {copy?.overline || t('home.joinFamily')}
           </p>
           <h2 className="font-heading text-4xl lg:text-5xl font-semibold text-white leading-tight mb-2">
-            {t('home.newsletterTitle1')}
+            {copy?.title1 || t('home.newsletterTitle1')}
           </h2>
           <h2 className="font-heading text-4xl lg:text-5xl font-semibold text-rosegold-300 leading-tight mb-5">
-            {t('home.newsletterTitle2')}
+            {copy?.title2 || t('home.newsletterTitle2')}
           </h2>
           <p className="font-body text-base text-white/70 leading-relaxed mb-3 max-w-md mx-auto">
-            {t('home.newsletterSubtitle')}
+            {copy?.subtitle || t('home.newsletterSubtitle')}
           </p>
 
           <div className="flex flex-wrap justify-center gap-4 mb-8">

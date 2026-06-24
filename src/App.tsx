@@ -20,11 +20,14 @@ function Layout() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
   const isAdminLogin = location.pathname === '/admin/login';
+  const isAdminApp = isAdminRoute && !isAdminLogin;
   const isStorefront = !isAdminRoute;
 
   return (
     <>
-      {!isAdminLogin && <Navbar showCategoryStrip={location.pathname === '/' && !isAdminRoute} />}
+      {isStorefront && (
+        <Navbar showCategoryStrip={location.pathname === '/'} />
+      )}
 
       <Routes>
         <Route path="/admin/login" element={<AdminLoginPage />} />
@@ -69,6 +72,8 @@ function Layout() {
           <AuthModal />
         </>
       )}
+
+      {isAdminApp && <AuthHydrator />}
     </>
   );
 }

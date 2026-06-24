@@ -1,4 +1,4 @@
-﻿{
+{
   "nav": {
     "collections": "संग्रह",
     "shop": "खरीदारी",
@@ -95,7 +95,11 @@
     "materialStories": "कपड़े की कहानियाँ",
     "shopByFabricSubtitle": "हर कपड़ा इसलिए चुना गया है कि वह आपको कैसा महसूस कराता है — भार, झलक, त्वचा पर कपड़े की सरसराहट।",
     "everyMoment": "हर पल, हर महिला",
+    "findPerfectOutfit": "अपना परफेक्ट आउटफिट खोजें",
     "shopByOccasionSubtitle": "कार्यदिवस की शांत सुंदरता से लेकर शादी की चमक तक — सितारा वस्त्रम में आपका लुक है।",
+    "shopByOccasionSubtitleAlt": "जीवन के हर खास पल के लिए डिज़ाइन किए गए आउटफिट खोजें। सितारा के साथ स्टाइल में जश्न मनाएं।",
+    "everydayOccasion": "रोज़मर्रा",
+    "popular": "लोकप्रिय",
     "exploreCollections": "संग्रह देखें",
     "shopTheEdit": "एडिट खरीदें",
     "realStories": "असली कहानियाँ",

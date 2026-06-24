@@ -43,6 +43,7 @@ export default function CustomerReviews() {
   const { t } = useTranslation();
   const { data } = useHomepage();
   const reviews = data?.reviews ?? [];
+  const copy = data?.sectionCopy?.reviews;
   const swiperRef = useRef<SwiperType | null>(null);
   const [atStart, setAtStart] = useState(true);
   const [atEnd, setAtEnd] = useState(false);
@@ -58,9 +59,9 @@ export default function CustomerReviews() {
         {/* Heading */}
         <div className="px-4 sm:px-5 lg:pl-6 xl:pl-10 2xl:pl-14 lg:pr-0 mb-10 lg:mb-0 shrink-0">
           <h2 className="type-heading-xl text-navy-900 leading-[1.15] max-w-[280px] lg:max-w-none">
-            {t('home.reviewsHeading1')}
+            {copy?.heading1 || t('home.reviewsHeading1')}
             <br />
-            {t('home.reviewsHeading2')}
+            {copy?.heading2 || t('home.reviewsHeading2')}
           </h2>
         </div>
 

@@ -407,6 +407,31 @@
   cursor: default;
 }
 
+.occasion-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+  border: 1px solid rgba(27, 42, 74, 0.12);
+  background: white;
+  color: #1b2a4a;
+  box-shadow: 0 4px 14px rgba(27, 42, 74, 0.08);
+  transition: opacity 0.2s ease, transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.occasion-nav-btn:hover:not(:disabled) {
+  border-color: rgba(201, 149, 106, 0.45);
+  background: #fffdfb;
+  transform: scale(1.04);
+}
+
+.occasion-nav-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
 /* Floating animation for decorative elements */
 @keyframes floatSlow {
   0%, 100% { transform: translateY(0px) rotate(0deg); }
@@ -421,3 +446,50 @@
 
 .float-slow { animation: floatSlow 8s ease-in-out infinite; }
 .rotate-glow { animation: rotateGlow 20s linear infinite; }
+
+/* ── Admin panel ── */
+@layer components {
+  .admin-shell {
+    font-family: var(--font-body);
+  }
+
+  .admin-sidebar {
+    background: linear-gradient(180deg, #0e1a32 0%, #152240 40%, #1B2A4A 100%);
+    box-shadow: 4px 0 24px rgba(14, 26, 50, 0.15);
+  }
+
+  .admin-topbar {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(27, 42, 74, 0.06);
+  }
+
+  .admin-card {
+    @apply bg-white rounded-xl border border-gray-100/80 shadow-sm;
+  }
+
+  .admin-table thead tr {
+    @apply border-b border-gray-100;
+  }
+
+  .admin-table th {
+    @apply px-5 sm:px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-400;
+  }
+
+  .admin-table tbody tr {
+    @apply border-b border-gray-50 last:border-0 transition-colors hover:bg-cream-100/50;
+  }
+
+  .admin-table td {
+    @apply px-5 sm:px-6 py-3.5;
+  }
+
+  .admin-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .admin-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+  }
+}

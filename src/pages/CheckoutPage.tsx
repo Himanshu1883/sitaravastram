@@ -10,7 +10,7 @@ import type { Order } from '../types';
 import { useFormatPrice } from '../hooks/useFormatPrice';
 import { mediaUrl } from '../lib/api';
 import { sendOtp, verifyOtp, createOrder } from '../lib/api';
-import { normalizeIndianMobile, validateIndianMobile } from '../lib/otpAuth';
+import { validateIndianMobile } from '../lib/otpAuth';
 
 const steps = [
   { id: 1, label: 'Login', icon: Phone },

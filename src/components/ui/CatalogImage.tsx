@@ -26,8 +26,8 @@ export default function CatalogImage({
       alt={alt}
       className={className}
       loading={loading}
-      decoding="async"
-      fetchPriority={priority ? 'high' : 'auto'}
+      decoding={priority ? 'sync' : 'async'}
+      fetchPriority={priority ? 'high' : loading === 'eager' ? 'low' : 'auto'}
       {...rest}
     />
   );

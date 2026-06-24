@@ -32,7 +32,7 @@ export function useContentTranslation() {
   );
 
   const promo = useCallback(
-    (field: string, value: string) => t(`labels.${textKey(value)}`, { defaultValue: value }),
+    (_field: string, value: string) => t(`labels.${textKey(value)}`, { defaultValue: value }),
     [t],
   );
 

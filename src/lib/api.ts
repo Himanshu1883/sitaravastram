@@ -130,6 +130,39 @@ export interface FeaturedCollectionItem {
   href: string;
   reverse: boolean;
   hotspots?: ProductHotspotItem[];
+  overline?: string;
+  title?: string;
+  description?: string;
+  cta?: string;
+}
+
+export interface SectionCopyGroup {
+  overline?: string;
+  title?: string;
+  subtitle?: string;
+  cta?: string;
+  heading1?: string;
+  heading2?: string;
+  title1?: string;
+  title2?: string;
+  handle?: string;
+  tagline?: string;
+}
+
+export interface SectionCopy {
+  newArrivals: SectionCopyGroup;
+  bestSellers: SectionCopyGroup;
+  fabric: SectionCopyGroup;
+  occasion: SectionCopyGroup;
+  featured: SectionCopyGroup;
+  reviews: SectionCopyGroup;
+  instagram: SectionCopyGroup;
+  newsletter: SectionCopyGroup;
+}
+
+export interface InstagramMeta {
+  handle: string;
+  profileUrl: string;
 }
 
 export interface HomepageData {
@@ -144,7 +177,21 @@ export interface HomepageData {
   occasionSlugMap: Record<string, string>;
   allColors: string[];
   featuredCollections: FeaturedCollectionItem[];
+  sectionCopy?: SectionCopy;
+  instagramMeta?: InstagramMeta;
 }
+
+export type AdminHomepageData = {
+  heroSlides: import('../types').HeroSlide[];
+  categories: import('../types').Category[];
+  fabrics: HomepageData['fabrics'];
+  occasions: HomepageData['occasions'];
+  featuredCollections: FeaturedCollectionItem[];
+  instagramPosts: HomepageData['instagramPosts'];
+  sectionCopy: SectionCopy;
+  instagramMeta: InstagramMeta;
+  reviews: import('../types').Review[];
+};
 
 // Commerce
 export const validateCouponApi = (code: string, subtotal: number) =>
@@ -208,3 +255,60 @@ export const adminFetchDashboard = () => api<{
   metrics: { products: number; orders: number; lowStock: number; revenue: number; pendingReturns: number };
   recentOrders: { id: string; date: string; status: string; customer: string; total: number }[];
 }>('/api/admin/dashboard', { auth: 'admin' });
+
+export interface AdminSettings {
+  user: AuthUser;
+  loginMethod: 'email' | 'phone';
+  canChangePassword: boolean;
+}
+
+export const adminFetchSettings = () =>
+  api<AdminSettings>('/api/admin/settings', { auth: 'admin' });
+
+export const adminUpdateProfile = (data: { name: string; email?: string }) =>
+  api<{ user: AuthUser }>('/api/admin/settings/profile', {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+    auth: 'admin',
+  });
+
+export const adminChangePassword = (data: { currentPassword: string; newPassword: string }) =>
+  api<{ success: boolean; message: string }>('/api/admin/settings/password', {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+    auth: 'admin',
+  });
+
+export const adminFetchHomepage = () =>
+  api<AdminHomepageData>('/api/admin/homepage', { auth: 'admin' });
+
+export const adminSaveHeroSlides = (slides: import('../types').HeroSlide[]) =>
+  api<{ heroSlides: import('../types').HeroSlide[] }>('/api/admin/homepage/hero', {
+    method: 'PUT',
+    body: JSON.stringify({ slides }),
+    auth: 'admin',
+  });
+
+export const adminSaveHomepageBlock = (key: string, data: unknown) =>
+  api<{ key: string; data: unknown }>(`/api/admin/homepage/blocks/${key}`, {
+    method: 'PUT',
+    body: JSON.stringify({ data }),
+    auth: 'admin',
+  });
+
+export const adminUpdateHomepageCategory = (
+  id: string,
+  data: { name?: string; image?: string; featured?: boolean },
+) =>
+  api<{ category: import('../types').Category }>(`/api/admin/homepage/categories/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+    auth: 'admin',
+  });
+
+export const adminSaveHomepageReviews = (reviews: import('../types').Review[]) =>
+  api<{ reviews: import('../types').Review[] }>('/api/admin/homepage/reviews', {
+    method: 'PUT',
+    body: JSON.stringify({ reviews }),
+    auth: 'admin',
+  });

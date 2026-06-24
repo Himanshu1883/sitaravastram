@@ -11,14 +11,15 @@ export default function ShopByFabric() {
   const { fabric } = useContentTranslation();
   const { data } = useHomepage();
   const fabrics = data?.fabrics ?? [];
+  const copy = data?.sectionCopy?.fabric;
 
   return (
     <section className="py-20 bg-white">
       <div className="section-container">
         <SectionHeading
-          overline={t('home.materialStories')}
-          title={t('home.shopByFabric')}
-          subtitle={t('home.shopByFabricSubtitle')}
+          overline={copy?.overline || t('home.materialStories')}
+          title={copy?.title || t('home.shopByFabric')}
+          subtitle={copy?.subtitle || t('home.shopByFabricSubtitle')}
           center
         />
 

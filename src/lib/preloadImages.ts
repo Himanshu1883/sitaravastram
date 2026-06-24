@@ -72,11 +72,12 @@ export function preloadProductCatalog(products: Product[]) {
   preloadMany(urls, 8);
 }
 
-/** PDP / hover — all gallery images at appropriate sizes. */
+/** PDP — preload detail + zoom variants for gallery switching and hover magnifier. */
 export function preloadProductGallery(images: string[]) {
-  const urls = images.map((img, i) => mediaUrl(img, i === 0 ? 'detail' : 'thumb'));
-  urls.slice(0, 1).forEach(preloadLinkHint);
-  preloadMany(urls, 4);
+  const detailUrls = images.map(img => mediaUrl(img, 'detail'));
+  const zoomUrls = images.map(img => mediaUrl(img, 'zoom'));
+  detailUrls.slice(0, 2).forEach(preloadLinkHint);
+  [...detailUrls, ...zoomUrls].forEach(preloadImageUrl);
 }
 
 export function preloadProductDetail(product: Product) {

@@ -14,6 +14,8 @@ export interface IProduct extends Document {
   occasion: string[];
   colors: string[];
   sizes: string[];
+  showColorSelector?: boolean;
+  showSizeSelector?: boolean;
   rating: number;
   reviewCount: number;
   description: string;
@@ -45,6 +47,8 @@ const productSchema = new Schema<IProduct>(
     occasion: [String],
     colors: [String],
     sizes: [String],
+    showColorSelector: { type: Boolean, default: false },
+    showSizeSelector: { type: Boolean, default: false },
     rating: { type: Number, default: 4.5 },
     reviewCount: { type: Number, default: 0 },
     description: { type: String, default: '' },
@@ -83,6 +87,8 @@ export function toProductDto(doc: IProduct) {
     occasion: doc.occasion,
     colors: doc.colors,
     sizes: doc.sizes,
+    showColorSelector: doc.showColorSelector ?? false,
+    showSizeSelector: doc.showSizeSelector ?? false,
     rating: doc.rating,
     reviewCount: doc.reviewCount,
     description: doc.description,

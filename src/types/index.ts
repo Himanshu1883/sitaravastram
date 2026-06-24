@@ -12,6 +12,8 @@ export interface Product {
   occasion: string[];
   colors: string[];
   sizes: string[];
+  showColorSelector?: boolean;
+  showSizeSelector?: boolean;
   rating: number;
   reviewCount: number;
   description: string;

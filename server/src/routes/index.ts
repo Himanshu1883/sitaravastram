@@ -17,6 +17,8 @@ import adminReturnRoutes from './admin/returns.js';
 import adminNotificationRoutes from './admin/notifications.js';
 import adminDashboardRoutes from './admin/dashboard.js';
 import adminMediaRoutes from './admin/media.js';
+import adminSettingsRoutes from './admin/settings.js';
+import adminHomepageRoutes from './admin/homepage.js';
 
 const router = Router();
 
@@ -38,5 +40,7 @@ router.use('/admin/returns', adminReturnRoutes);
 router.use('/admin/notifications', adminNotificationRoutes);
 router.use('/admin/dashboard', adminDashboardRoutes);
 router.use('/admin/media', adminMediaRoutes);
+router.use('/admin/settings', adminSettingsRoutes);
+router.use('/admin/homepage', adminHomepageRoutes);
 
 export default router;

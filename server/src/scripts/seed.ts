@@ -18,6 +18,7 @@ import { seedProducts } from '../seed/products.js';
 import { groupProductImages, resolveImagePath } from '../seed/localImages.js';
 import { HERO_BANNER_FILES, CATEGORY_IMAGE_FILES, featuredCollectionsSeed, heroSlideHotspotsSeed } from '../seed/marketing.js';
 import { buildFabricsBlock, buildOccasionsBlock } from '../lib/homepageMediaSeed.js';
+import { defaultInstagramMeta, defaultSectionCopy } from '../lib/sectionCopySeed.js';
 import mongoose from 'mongoose';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -153,6 +154,8 @@ async function seed(force: boolean) {
     { key: 'occasionSlugMap', data: occasionSlugMap },
     { key: 'allColors', data: allColors },
     { key: 'featuredCollections', data: featuredCollections },
+    { key: 'sectionCopy', data: defaultSectionCopy },
+    { key: 'instagramMeta', data: defaultInstagramMeta },
   ]);
 
   const productImageMap = groupProductImages(IMAGES_DIR);
