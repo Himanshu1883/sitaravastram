@@ -5,6 +5,7 @@ import CartDrawer from './components/layout/CartDrawer';
 import BottomNav from './components/layout/BottomNav';
 import FloatingActions from './components/ui/FloatingActions';
 import AuthModal from './components/auth/AuthModal';
+import AuthHydrator from './components/auth/AuthHydrator';
 import AdminProtected from './components/admin/AdminProtected';
 import HomePage from './pages/HomePage';
 import CollectionPage from './pages/CollectionPage';
@@ -60,6 +61,7 @@ function Layout() {
 
       {isStorefront && (
         <>
+          <AuthHydrator />
           <Footer />
           <CartDrawer />
           <BottomNav />

@@ -4,7 +4,7 @@ import { Home, Search, ShoppingBag, Heart, User } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectCartCount, toggleCart } from '../../store/cartSlice';
 import { selectWishlistIds } from '../../store/wishlistSlice';
-import { openAuthModal, selectAuth } from '../../store/authSlice';
+import { openAuthModal, selectIsLoggedIn, selectIsAdmin } from '../../store/authSlice';
 
 export default function BottomNav() {
   const { t } = useTranslation();
@@ -12,10 +12,11 @@ export default function BottomNav() {
   const dispatch = useDispatch();
   const cartCount = useSelector(selectCartCount);
   const wishlistIds = useSelector(selectWishlistIds);
-  const { isLoggedIn } = useSelector(selectAuth);
-  const isAdmin = location.pathname.startsWith('/admin');
+  const isLoggedIn = useSelector(selectIsLoggedIn);
+  const isAdminUser = useSelector(selectIsAdmin);
+  const isAdminRoute = location.pathname.startsWith('/admin');
 
-  if (isAdmin) return null;
+  if (isAdminRoute) return null;
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -66,8 +67,8 @@ export default function BottomNav() {
 
         {isLoggedIn ? (
           <Link
-            to="/account"
-            className={`flex flex-col items-center gap-1 px-4 py-1 transition-colors ${location.pathname.includes('/account') ? 'text-rosegold-500' : 'text-gray-500 hover:text-navy-700'}`}
+            to={isAdminUser ? '/admin/dashboard' : '/account'}
+            className={`flex flex-col items-center gap-1 px-4 py-1 transition-colors ${(isAdminUser ? location.pathname.startsWith('/admin') : location.pathname.includes('/account')) ? 'text-rosegold-500' : 'text-gray-500 hover:text-navy-700'}`}
           >
             <User size={20} />
             <span className="text-[10px] font-body">{t('bottomNav.account')}</span>

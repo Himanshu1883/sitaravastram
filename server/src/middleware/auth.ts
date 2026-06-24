@@ -4,9 +4,11 @@ import type { Request, Response, NextFunction } from 'express';
 import { env } from '../config/env.js';
 import { ApiError } from '../middleware/errorHandler.js';
 
+export type JwtRole = 'user' | 'admin';
+
 export interface JwtPayload {
   sub: string;
-  role: 'customer' | 'admin';
+  role: JwtRole;
   phone?: string;
   email?: string;
 }
@@ -16,7 +18,11 @@ export function signToken(payload: JwtPayload): string {
 }
 
 export function verifyToken(token: string): JwtPayload {
-  return jwt.verify(token, env.jwtSecret) as JwtPayload;
+  const payload = jwt.verify(token, env.jwtSecret) as JwtPayload & { role?: string };
+  if ((payload.role as string) === 'customer') {
+    payload.role = 'user';
+  }
+  return payload as JwtPayload;
 }
 
 export async function hashPassword(password: string): Promise<string> {
@@ -39,18 +45,21 @@ export function authOptional(req: Request, _res: Response, next: NextFunction) {
   next();
 }
 
-export function requireCustomer(req: Request, _res: Response, next: NextFunction) {
+export function requireUser(req: Request, _res: Response, next: NextFunction) {
   const header = req.headers.authorization;
   if (!header?.startsWith('Bearer ')) return next(new ApiError(401, 'Unauthorized'));
   try {
     const user = verifyToken(header.slice(7));
-    if (user.role !== 'customer') return next(new ApiError(401, 'Unauthorized'));
+    if (user.role !== 'user') return next(new ApiError(401, 'Unauthorized'));
     req.user = user;
     next();
   } catch {
     next(new ApiError(401, 'Invalid token'));
   }
 }
+
+/** @deprecated use requireUser */
+export const requireCustomer = requireUser;
 
 export function requireAdmin(req: Request, _res: Response, next: NextFunction) {
   const header = req.headers.authorization;

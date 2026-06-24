@@ -26,6 +26,25 @@ export const CATEGORY_IMAGE_FILES: Record<string, string> = {
   'combo-sets': 'single_main (4).png',
 };
 
+/** Fabric name → local image in server/src/seed/images/ */
+export const FABRIC_IMAGE_FILES: Record<string, string> = {
+  Cotton: 'new_images_singles (1).jpeg',
+  Silk: 'new_images_singles (2).jpeg',
+  Chiffon: 'single_main (3).png',
+  Linen: 'single_main.png',
+  Rayon: 'single_main (2).png',
+  Georgette: 'single_main (1).png',
+};
+
+/** Occasion slug → local image in server/src/seed/images/ */
+export const OCCASION_IMAGE_FILES: Record<string, string> = {
+  casual: 'new_images_singles.png',
+  office: 'new_images_singles (1).png',
+  party: 'new_images_singles (2).png',
+  festive: 'new_images_singles (3).png',
+  wedding: 'new_images_singles.jpeg',
+};
+
 export type FeaturedHotspotSeed = {
   productSlug: string;
   x: number;

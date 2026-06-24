@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -8,16 +8,19 @@ import { useTranslation } from 'react-i18next';
 import Logo from '../ui/Logo';
 import {
   closeAuthModal,
-  login,
+  setSession,
+  updateUser,
   selectAuth,
 } from '../../store/authSlice';
-import { sendOtp, verifyOtp } from '../../lib/api';
+import { sendOtp, verifyOtp, updateProfile } from '../../lib/api';
 import {
   normalizeIndianMobile,
   validateIndianMobile,
 } from '../../lib/otpAuth';
+import { authRedirectPath } from '../../lib/auth/session';
+import type { AuthUser } from '../../types/auth';
 
-type AuthStep = 'phone' | 'otp';
+type AuthStep = 'phone' | 'otp' | 'profile';
 
 const perks = [
   { key: 'perkEarlyAccess', icon: Sparkles },
@@ -34,18 +37,32 @@ export default function AuthModal() {
   const [step, setStep] = useState<AuthStep>('phone');
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [notifyOffers, setNotifyOffers] = useState(true);
   const [phoneError, setPhoneError] = useState('');
   const [otpError, setOtpError] = useState('');
+  const [profileError, setProfileError] = useState('');
   const [loading, setLoading] = useState(false);
+  const pendingSession = useRef<{ token: string; user: AuthUser } | null>(null);
 
   const resetForm = () => {
     setStep('phone');
     setPhone('');
     setOtp('');
+    setName('');
+    setEmail('');
     setPhoneError('');
     setOtpError('');
+    setProfileError('');
     setLoading(false);
+    pendingSession.current = null;
+  };
+
+  const finishAuth = (user: AuthUser) => {
+    dispatch(closeAuthModal());
+    resetForm();
+    navigate(authRedirectPath(user, authRedirect));
   };
 
   const handleClose = () => {
@@ -94,14 +111,38 @@ export default function AuthModal() {
       setOtpError(t('auth.otpRequired'));
       return;
     }
+    setLoading(true);
     try {
-      const { token, user } = await verifyOtp(phone, otp);
-      dispatch(login({ phone: user.phone, token }));
-      dispatch(closeAuthModal());
-      resetForm();
-      navigate(authRedirect);
+      const { token, user, isNew } = await verifyOtp(phone, otp);
+      dispatch(setSession({ token, user }));
+
+      if (isNew && !user.name && user.role === 'user') {
+        pendingSession.current = { token, user };
+        setStep('profile');
+        return;
+      }
+
+      finishAuth(user);
     } catch (err) {
       setOtpError(err instanceof Error ? err.message : t('auth.invalidOtp'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCompleteProfile = async () => {
+    if (!name.trim()) {
+      setProfileError(t('auth.nameRequired'));
+      return;
+    }
+    setProfileError('');
+    setLoading(true);
+    try {
+      const { user } = await updateProfile({ name: name.trim(), email: email.trim() || undefined });
+      dispatch(updateUser(user));
+      finishAuth(user);
+    } catch (err) {
+      setProfileError(err instanceof Error ? err.message : t('auth.profileFailed'));
     } finally {
       setLoading(false);
     }
@@ -154,7 +195,6 @@ export default function AuthModal() {
               <X size={18} strokeWidth={2} />
             </button>
 
-            {/* Left — brand panel */}
             <div className="hidden w-[42%] flex-col justify-between bg-gradient-to-br from-navy-800 via-navy-700 to-navy-900 p-8 lg:flex">
               <div>
                 <Logo size="md" className="mb-8 brightness-0 invert" />
@@ -186,7 +226,6 @@ export default function AuthModal() {
               </div>
             </div>
 
-            {/* Right — form */}
             <div className="flex w-full flex-col justify-center px-6 py-10 sm:px-10 lg:w-[58%] lg:py-12">
               <div className="lg:hidden mb-6 flex justify-center">
                 <Logo size="sm" />
@@ -196,7 +235,7 @@ export default function AuthModal() {
                 id="auth-modal-title"
                 className="mb-6 font-heading text-2xl font-bold text-navy-900 sm:text-[1.65rem]"
               >
-                {t('auth.loginSignup')}
+                {step === 'profile' ? t('auth.completeProfile') : t('auth.loginSignup')}
               </h1>
 
               {step === 'phone' ? (
@@ -265,7 +304,7 @@ export default function AuthModal() {
                     )}
                   </button>
                 </>
-              ) : (
+              ) : step === 'otp' ? (
                 <>
                   <p className="mb-4 font-body text-sm text-gray-600">
                     {t('auth.otpSentTo', { phone })}
@@ -333,6 +372,54 @@ export default function AuthModal() {
                       {t('auth.resendOtp')}
                     </button>
                   </div>
+                </>
+              ) : (
+                <>
+                  <p className="mb-4 font-body text-sm text-gray-600">{t('auth.profileSub')}</p>
+
+                  <label className="block font-body text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
+                    {t('auth.yourName')}
+                  </label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={e => {
+                      setName(e.target.value);
+                      setProfileError('');
+                    }}
+                    placeholder={t('auth.namePlaceholder')}
+                    className={`w-full border bg-white px-4 py-3.5 font-body text-sm text-navy-900 placeholder:text-gray-400 focus:outline-none mb-4 ${
+                      profileError ? 'border-red-500' : 'border-navy-900'
+                    }`}
+                    autoFocus
+                  />
+
+                  <label className="block font-body text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
+                    {t('auth.emailOptional')}
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    placeholder={t('auth.emailPlaceholder')}
+                    className="w-full border border-navy-900 bg-white px-4 py-3.5 font-body text-sm text-navy-900 placeholder:text-gray-400 focus:outline-none"
+                  />
+
+                  {profileError && (
+                    <div className="mt-3 flex items-start gap-2 rounded-sm border border-red-200 bg-red-50 px-3 py-2.5">
+                      <AlertCircle size={16} className="mt-0.5 flex-shrink-0 text-red-500" />
+                      <p className="font-body text-xs text-red-600">{profileError}</p>
+                    </div>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={handleCompleteProfile}
+                    disabled={loading}
+                    className="mt-6 flex h-12 w-full items-center justify-center gap-2 bg-rosegold-500 font-body text-sm font-bold uppercase tracking-wide text-white transition-colors hover:bg-rosegold-600 disabled:opacity-70"
+                  >
+                    {loading ? <Loader2 size={18} className="animate-spin" /> : t('auth.continue')}
+                  </button>
                 </>
               )}
 

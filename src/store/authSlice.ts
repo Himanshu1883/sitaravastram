@@ -1,47 +1,50 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import { setToken } from '../lib/api';
+import type { AuthUser } from '../types/auth';
+import { setToken, getToken, clearLegacyAdminToken } from '../lib/api';
 
-const CUSTOMER_KEY = 'sitara_customer';
+const SESSION_KEY = 'sitara_session';
 
 interface AuthState {
-  isLoggedIn: boolean;
-  phone: string;
-  isAdmin: boolean;
+  user: AuthUser | null;
+  token: string | null;
   authModalOpen: boolean;
   authRedirect: string;
 }
 
-function loadCustomerSession(): Pick<AuthState, 'isLoggedIn' | 'phone'> {
+function loadSession(): Pick<AuthState, 'user' | 'token'> {
   try {
-    const raw = localStorage.getItem(CUSTOMER_KEY);
-    if (!raw) return { isLoggedIn: false, phone: '' };
-    const { phone } = JSON.parse(raw) as { phone: string };
-    const hasToken = !!localStorage.getItem('sitara_token');
-    return phone && hasToken ? { isLoggedIn: true, phone } : { isLoggedIn: false, phone: '' };
+    const token = getToken();
+    if (!token) return { user: null, token: null };
+
+    const raw = localStorage.getItem(SESSION_KEY);
+    if (!raw) {
+      return { user: null, token };
+    }
+
+    const user = JSON.parse(raw) as AuthUser;
+    return user?.id ? { user, token } : { user: null, token };
   } catch {
-    return { isLoggedIn: false, phone: '' };
+    return { user: null, token: getToken() };
   }
 }
 
-function saveCustomerSession(phone: string) {
-  localStorage.setItem(CUSTOMER_KEY, JSON.stringify({ phone }));
+function saveSession(user: AuthUser | null, token: string | null) {
+  if (user && token) {
+    localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+    setToken(token);
+  } else {
+    localStorage.removeItem(SESSION_KEY);
+    setToken(null);
+    clearLegacyAdminToken();
+  }
 }
 
-function clearCustomerSession() {
-  localStorage.removeItem(CUSTOMER_KEY);
-  setToken(null, 'customer');
-}
-
-function loadAdminSession(): boolean {
-  return !!localStorage.getItem('sitara_admin_token');
-}
-
-const customer = loadCustomerSession();
+const session = loadSession();
+clearLegacyAdminToken();
 
 const initialState: AuthState = {
-  isLoggedIn: customer.isLoggedIn,
-  phone: customer.phone,
-  isAdmin: loadAdminSession(),
+  user: session.user,
+  token: session.token,
   authModalOpen: false,
   authRedirect: '/account',
 };
@@ -50,24 +53,48 @@ const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    login(state, action: PayloadAction<{ phone: string; token: string }>) {
-      state.isLoggedIn = true;
-      state.phone = action.payload.phone;
-      saveCustomerSession(action.payload.phone);
-      setToken(action.payload.token, 'customer');
+    setSession(state, action: PayloadAction<{ user: AuthUser; token: string }>) {
+      state.user = action.payload.user;
+      state.token = action.payload.token;
+      saveSession(action.payload.user, action.payload.token);
     },
+    updateUser(state, action: PayloadAction<AuthUser>) {
+      state.user = action.payload;
+      if (state.token) saveSession(action.payload, state.token);
+    },
+    clearSession(state) {
+      state.user = null;
+      state.token = null;
+      saveSession(null, null);
+    },
+    /** @deprecated use setSession */
+    login(state, action: PayloadAction<{ phone: string; token: string; user?: AuthUser }>) {
+      const user: AuthUser = action.payload.user ?? {
+        id: '',
+        role: 'user',
+        phone: action.payload.phone,
+      };
+      state.user = user;
+      state.token = action.payload.token;
+      saveSession(user, action.payload.token);
+    },
+    /** @deprecated use clearSession */
     logout(state) {
-      state.isLoggedIn = false;
-      state.phone = '';
-      clearCustomerSession();
+      state.user = null;
+      state.token = null;
+      saveSession(null, null);
     },
-    adminLogin(state, action: PayloadAction<string>) {
-      state.isAdmin = true;
-      setToken(action.payload, 'admin');
+    /** @deprecated use setSession */
+    adminLogin(state, action: PayloadAction<{ token: string; user: AuthUser }>) {
+      state.user = action.payload.user;
+      state.token = action.payload.token;
+      saveSession(action.payload.user, action.payload.token);
     },
+    /** @deprecated use clearSession */
     adminLogout(state) {
-      state.isAdmin = false;
-      setToken(null, 'admin');
+      state.user = null;
+      state.token = null;
+      saveSession(null, null);
     },
     openAuthModal(state, action: PayloadAction<string | undefined>) {
       state.authModalOpen = true;
@@ -79,6 +106,22 @@ const authSlice = createSlice({
   },
 });
 
-export const { login, logout, adminLogin, adminLogout, openAuthModal, closeAuthModal } = authSlice.actions;
+export const {
+  setSession,
+  updateUser,
+  clearSession,
+  login,
+  logout,
+  adminLogin,
+  adminLogout,
+  openAuthModal,
+  closeAuthModal,
+} = authSlice.actions;
+
 export const selectAuth = (state: { auth: AuthState }) => state.auth;
+export const selectAuthUser = (state: { auth: AuthState }) => state.auth.user;
+export const selectIsLoggedIn = (state: { auth: AuthState }) => state.auth.user !== null;
+export const selectIsAdmin = (state: { auth: AuthState }) => state.auth.user?.role === 'admin';
+export const selectIsUser = (state: { auth: AuthState }) => state.auth.user?.role === 'user';
+
 export default authSlice.reducer;

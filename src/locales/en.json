@@ -41,7 +41,16 @@
     "and": "and",
     "terms": "T&Cs",
     "close": "Close",
-    "demoOtpHint": "Demo OTP: 123456"
+    "demoOtpHint": "Demo OTP: 123456",
+    "completeProfile": "Complete Your Profile",
+    "profileSub": "Tell us your name so we can personalize your experience.",
+    "yourName": "Your name",
+    "namePlaceholder": "Full name",
+    "emailOptional": "Email (optional)",
+    "emailPlaceholder": "you@example.com",
+    "nameRequired": "Please enter your name.",
+    "profileFailed": "Could not save profile. Please try again.",
+    "continue": "Continue"
   },
   "search": {
     "title": "Search",

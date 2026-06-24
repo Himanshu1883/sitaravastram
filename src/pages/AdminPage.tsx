@@ -6,7 +6,7 @@ import {
   Tag, Bell, Menu, X, RotateCcw, Layers, Store, LogOut,
 } from 'lucide-react';
 import { useAdminApi } from '../hooks/useAdminApi';
-import { adminLogout } from '../store/authSlice';
+import { clearSession } from '../store/authSlice';
 import DashboardTab from '../components/admin/DashboardTab';
 import ProductsTab from '../components/admin/ProductsTab';
 import OrdersTab from '../components/admin/OrdersTab';
@@ -75,7 +75,7 @@ export default function AdminPage() {
   };
 
   const handleLogout = () => {
-    dispatch(adminLogout());
+    dispatch(clearSession());
     navigate('/admin/login', { replace: true });
   };
 

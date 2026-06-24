@@ -2,15 +2,16 @@ import { useState } from 'react';
 import { Link, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Lock, Mail, ArrowRight } from 'lucide-react';
-import { adminLogin, selectAuth } from '../store/authSlice';
+import { setSession, selectIsAdmin } from '../store/authSlice';
 import { adminLoginApi } from '../lib/api';
+import { authRedirectPath } from '../lib/auth/session';
 import Logo from '../components/ui/Logo';
 
 export default function AdminLoginPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAdmin } = useSelector(selectAuth);
+  const isAdmin = useSelector(selectIsAdmin);
   const [email, setEmail] = useState('admin@sitaravastram.com');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -25,9 +26,9 @@ export default function AdminLoginPage() {
     e.preventDefault();
     setError('');
     try {
-      const { token } = await adminLoginApi(email, password);
-      dispatch(adminLogin(token));
-      navigate(from, { replace: true });
+      const { token, user } = await adminLoginApi(email, password);
+      dispatch(setSession({ token, user }));
+      navigate(authRedirectPath(user, from), { replace: true });
     } catch {
       setError('Invalid email or password. Please try again.');
     }

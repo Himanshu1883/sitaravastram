@@ -1,9 +1,9 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { selectAuth } from '../../store/authSlice';
+import { selectIsAdmin } from '../../store/authSlice';
 
 export default function AdminProtected({ children }: { children: React.ReactNode }) {
-  const { isAdmin } = useSelector(selectAuth);
+  const isAdmin = useSelector(selectIsAdmin);
   const location = useLocation();
 
   if (!isAdmin) {

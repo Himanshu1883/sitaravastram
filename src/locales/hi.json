@@ -41,7 +41,16 @@
     "and": "और",
     "terms": "नियम व शर्तें",
     "close": "बंद करें",
-    "demoOtpHint": "डेमो OTP: 123456"
+    "demoOtpHint": "डेमो OTP: 123456",
+    "completeProfile": "अपनी प्रोफ़ाइल पूरी करें",
+    "profileSub": "अपना नाम बताएं ताकि हम आपके अनुभव को व्यक्तिगत बना सकें।",
+    "yourName": "आपका नाम",
+    "namePlaceholder": "पूरा नाम",
+    "emailOptional": "ईमेल (वैकल्पिक)",
+    "emailPlaceholder": "you@example.com",
+    "nameRequired": "कृपया अपना नाम दर्ज करें।",
+    "profileFailed": "प्रोफ़ाइल सहेजी नहीं जा सकी। कृपया पुनः प्रयास करें।",
+    "continue": "जारी रखें"
   },
   "search": {
     "title": "खोजें",

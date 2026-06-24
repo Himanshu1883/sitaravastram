@@ -12,7 +12,7 @@ import Logo from '../ui/Logo';
 import CurrencySelector from '../ui/CurrencySelector';
 import SearchOverlay from './SearchOverlay';
 import MobileMenu from './MobileMenu';
-import { openAuthModal, selectAuth } from '../../store/authSlice';
+import { openAuthModal, selectIsLoggedIn, selectIsAdmin } from '../../store/authSlice';
 
 function DesktopNavLinks({
   items,
@@ -59,11 +59,12 @@ export default function Navbar({ showCategoryStrip = false }: { showCategoryStri
   const dispatch = useDispatch();
   const cartCount = useSelector(selectCartCount);
   const wishlistIds = useSelector(selectWishlistIds);
-  const { isLoggedIn } = useSelector(selectAuth);
+  const isLoggedIn = useSelector(selectIsLoggedIn);
+  const isAdmin = useSelector(selectIsAdmin);
 
   const handleAccountClick = () => {
     if (isLoggedIn) {
-      navigate('/account');
+      navigate(isAdmin ? '/admin/dashboard' : '/account');
     } else {
       dispatch(openAuthModal('/account'));
     }

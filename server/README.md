@@ -14,6 +14,7 @@ npm install
 npm run seed        # first time
 npm run seed:force  # reset database
 npm run seed:featured  # only upsert featured collections block (safe, no wipe)
+npm run seed:fabrics-occasions  # only upsert shop-by-fabric & shop-by-occasion images (safe)
 ```
 
 4. Start the API:

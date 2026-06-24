@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
-import { User, Package, Heart, MapPin, Settings, ChevronRight, Truck, Check, Clock, X, LayoutDashboard, LogOut } from 'lucide-react';
+import { Link, useParams, useNavigate, Navigate } from 'react-router-dom';
+import { User, Package, Heart, MapPin, Settings, ChevronRight, Truck, Check, Clock, X, LogOut } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectWishlistIds } from '../store/wishlistSlice';
-import { logout, adminLogout, openAuthModal, selectAuth } from '../store/authSlice';
+import { clearSession, openAuthModal, selectAuth, selectIsAdmin, selectIsUser } from '../store/authSlice';
 import { fetchOrders } from '../lib/api';
 import { useProducts } from '../hooks/useCatalog';
 import ProductCard from '../components/ui/ProductCard';
@@ -69,17 +69,19 @@ export default function AccountPage() {
   const [apiOrders, setApiOrders] = useState<Order[]>([]);
   const wishlistIds = useSelector(selectWishlistIds);
   const auth = useSelector(selectAuth);
+  const isUser = useSelector(selectIsUser);
+  const isAdmin = useSelector(selectIsAdmin);
   const { products } = useProducts();
   const formatPrice = useFormatPrice();
   const wishlistProducts = products.filter(p => wishlistIds.includes(p.id));
 
   useEffect(() => {
-    if (auth.isLoggedIn) {
+    if (isUser) {
       fetchOrders().then(setApiOrders).catch(() => setApiOrders([]));
     } else {
       setApiOrders([]);
     }
-  }, [auth.isLoggedIn]);
+  }, [isUser]);
 
   const allOrders: Order[] = apiOrders;
 
@@ -87,15 +89,18 @@ export default function AccountPage() {
     if (tab && navItems.some(n => n.id === tab)) setActiveTab(tab);
   }, [tab]);
 
-  const displayName = auth.phone ? `+91 ${auth.phone}` : 'Priya Sharma';
-  const initial = displayName.charAt(displayName.length - 1).toUpperCase();
-  const isSignedIn = auth.isLoggedIn || auth.isAdmin;
+  const displayName = auth.user?.name || (auth.user?.phone ? `+91 ${auth.user.phone}` : 'Guest');
+  const initial = (auth.user?.name || auth.user?.phone || 'G').charAt(0).toUpperCase();
+  const isSignedIn = auth.user !== null;
 
   const handleLogout = () => {
-    if (auth.isAdmin) dispatch(adminLogout());
-    if (auth.isLoggedIn) dispatch(logout());
+    dispatch(clearSession());
     navigate('/');
   };
+
+  if (isAdmin) {
+    return <Navigate to="/admin/dashboard" replace />;
+  }
 
   return (
     <div className="min-h-screen bg-cream-100">
@@ -109,11 +114,9 @@ export default function AccountPage() {
               <div className="min-w-0">
                 <h1 className="font-heading text-2xl font-semibold text-white truncate">{displayName}</h1>
                 <p className="font-body text-sm text-white/70">
-                  {auth.isLoggedIn
+                  {isUser
                     ? 'Verified via OTP'
-                    : auth.isAdmin
-                      ? 'Admin session active'
-                      : 'Guest · Sign in to save your orders'}
+                    : 'Guest · Sign in to save your orders'}
                 </p>
               </div>
             </div>
@@ -147,16 +150,6 @@ export default function AccountPage() {
                   <ChevronRight size={14} />
                 </Link>
               ))}
-              <Link
-                to={auth.isAdmin ? '/admin/dashboard' : '/admin/login'}
-                className="flex items-center justify-between w-full px-5 py-3.5 text-xs font-body font-medium text-gray-500 hover:text-rosegold-600 hover:bg-cream-50 transition-colors border-t border-rosegold-100"
-              >
-                <div className="flex items-center gap-3">
-                  <LayoutDashboard size={14} />
-                  {auth.isAdmin ? 'Admin Dashboard' : 'Admin Panel'}
-                </div>
-                <ChevronRight size={12} />
-              </Link>
               {isSignedIn && (
                 <button
                   type="button"
@@ -279,16 +272,6 @@ export default function AccountPage() {
                   <button type="button" className="btn-primary mt-6">Save Changes</button>
 
                   <div className="mt-8 pt-6 border-t border-rosegold-100 space-y-4">
-                    <div>
-                      <p className="font-body text-xs text-gray-400 mb-2">Store management</p>
-                      <Link
-                        to={auth.isAdmin ? '/admin/dashboard' : '/admin/login'}
-                        className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-rosegold-600 transition-colors"
-                      >
-                        <LayoutDashboard size={15} />
-                        {auth.isAdmin ? 'Open Admin Dashboard' : 'Go to Admin Panel'}
-                      </Link>
-                    </div>
                     {isSignedIn ? (
                       <button
                         type="button"

@@ -3,16 +3,32 @@ export const API_BASE = import.meta.env.VITE_API_URL || '';
 export { mediaUrl, mediaUrls, MEDIA_BASE, type MediaVariant } from './media';
 
 const TOKEN_KEY = 'sitara_token';
-const ADMIN_TOKEN_KEY = 'sitara_admin_token';
+const LEGACY_ADMIN_TOKEN_KEY = 'sitara_admin_token';
+const LEGACY_CUSTOMER_KEY = 'sitara_customer';
 
-export function getToken(role: 'customer' | 'admin' = 'customer'): string | null {
-  return localStorage.getItem(role === 'admin' ? ADMIN_TOKEN_KEY : TOKEN_KEY);
+export function getToken(): string | null {
+  return localStorage.getItem(TOKEN_KEY) || localStorage.getItem(LEGACY_ADMIN_TOKEN_KEY);
 }
 
-export function setToken(token: string | null, role: 'customer' | 'admin' = 'customer') {
-  const key = role === 'admin' ? ADMIN_TOKEN_KEY : TOKEN_KEY;
-  if (token) localStorage.setItem(key, token);
-  else localStorage.removeItem(key);
+export function setToken(token: string | null) {
+  if (token) {
+    localStorage.setItem(TOKEN_KEY, token);
+    localStorage.removeItem(LEGACY_ADMIN_TOKEN_KEY);
+  } else {
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(LEGACY_ADMIN_TOKEN_KEY);
+  }
+}
+
+export function clearLegacyAdminToken() {
+  localStorage.removeItem(LEGACY_ADMIN_TOKEN_KEY);
+  localStorage.removeItem(LEGACY_CUSTOMER_KEY);
+}
+
+/** @deprecated use getToken() */
+export function getTokenLegacy(role: 'customer' | 'admin' = 'customer'): string | null {
+  if (role === 'admin') return localStorage.getItem(LEGACY_ADMIN_TOKEN_KEY) || getToken();
+  return getToken();
 }
 
 export class ApiError extends Error {
@@ -25,7 +41,7 @@ export class ApiError extends Error {
 
 export async function api<T>(
   path: string,
-  options: RequestInit & { auth?: 'customer' | 'admin' | false } = {},
+  options: RequestInit & { auth?: 'user' | 'admin' | 'customer' | false } = {},
 ): Promise<T> {
   const { auth = false, ...init } = options;
   const headers = new Headers(init.headers);
@@ -33,7 +49,7 @@ export async function api<T>(
     headers.set('Content-Type', 'application/json');
   }
   if (auth) {
-    const token = getToken(auth === 'admin' ? 'admin' : 'customer');
+    const token = getToken();
     if (token) headers.set('Authorization', `Bearer ${token}`);
   }
 
@@ -53,20 +69,36 @@ export async function uploadMedia(file: File): Promise<{ fileId: string; url: st
 }
 
 // Auth
+import type { AuthUser } from '../types/auth';
+
 export const sendOtp = (phone: string) =>
   api<{ success: boolean }>('/api/auth/otp/send', { method: 'POST', body: JSON.stringify({ phone }) });
 
 export const verifyOtp = (phone: string, otp: string) =>
-  api<{ token: string; user: { phone: string } }>('/api/auth/otp/verify', {
+  api<{ token: string; user: AuthUser; isNew: boolean }>('/api/auth/otp/verify', {
     method: 'POST',
     body: JSON.stringify({ phone, otp }),
   });
 
-export const adminLoginApi = (email: string, password: string) =>
-  api<{ token: string; admin: { email: string; name: string } }>('/api/admin/auth/login', {
-    method: 'POST',
-    body: JSON.stringify({ email, password }),
+export const fetchMe = () => {
+  const token = getToken();
+  return api<{ user: AuthUser | null }>('/api/auth/me', {
+    ...(token ? { headers: { Authorization: `Bearer ${token}` } } : {}),
   });
+};
+
+export const updateProfile = (data: { name: string; email?: string }) =>
+  api<{ user: AuthUser }>('/api/auth/profile', {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+    auth: 'user',
+  });
+
+export const adminLoginApi = (email: string, password: string) =>
+  api<{ token: string; user: AuthUser; admin: { id: string; email: string; name: string } }>(
+    '/api/admin/auth/login',
+    { method: 'POST', body: JSON.stringify({ email, password }) },
+  );
 
 // Catalog
 export const fetchProducts = (params?: Record<string, string>) => {
@@ -122,10 +154,10 @@ export const validateCouponApi = (code: string, subtotal: number) =>
   );
 
 export const createOrder = (order: unknown) =>
-  api<import('../types').Order>('/api/orders', { method: 'POST', body: JSON.stringify(order), auth: 'customer' });
+  api<import('../types').Order>('/api/orders', { method: 'POST', body: JSON.stringify(order), auth: 'user' });
 
 export const fetchOrders = () =>
-  api<import('../types').Order[]>('/api/orders', { auth: 'customer' });
+  api<import('../types').Order[]>('/api/orders', { auth: 'user' });
 
 export const submitReview = (data: {
   productId?: string;
@@ -134,7 +166,7 @@ export const submitReview = (data: {
   rating: number;
   comment: string;
 }) =>
-  api<import('../types').Review>('/api/reviews', { method: 'POST', body: JSON.stringify(data), auth: 'customer' });
+  api<import('../types').Review>('/api/reviews', { method: 'POST', body: JSON.stringify(data), auth: 'user' });
 
 // Admin
 export const adminFetchProducts = () => api<import('../types').Product[]>('/api/admin/products', { auth: 'admin' });

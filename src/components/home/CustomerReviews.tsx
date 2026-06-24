@@ -53,21 +53,20 @@ export default function CustomerReviews() {
   };
 
   return (
-    <section className="py-16 lg:py-24 bg-[#f5f5f5]">
-      <div className="section-container">
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(240px,320px)_1fr] gap-10 lg:gap-14 xl:gap-20 items-start lg:items-center">
-          {/* Heading — own column, never overlaps carousel */}
-          <div className="relative z-10">
-            <h2 className="type-heading-xl text-navy-900 leading-[1.15]">
-              {t('home.reviewsHeading1')}
-              <br />
-              {t('home.reviewsHeading2')}
-            </h2>
-          </div>
+    <section className="py-16 lg:py-24 bg-[#f5f5f5] overflow-hidden w-full">
+      <div className="lg:flex lg:items-center lg:gap-8 xl:gap-12 2xl:gap-16">
+        {/* Heading */}
+        <div className="px-4 sm:px-5 lg:pl-6 xl:pl-10 2xl:pl-14 lg:pr-0 mb-10 lg:mb-0 shrink-0">
+          <h2 className="type-heading-xl text-navy-900 leading-[1.15] max-w-[280px] lg:max-w-none">
+            {t('home.reviewsHeading1')}
+            <br />
+            {t('home.reviewsHeading2')}
+          </h2>
+        </div>
 
-          {/* Carousel + nav — separate column */}
-          <div className="min-w-0 w-full">
-            <div className="flex items-center gap-3 sm:gap-4">
+        {/* Carousel + nav — fills remaining width */}
+        <div className="min-w-0 flex-1 w-full">
+          <div className="flex items-center gap-2 sm:gap-3 pl-4 sm:pl-5 lg:pl-0 pr-3 sm:pr-5 lg:pr-6 xl:pr-8 2xl:pr-10">
               <button
                 type="button"
                 aria-label="Previous review"
@@ -115,7 +114,7 @@ export default function CustomerReviews() {
               </button>
             </div>
 
-            <div className="flex justify-between mt-6 md:hidden">
+            <div className="flex justify-between mt-6 px-4 sm:px-5 md:hidden">
               <button
                 type="button"
                 aria-label="Previous review"
@@ -135,7 +134,6 @@ export default function CustomerReviews() {
                 <ChevronRight size={20} strokeWidth={2} />
               </button>
             </div>
-          </div>
         </div>
       </div>
     </section>

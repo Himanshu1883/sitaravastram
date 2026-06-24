@@ -17,6 +17,7 @@ import { uploadUrls, uploadLocalFiles, uploadLocalFile, clearUrlCache } from '..
 import { seedProducts } from '../seed/products.js';
 import { groupProductImages, resolveImagePath } from '../seed/localImages.js';
 import { HERO_BANNER_FILES, CATEGORY_IMAGE_FILES, featuredCollectionsSeed, heroSlideHotspotsSeed } from '../seed/marketing.js';
+import { buildFabricsBlock, buildOccasionsBlock } from '../lib/homepageMediaSeed.js';
 import mongoose from 'mongoose';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -61,7 +62,7 @@ async function seed(force: boolean) {
   await connectDb();
   clearUrlCache();
 
-  const { categories, homepageCategories, heroSlides, reviews, fabrics, occasions, instagramPosts, occasionSlugMap, allColors, defaultCoupons } = catalog;
+  const { categories, homepageCategories, heroSlides, reviews, fabrics: _fabrics, occasions: _occasions, instagramPosts, occasionSlugMap, allColors, defaultCoupons } = catalog;
 
   const existing = await Product.countDocuments();
   if (existing > 0 && !force) {
@@ -125,18 +126,8 @@ async function seed(force: boolean) {
     });
   }
 
-  const migratedFabrics = await Promise.all(
-    fabrics.map(async (f: { image: string; name: string }) => ({
-      ...f,
-      image: (await migrateUrl(f.image, `fabric-${f.name}`)) || f.image,
-    })),
-  );
-  const migratedOccasions = await Promise.all(
-    occasions.map(async (o: { image: string; slug: string }) => ({
-      ...o,
-      image: (await migrateUrl(o.image, `occasion-${o.slug}`)) || o.image,
-    })),
-  );
+  const migratedFabrics = await buildFabricsBlock();
+  const migratedOccasions = await buildOccasionsBlock();
   const migratedInstagram = await Promise.all(
     instagramPosts.map(async (p: { image: string; url: string }, i: number) => ({
       ...p,

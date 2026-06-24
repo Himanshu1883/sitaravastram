@@ -4,7 +4,7 @@ import { Check, ChevronRight, MapPin, CreditCard, Package, Phone, Shield } from 
 import { useDispatch, useSelector } from 'react-redux';
 import { selectCartItems, selectCartTotal, clearCart } from '../store/cartSlice';
 import { selectAppliedCoupon } from '../store/couponSlice';
-import { login, selectAuth } from '../store/authSlice';
+import { setSession, selectAuth, selectIsUser } from '../store/authSlice';
 import { saveAbandonedCart } from '../lib/storage';
 import type { Order } from '../types';
 import { useFormatPrice } from '../hooks/useFormatPrice';
@@ -38,6 +38,7 @@ export default function CheckoutPage() {
   const subtotal = useSelector(selectCartTotal);
   const applied = useSelector(selectAppliedCoupon);
   const auth = useSelector(selectAuth);
+  const isUser = useSelector(selectIsUser);
 
   const discount = applied.discount;
   const shipping = subtotal > 999 ? 0 : 99;
@@ -45,8 +46,8 @@ export default function CheckoutPage() {
   const total = subtotal - discount + shipping + codFee;
 
   useEffect(() => {
-    if (auth.isLoggedIn && currentStep === 1) setCurrentStep(2);
-  }, [auth.isLoggedIn]);
+    if (isUser && currentStep === 1) setCurrentStep(2);
+  }, [isUser]);
 
   useEffect(() => {
     return () => {
@@ -74,7 +75,7 @@ export default function CheckoutPage() {
       const { token, user } = await verifyOtp(phone, otp);
       setOtpError('');
       setOtpSuccess(true);
-      dispatch(login({ phone: user.phone, token }));
+      dispatch(setSession({ token, user }));
       setTimeout(() => {
         setCurrentStep(2);
         setOtpSuccess(false);
@@ -98,7 +99,7 @@ export default function CheckoutPage() {
       total,
       paymentMethod,
       couponCode: applied.appliedCode || undefined,
-      phone: auth.phone || phone,
+      phone: auth.user?.phone || phone,
       trackingNumber: `TRK${Date.now().toString().slice(-10)}`,
       address: {
         id: '1',
@@ -137,7 +138,7 @@ export default function CheckoutPage() {
           <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-6"><Check size={28} className="text-emerald-600" /></div>
           <h1 className="font-heading text-3xl font-semibold text-navy-700 mb-3">Order Confirmed!</h1>
           <p className="font-body text-sm text-gray-600 leading-relaxed mb-2">Your order <span className="font-semibold text-rosegold-500">#{orderId}</span> has been placed successfully.</p>
-          <p className="font-body text-sm text-gray-500 mb-8">A confirmation has been sent to +91 {auth.phone || phone}. Estimated delivery: 4-7 business days.</p>
+          <p className="font-body text-sm text-gray-500 mb-8">A confirmation has been sent to +91 {auth.user?.phone || phone}. Estimated delivery: 4-7 business days.</p>
           <div className="grid grid-cols-2 gap-3">
             <Link to="/account/orders" className="btn-primary text-center text-xs">Track Order</Link>
             <Link to="/collections" className="border border-navy-700 text-navy-700 text-xs font-body font-medium px-4 py-3 rounded-sm text-center hover:bg-navy-700 hover:text-white transition-colors">Continue Shopping</Link>
@@ -152,9 +153,9 @@ export default function CheckoutPage() {
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <h1 className="font-heading text-3xl font-semibold text-navy-700 mb-8">Checkout</h1>
 
-        {auth.isLoggedIn && (
+        {isUser && (
           <div className="bg-emerald-50 border border-emerald-200 rounded-sm px-4 py-3 mb-6 text-sm font-body text-emerald-700">
-            Logged in as +91 {auth.phone}
+            Logged in as +91 {auth.user?.phone}
           </div>
         )}
 
