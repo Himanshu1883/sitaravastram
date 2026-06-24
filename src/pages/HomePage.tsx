@@ -8,10 +8,8 @@ import ShopByOccasion from '../components/home/ShopByOccasion';
 import FeaturedCollection from '../components/home/FeaturedCollection';
 import CustomerReviews from '../components/home/CustomerReviews';
 import InstagramFeed from '../components/home/InstagramFeed';
-import Newsletter from '../components/home/Newsletter';
 
-export default function HomePage() {
-  return (
+export default function HomePage() {  return (
     <main>
       <CategoryStrip />
       <HeroSection />
@@ -23,7 +21,5 @@ export default function HomePage() {
       <FeaturedCollection />
       <CustomerReviews />
       <InstagramFeed />
-      {/* <Newsletter /> */}
-    </main>
-  );
+    </main>  );
 }

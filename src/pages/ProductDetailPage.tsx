@@ -617,10 +617,13 @@ export default function ProductDetailPage() {
                       </span>
                     )}
                   </p>
-                  <button type="button" className="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-navy-700">
+                  <Link
+                    to="/size-guide"
+                    className="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-navy-700"
+                  >
                     <Ruler size={13} />
                     {t('product.sizeGuide')}
-                  </button>
+                  </Link>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {product.sizes.map(size => (

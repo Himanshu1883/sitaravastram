@@ -546,5 +546,226 @@
       "tag": "Cotton Edit",
       "stat": "Artisan made"
     }
+  },
+  "infoPages": {
+    "contact": {
+      "title": "Contact Us",
+      "subtitle": "We're here to help with orders, sizing, returns, and styling advice.",
+      "intro": "Reach our customer care team by phone, email, or WhatsApp. We typically respond within 24 hours on business days.",
+      "hours": "Mon–Sat, 10:00 AM – 7:00 PM IST",
+      "namePlaceholder": "Your name",
+      "emailPlaceholder": "Your email",
+      "messagePlaceholder": "How can we help?",
+      "submit": "Send Message",
+      "sent": "Thank you! We've received your message and will get back to you shortly."
+    },
+    "sizeGuide": {
+      "title": "Size Guide",
+      "subtitle": "Find your perfect fit for suits, kurta sets, and ethnic wear.",
+      "intro": "Measurements are in inches. For the best fit, measure over light clothing and compare with the chart below. If you're between sizes, we recommend sizing up for a relaxed fit.",
+      "sections": [
+        {
+          "heading": "How to Measure",
+          "list": [
+            "Bust/Chest: Measure around the fullest part of your chest.",
+            "Waist: Measure around your natural waistline.",
+            "Hip: Measure around the fullest part of your hips.",
+            "Length: Measure from shoulder to desired hemline."
+          ]
+        },
+        {
+          "heading": "Fit Tips",
+          "paragraphs": [
+            "Our ethnic wear is designed with comfortable ease. Kurtas and suit sets may have 1–2 inches of wearing ease built in.",
+            "For bridal or festive pieces with heavy embroidery, consider one size up for comfort."
+          ]
+        }
+      ],
+      "table": {
+        "headers": ["Size", "Bust", "Waist", "Hip"],
+        "rows": [
+          ["XS", "32–34", "26–28", "34–36"],
+          ["S", "34–36", "28–30", "36–38"],
+          ["M", "36–38", "30–32", "38–40"],
+          ["L", "38–40", "32–34", "40–42"],
+          ["XL", "40–42", "34–36", "42–44"],
+          ["XXL", "42–44", "36–38", "44–46"]
+        ]
+      }
+    },
+    "shipping": {
+      "title": "Shipping Information",
+      "subtitle": "Fast, reliable delivery across India.",
+      "intro": "We dispatch most orders within 1–2 business days. Delivery timelines vary by location and product type.",
+      "sections": [
+        {
+          "heading": "Delivery Timelines",
+          "list": [
+            "Metro cities: 3–5 business days",
+            "Other locations: 5–8 business days",
+            "Remote areas: up to 10 business days",
+            "Made-to-order / bridal pieces: 10–21 business days (confirmed at checkout)"
+          ]
+        },
+        {
+          "heading": "Shipping Charges",
+          "paragraphs": [
+            "Free standard shipping on orders above ₹999. Orders below ₹999 incur a flat ₹99 shipping fee.",
+            "Express shipping may be available at checkout for select pin codes."
+          ]
+        },
+        {
+          "heading": "Order Tracking",
+          "paragraphs": [
+            "Once your order ships, you'll receive an SMS and email with tracking details. You can also track orders from your account under My Orders."
+          ]
+        }
+      ]
+    },
+    "returns": {
+      "title": "Returns & Refunds",
+      "subtitle": "Hassle-free returns within 7 days of delivery.",
+      "intro": "We want you to love every Sitara Vastram piece. If something isn't right, we're happy to help with a return or exchange.",
+      "sections": [
+        {
+          "heading": "Return Eligibility",
+          "list": [
+            "Items must be unused, unworn, and with original tags attached",
+            "Returns requested within 7 days of delivery",
+            "Customised, altered, or sale items marked final sale are not eligible",
+            "Innerwear and hygiene-sensitive items cannot be returned"
+          ]
+        },
+        {
+          "heading": "How to Return",
+          "paragraphs": [
+            "Log in to your account, go to My Orders, and select Return/Exchange. Our team will arrange a pickup or share return instructions.",
+            "Refunds are processed to your original payment method within 5–7 business days after we receive and inspect the item."
+          ]
+        },
+        {
+          "heading": "Exchanges",
+          "paragraphs": [
+            "Exchanges are subject to stock availability. For size exchanges, we recommend initiating a return and placing a new order if your size is low in stock."
+          ]
+        }
+      ]
+    },
+    "faqs": {
+      "title": "FAQs",
+      "subtitle": "Answers to common questions about shopping with Sitara Vastram.",
+      "intro": "Can't find what you're looking for? Contact us — we're happy to help.",
+      "items": [
+        {
+          "q": "How do I track my order?",
+          "a": "Sign in to your account and open My Orders, or use the tracking link sent via SMS and email once your order ships."
+        },
+        {
+          "q": "Do you offer Cash on Delivery?",
+          "a": "Yes, COD is available on most orders across India, subject to pin code serviceability."
+        },
+        {
+          "q": "Are your products authentic handloom and handcrafted?",
+          "a": "Yes. We work directly with weavers and artisan clusters across India. Product pages list fabric, craft, and origin details."
+        },
+        {
+          "q": "Can I cancel my order?",
+          "a": "Orders can be cancelled before they are shipped. Once dispatched, please initiate a return after delivery."
+        },
+        {
+          "q": "How should I care for silk and embroidered pieces?",
+          "a": "Dry clean only for silk and heavily embroidered garments. Cotton pieces can be hand-washed in cold water with mild detergent."
+        },
+        {
+          "q": "Do you ship internationally?",
+          "a": "Currently we ship within India only. International shipping will be announced on our website and newsletter."
+        }
+      ]
+    },
+    "privacyPolicy": {
+      "title": "Privacy Policy",
+      "subtitle": "Last updated: June 2025",
+      "intro": "Sitara Vastram respects your privacy. This policy explains how we collect, use, and protect your personal information.",
+      "sections": [
+        {
+          "heading": "Information We Collect",
+          "list": [
+            "Name, phone number, email, and delivery address when you place an order or create an account",
+            "Payment information processed securely by our payment partners (we do not store full card details)",
+            "Browsing data, device information, and cookies to improve your experience"
+          ]
+        },
+        {
+          "heading": "How We Use Your Information",
+          "paragraphs": [
+            "We use your data to process orders, provide customer support, send order updates, and — with your consent — share offers and new collection announcements."
+          ]
+        },
+        {
+          "heading": "Data Security",
+          "paragraphs": [
+            "We use industry-standard encryption and secure servers. Access to personal data is limited to authorised personnel only."
+          ]
+        },
+        {
+          "heading": "Your Rights",
+          "paragraphs": [
+            "You may request access, correction, or deletion of your personal data by emailing care@sitaravastram.com."
+          ]
+        }
+      ]
+    },
+    "terms": {
+      "title": "Terms of Service",
+      "subtitle": "Please read these terms before using our website.",
+      "intro": "By accessing or purchasing from sitaravastram.com, you agree to these terms and conditions.",
+      "sections": [
+        {
+          "heading": "Use of Website",
+          "paragraphs": [
+            "You must be 18 years or older to make a purchase. You agree not to misuse the site, attempt unauthorised access, or copy our content without permission."
+          ]
+        },
+        {
+          "heading": "Products & Pricing",
+          "paragraphs": [
+            "We strive for accurate product descriptions and images. Minor colour variations may occur due to screen settings and handcrafted nature of our products. Prices are in INR and may change without notice."
+          ]
+        },
+        {
+          "heading": "Orders & Payment",
+          "paragraphs": [
+            "An order is confirmed only after successful payment (or COD confirmation). We reserve the right to cancel orders in case of pricing errors, stock issues, or suspected fraud."
+          ]
+        },
+        {
+          "heading": "Limitation of Liability",
+          "paragraphs": [
+            "Sitara Vastram is not liable for indirect or consequential damages arising from use of our website or products, to the extent permitted by law."
+          ]
+        }
+      ]
+    },
+    "cookies": {
+      "title": "Cookie Policy",
+      "subtitle": "How we use cookies on sitaravastram.com",
+      "intro": "Cookies are small text files stored on your device to help our website work better and remember your preferences.",
+      "sections": [
+        {
+          "heading": "Types of Cookies We Use",
+          "list": [
+            "Essential cookies: required for cart, checkout, and account login",
+            "Analytics cookies: help us understand how visitors use our site",
+            "Preference cookies: remember language and display settings"
+          ]
+        },
+        {
+          "heading": "Managing Cookies",
+          "paragraphs": [
+            "You can control or delete cookies through your browser settings. Disabling essential cookies may affect site functionality such as checkout and wishlist."
+          ]
+        }
+      ]
+    }
   }
 }

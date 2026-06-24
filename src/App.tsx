@@ -16,6 +16,8 @@ import CheckoutPage from './pages/CheckoutPage';
 import AccountPage from './pages/AccountPage';
 import AdminPage from './pages/AdminPage';
 import AdminLoginPage from './pages/AdminLoginPage';
+import InfoPage from './pages/InfoPage';
+import { INFO_PAGE_BY_PATH } from './lib/infoPages';
 
 function Layout() {
   const location = useLocation();
@@ -60,6 +62,9 @@ function Layout() {
         <Route path="/shop" element={<CollectionPage />} />
         <Route path="/occasions" element={<CollectionPage />} />
         <Route path="/sale" element={<CollectionPage />} />
+        {Object.keys(INFO_PAGE_BY_PATH).map(path => (
+          <Route key={path} path={path} element={<InfoPage />} />
+        ))}
         <Route path="*" element={<HomePage />} />
       </Routes>
 
