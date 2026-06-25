@@ -1,27 +1,36 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Check, ChevronRight, MapPin, CreditCard, Package, Phone, Shield } from 'lucide-react';
+import { Check, MapPin, CreditCard, Package, Phone } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import { selectCartItems, selectCartTotal, clearCart } from '../store/cartSlice';
 import { selectAppliedCoupon } from '../store/couponSlice';
-import { setSession, selectAuth, selectIsUser } from '../store/authSlice';
+import { setSession, selectAuth, selectIsUser, updateUser } from '../store/authSlice';
 import { saveAbandonedCart } from '../lib/storage';
 import type { Order } from '../types';
 import { useFormatPrice } from '../hooks/useFormatPrice';
-import { mediaUrl } from '../lib/api';
-import { sendOtp, verifyOtp, createOrder } from '../lib/api';
+import { mediaUrl, sendOtp, verifyOtp, createOrder, fetchOrders, updateProfile } from '../lib/api';
 import { validateIndianMobile } from '../lib/otpAuth';
+import { emptyCheckoutAddress, type CheckoutAddress } from '../lib/checkout/types';
+import {
+  validateCheckoutAddress,
+  type AddressFieldErrors,
+} from '../lib/checkout/validateAddress';
+import CheckoutStepper, { type CheckoutStep } from '../components/checkout/CheckoutStepper';
+import CheckoutAddressForm from '../components/checkout/CheckoutAddressForm';
+import CheckoutPaymentStep from '../components/checkout/CheckoutPaymentStep';
+import CheckoutOrderSummary from '../components/checkout/CheckoutOrderSummary';
 
-const steps = [
-  { id: 1, label: 'Login', icon: Phone },
-  { id: 2, label: 'Address', icon: MapPin },
-  { id: 3, label: 'Review', icon: Package },
-  { id: 4, label: 'Payment', icon: CreditCard },
-  { id: 5, label: 'Confirm', icon: Check },
+const steps: CheckoutStep[] = [
+  { id: 1, labelKey: 'checkout.stepLogin', icon: Phone },
+  { id: 2, labelKey: 'checkout.stepAddress', icon: MapPin },
+  { id: 3, labelKey: 'checkout.stepReview', icon: Package },
+  { id: 4, labelKey: 'checkout.stepPayment', icon: CreditCard },
 ];
 
 export default function CheckoutPage() {
   const dispatch = useDispatch();
+  const { t } = useTranslation();
   const formatPrice = useFormatPrice();
   const [currentStep, setCurrentStep] = useState(1);
   const [phone, setPhone] = useState('');
@@ -29,10 +38,12 @@ export default function CheckoutPage() {
   const [otpSent, setOtpSent] = useState(false);
   const [otpError, setOtpError] = useState('');
   const [otpSuccess, setOtpSuccess] = useState(false);
-  const [address, setAddress] = useState({ name: '', phone: '', line1: '', line2: '', city: '', state: '', pincode: '' });
+  const [address, setAddress] = useState<CheckoutAddress>(emptyCheckoutAddress);
+  const [addressErrors, setAddressErrors] = useState<AddressFieldErrors>({});
   const [paymentMethod, setPaymentMethod] = useState<'razorpay' | 'cod'>('razorpay');
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderId, setOrderId] = useState('');
+  const [orderEmail, setOrderEmail] = useState('');
 
   const items = useSelector(selectCartItems);
   const subtotal = useSelector(selectCartTotal);
@@ -45,15 +56,62 @@ export default function CheckoutPage() {
   const codFee = paymentMethod === 'cod' ? 49 : 0;
   const total = subtotal - discount + shipping + codFee;
 
+  const validationMessages = useCallback(
+    () => ({
+      nameRequired: t('checkout.nameRequired'),
+      emailRequired: t('checkout.emailRequired'),
+      emailInvalid: t('checkout.emailInvalid'),
+      phoneRequired: t('checkout.phoneRequired'),
+      phoneInvalid: t('checkout.phoneInvalid'),
+      line1Required: t('checkout.line1Required'),
+      stateRequired: t('checkout.stateRequired'),
+      cityRequired: t('checkout.cityRequired'),
+      pincodeRequired: t('checkout.pincodeRequired'),
+      pincodeInvalid: t('checkout.pincodeInvalid'),
+      countryRequired: t('checkout.countryRequired'),
+    }),
+    [t],
+  );
+
   useEffect(() => {
     if (isUser && currentStep === 1) setCurrentStep(2);
-  }, [isUser]);
+  }, [isUser, currentStep]);
 
   useEffect(() => {
     return () => {
       if (items.length > 0 && !orderPlaced) saveAbandonedCart(items);
     };
   }, [items, orderPlaced]);
+
+  useEffect(() => {
+    setAddress(prev => ({
+      ...prev,
+      name: prev.name || auth.user?.name || '',
+      email: prev.email || auth.user?.email || '',
+      phone: prev.phone || auth.user?.phone || phone || '',
+    }));
+  }, [auth.user, phone]);
+
+  useEffect(() => {
+    if (!isUser) return;
+    fetchOrders()
+      .then(orders => {
+        const last = orders[0]?.address;
+        if (!last) return;
+        setAddress(prev => ({
+          ...prev,
+          name: prev.name || last.name,
+          phone: prev.phone || last.phone,
+          line1: prev.line1 || last.line1,
+          line2: prev.line2 || last.line2 || '',
+          city: prev.city || last.city,
+          state: prev.state || last.state,
+          pincode: prev.pincode || last.pincode,
+          countryCode: prev.countryCode || last.country || 'IN',
+        }));
+      })
+      .catch(() => undefined);
+  }, [isUser]);
 
   const handleSendOtp = async () => {
     if (!validateIndianMobile(phone)) return;
@@ -68,7 +126,7 @@ export default function CheckoutPage() {
 
   const handleVerifyOtp = async () => {
     if (otp.length !== 6) {
-      setOtpError('Please enter a 6-digit OTP');
+      setOtpError(t('checkout.otpLength'));
       return;
     }
     try {
@@ -76,13 +134,21 @@ export default function CheckoutPage() {
       setOtpError('');
       setOtpSuccess(true);
       dispatch(setSession({ token, user }));
+      setAddress(prev => ({ ...prev, phone: prev.phone || user.phone || phone }));
       setTimeout(() => {
         setCurrentStep(2);
         setOtpSuccess(false);
       }, 800);
     } catch {
-      setOtpError('Invalid OTP. Use 123456 for demo.');
+      setOtpError(t('checkout.otpInvalid'));
     }
+  };
+
+  const handleAddressSubmit = () => {
+    const errors = validateCheckoutAddress(address, validationMessages());
+    setAddressErrors(errors);
+    if (Object.keys(errors).length > 0) return;
+    setCurrentStep(3);
   };
 
   const handlePlaceOrder = async () => {
@@ -99,27 +165,43 @@ export default function CheckoutPage() {
       total,
       paymentMethod,
       couponCode: applied.appliedCode || undefined,
-      phone: auth.user?.phone || phone,
+      email: address.email.trim(),
+      phone: auth.user?.phone || address.phone || phone,
       trackingNumber: `TRK${Date.now().toString().slice(-10)}`,
       address: {
         id: '1',
-        name: address.name,
+        name: address.name.trim(),
         phone: address.phone || phone,
-        line1: address.line1,
-        line2: address.line2,
-        city: address.city,
-        state: address.state,
-        pincode: address.pincode,
+        line1: address.line1.trim(),
+        line2: address.line2.trim() || undefined,
+        city: address.city.trim(),
+        state: address.state.trim(),
+        pincode: address.pincode.trim(),
+        country: address.countryCode,
         isDefault: true,
       },
     };
+
     try {
       await createOrder(order);
+      if (isUser && address.email.trim()) {
+        try {
+          const { user } = await updateProfile({
+            name: address.name.trim(),
+            email: address.email.trim(),
+          });
+          dispatch(updateUser(user));
+        } catch {
+          // non-blocking
+        }
+      }
     } catch (err) {
       console.error('Order creation failed:', err);
     }
+
     dispatch(clearCart());
     setOrderId(id);
+    setOrderEmail(address.email.trim());
     setOrderPlaced(true);
   };
 
@@ -133,15 +215,30 @@ export default function CheckoutPage() {
 
   if (orderPlaced) {
     return (
-      <div className="min-h-screen bg-cream-100 flex items-center justify-center px-4">
-        <div className="bg-white rounded-sm shadow-luxury-lg p-10 max-w-lg w-full text-center">
-          <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-6"><Check size={28} className="text-emerald-600" /></div>
-          <h1 className="font-heading text-3xl font-semibold text-navy-700 mb-3">Order Confirmed!</h1>
-          <p className="font-body text-sm text-gray-600 leading-relaxed mb-2">Your order <span className="font-semibold text-rosegold-500">#{orderId}</span> has been placed successfully.</p>
-          <p className="font-body text-sm text-gray-500 mb-8">A confirmation has been sent to +91 {auth.user?.phone || phone}. Estimated delivery: 4-7 business days.</p>
+      <div className="flex min-h-screen items-center justify-center bg-[#faf8f5] px-4">
+        <div className="w-full max-w-lg rounded-2xl border border-rosegold-100/70 bg-white p-10 text-center shadow-[0_10px_36px_rgba(27,42,74,0.08)]">
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
+            <Check size={28} className="text-emerald-600" />
+          </div>
+          <h1 className="mb-3 font-heading text-3xl font-semibold text-navy-700">
+            {t('checkout.orderConfirmed')}
+          </h1>
+          <p className="mb-2 font-body text-sm leading-relaxed text-gray-600">
+            {t('checkout.orderConfirmedDetail', { id: orderId })}
+          </p>
+          <p className="mb-8 font-body text-sm text-gray-500">
+            {t('checkout.confirmationSent', {
+              email: orderEmail,
+              phone: auth.user?.phone || phone,
+            })}
+          </p>
           <div className="grid grid-cols-2 gap-3">
-            <Link to="/account/orders" className="btn-primary text-center text-xs">Track Order</Link>
-            <Link to="/collections" className="border border-navy-700 text-navy-700 text-xs font-body font-medium px-4 py-3 rounded-sm text-center hover:bg-navy-700 hover:text-white transition-colors">Continue Shopping</Link>
+            <Link to="/account/orders" className="btn-primary text-center text-xs">
+              {t('checkout.trackOrder')}
+            </Link>
+            <Link to="/collections" className="btn-outline-navy text-xs">
+              {t('checkout.continueShopping')}
+            </Link>
           </div>
         </div>
       </div>
@@ -149,56 +246,90 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-cream-100">
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <h1 className="font-heading text-3xl font-semibold text-navy-700 mb-8">Checkout</h1>
+    <div className="min-h-screen bg-[#faf8f5]">
+      <div className="mx-auto max-w-screen-xl px-4 py-10 sm:px-6 lg:px-8">
+        <h1 className="mb-8 font-heading text-3xl font-semibold text-navy-700">
+          {t('checkout.title')}
+        </h1>
 
         {isUser && (
-          <div className="bg-emerald-50 border border-emerald-200 rounded-sm px-4 py-3 mb-6 text-sm font-body text-emerald-700">
-            Logged in as +91 {auth.user?.phone}
+          <div className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 font-body text-sm text-emerald-700">
+            {t('checkout.loggedInAs', { phone: auth.user?.phone })}
           </div>
         )}
 
-        <div className="flex items-center gap-2 mb-10 overflow-x-auto scrollbar-hide pb-2">
-          {steps.map((step, i) => (
-            <div key={step.id} className="flex items-center gap-2 flex-shrink-0">
-              <div className={`flex items-center gap-2 ${currentStep === step.id ? 'text-rosegold-500' : currentStep > step.id ? 'text-emerald-600' : 'text-gray-400'}`}>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all ${currentStep === step.id ? 'border-rosegold-500 bg-rosegold-50' : currentStep > step.id ? 'border-emerald-500 bg-emerald-50' : 'border-gray-300'}`}>
-                  {currentStep > step.id ? <Check size={14} /> : <step.icon size={14} />}
-                </div>
-                <span className="font-body text-xs font-medium hidden sm:block">{step.label}</span>
-              </div>
-              {i < steps.length - 1 && <ChevronRight size={14} className="text-gray-300 flex-shrink-0" />}
-            </div>
-          ))}
-        </div>
+        <CheckoutStepper steps={steps} currentStep={currentStep} />
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-sm shadow-card p-6">
+            <div className="rounded-2xl border border-rosegold-100/70 bg-white p-6 shadow-[0_10px_36px_rgba(27,42,74,0.05)] sm:p-8">
               {currentStep === 1 && (
                 <div>
-                  <h2 className="font-heading text-xl font-semibold text-navy-700 mb-6">Login with OTP</h2>
+                  <h2 className="mb-6 font-heading text-xl font-semibold text-navy-700">
+                    {t('checkout.loginOtp')}
+                  </h2>
                   <div className="max-w-sm">
                     {!otpSent ? (
                       <>
-                        <label className="font-body text-sm font-medium text-navy-700 block mb-2">Mobile Number</label>
-                        <div className="flex gap-2 mb-4">
-                          <span className="flex items-center px-3 bg-cream-100 border border-rosegold-200 rounded-sm text-sm font-body text-gray-600">+91</span>
-                          <input type="tel" maxLength={10} value={phone} onChange={e => setPhone(e.target.value.replace(/\D/g, ''))} placeholder="9876543210" className="input-field flex-1" />
+                        <label className="mb-2 block font-body text-sm font-medium text-navy-700">
+                          {t('checkout.phone')}
+                        </label>
+                        <div className="mb-4 flex gap-2">
+                          <span className="flex items-center rounded-sm border border-rosegold-200 bg-cream-100 px-3 font-body text-sm text-gray-600">
+                            +91
+                          </span>
+                          <input
+                            type="tel"
+                            maxLength={10}
+                            value={phone}
+                            onChange={e => setPhone(e.target.value.replace(/\D/g, ''))}
+                            placeholder="9876543210"
+                            className="input-field flex-1"
+                          />
                         </div>
-                        <button onClick={handleSendOtp} disabled={!validateIndianMobile(phone)} className="btn-primary w-full disabled:opacity-50">Send OTP</button>
-                        <p className="text-xs text-gray-400 mt-2">Demo: any 10-digit number, OTP is 123456</p>
+                        <button
+                          type="button"
+                          onClick={handleSendOtp}
+                          disabled={!validateIndianMobile(phone)}
+                          className="btn-primary w-full disabled:opacity-50"
+                        >
+                          {t('checkout.sendOtp')}
+                        </button>
+                        <p className="mt-2 font-body text-xs text-gray-400">{t('checkout.otpDemo')}</p>
                       </>
                     ) : (
                       <>
-                        <p className="font-body text-sm text-gray-600 mb-4">OTP sent to +91 {phone}</p>
-                        <label className="font-body text-sm font-medium text-navy-700 block mb-2">Enter OTP</label>
-                        <input type="text" maxLength={6} value={otp} onChange={e => { setOtp(e.target.value.replace(/\D/g, '')); setOtpError(''); }} placeholder="123456" className="input-field mb-2" />
-                        {otpError && <p className="text-xs text-red-500 mb-2">{otpError}</p>}
-                        {otpSuccess && <p className="text-xs text-emerald-600 mb-2">✓ Verified successfully!</p>}
-                        <button onClick={handleVerifyOtp} className="btn-primary w-full">Verify & Continue</button>
-                        <button onClick={() => setOtpSent(false)} className="w-full text-sm font-body text-rosegold-500 mt-3 hover:text-navy-700">Change Number</button>
+                        <p className="mb-4 font-body text-sm text-gray-600">
+                          {t('checkout.otpSent', { phone })}
+                        </p>
+                        <label className="mb-2 block font-body text-sm font-medium text-navy-700">
+                          {t('checkout.enterOtp')}
+                        </label>
+                        <input
+                          type="text"
+                          maxLength={6}
+                          value={otp}
+                          onChange={e => {
+                            setOtp(e.target.value.replace(/\D/g, ''));
+                            setOtpError('');
+                          }}
+                          placeholder="123456"
+                          className="input-field mb-2"
+                        />
+                        {otpError && <p className="mb-2 text-xs text-red-500">{otpError}</p>}
+                        {otpSuccess && (
+                          <p className="mb-2 text-xs text-emerald-600">{t('checkout.otpVerified')}</p>
+                        )}
+                        <button type="button" onClick={handleVerifyOtp} className="btn-primary w-full">
+                          {t('checkout.verifyContinue')}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setOtpSent(false)}
+                          className="mt-3 w-full font-body text-sm text-rosegold-500 hover:text-navy-700"
+                        >
+                          {t('checkout.changeNumber')}
+                        </button>
                       </>
                     )}
                   </div>
@@ -206,84 +337,82 @@ export default function CheckoutPage() {
               )}
 
               {currentStep === 2 && (
-                <div>
-                  <h2 className="font-heading text-xl font-semibold text-navy-700 mb-6">Delivery Address</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {[
-                      { key: 'name', label: 'Full Name', placeholder: 'Priya Sharma', col: 2 },
-                      { key: 'phone', label: 'Phone Number', placeholder: '9876543210', col: 1 },
-                      { key: 'line1', label: 'Address Line 1', placeholder: '123, Rose Garden Apartment', col: 2 },
-                      { key: 'line2', label: 'Address Line 2 (Optional)', placeholder: 'Near City Mall', col: 2 },
-                      { key: 'city', label: 'City', placeholder: 'Mumbai', col: 1 },
-                      { key: 'state', label: 'State', placeholder: 'Maharashtra', col: 1 },
-                      { key: 'pincode', label: 'Pincode', placeholder: '400001', col: 1 },
-                    ].map(field => (
-                      <div key={field.key} className={field.col === 2 ? 'sm:col-span-2' : ''}>
-                        <label className="font-body text-xs font-medium text-gray-600 block mb-1.5">{field.label}</label>
-                        <input type="text" value={address[field.key as keyof typeof address]} onChange={e => setAddress({ ...address, [field.key]: e.target.value })} placeholder={field.placeholder} className="input-field" />
-                      </div>
-                    ))}
-                  </div>
-                  <button onClick={handleNextStep} className="btn-primary mt-6">Save & Continue</button>
-                </div>
+                <CheckoutAddressForm
+                  address={address}
+                  errors={addressErrors}
+                  onChange={setAddress}
+                  onSubmit={handleAddressSubmit}
+                />
               )}
 
               {currentStep === 3 && (
                 <div>
-                  <h2 className="font-heading text-xl font-semibold text-navy-700 mb-6">Review Your Order</h2>
-                  <div className="space-y-4 mb-6">
+                  <h2 className="mb-6 font-heading text-xl font-semibold text-navy-700">
+                    {t('checkout.reviewOrder')}
+                  </h2>
+                  <div className="mb-6 space-y-4">
                     {items.map(item => (
-                      <div key={`${item.product.id}-${item.size}`} className="flex gap-4 py-4 border-b border-rosegold-100">
-                        <div className="w-16 h-20 bg-cream-200 rounded-sm overflow-hidden flex-shrink-0">
-                          <img src={mediaUrl(item.product.images[0])} alt={item.product.name} className="w-full h-full object-cover" />
+                      <div
+                        key={`${item.product.id}-${item.size}`}
+                        className="flex gap-4 border-b border-rosegold-100 py-4"
+                      >
+                        <div className="h-20 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-cream-100">
+                          <img
+                            src={mediaUrl(item.product.images[0])}
+                            alt={item.product.name}
+                            className="h-full w-full object-cover object-top"
+                          />
                         </div>
                         <div className="flex-1">
-                          <p className="font-body text-sm font-medium text-navy-700">{item.product.name}</p>
-                          <p className="font-body text-xs text-gray-500 mt-1">{item.color} · {item.size} · Qty: {item.quantity}</p>
-                          <p className="font-heading text-base font-semibold text-navy-700 mt-2">{formatPrice(item.product.price * item.quantity)}</p>
+                          <p className="font-body text-sm font-medium text-navy-700">
+                            {item.product.name}
+                          </p>
+                          <p className="mt-1 font-body text-xs text-gray-500">
+                            {item.color} · {item.size} · Qty: {item.quantity}
+                          </p>
+                          <p className="mt-2 font-heading text-base font-semibold text-navy-700">
+                            {formatPrice(item.product.price * item.quantity)}
+                          </p>
                         </div>
                       </div>
                     ))}
                   </div>
-                  <button onClick={handleNextStep} className="btn-primary">Proceed to Payment</button>
+                  <div className="mb-6 rounded-xl border border-rosegold-100 bg-cream-50/50 p-4 text-sm">
+                    <p className="font-semibold text-navy-700">{address.name}</p>
+                    <p className="mt-1 text-gray-600">{address.email}</p>
+                    <p className="mt-1 text-gray-600">
+                      {address.line1}
+                      {address.line2 ? `, ${address.line2}` : ''}, {address.city}, {address.state}{' '}
+                      {address.pincode}
+                    </p>
+                  </div>
+                  <button type="button" onClick={handleNextStep} className="btn-primary">
+                    {t('checkout.proceedPayment')}
+                  </button>
                 </div>
               )}
 
               {currentStep === 4 && (
-                <div>
-                  <h2 className="font-heading text-xl font-semibold text-navy-700 mb-6">Payment</h2>
-                  <div className="space-y-3 mb-6">
-                    {[
-                      { value: 'razorpay' as const, label: 'Pay Online', desc: 'UPI, Cards, Net Banking — powered by Razorpay' },
-                      { value: 'cod' as const, label: 'Cash on Delivery', desc: `${formatPrice(49)} handling charge applies` },
-                    ].map(method => (
-                      <label key={method.value} className={`flex items-start gap-4 p-4 border-2 rounded-sm cursor-pointer transition-all ${paymentMethod === method.value ? 'border-rosegold-500 bg-rosegold-50' : 'border-gray-200 hover:border-rosegold-200'}`}>
-                        <input type="radio" name="payment" value={method.value} checked={paymentMethod === method.value} onChange={() => setPaymentMethod(method.value)} className="mt-0.5 accent-rosegold-500" />
-                        <div>
-                          <p className="font-body text-sm font-semibold text-navy-700">{method.label}</p>
-                          <p className="font-body text-xs text-gray-500 mt-0.5">{method.desc}</p>
-                        </div>
-                      </label>
-                    ))}
-                  </div>
-                  <div className="flex items-center gap-2 text-xs font-body text-gray-500 mb-6"><Shield size={14} className="text-rosegold-500" />Your payment information is secure and encrypted</div>
-                  <button onClick={handleNextStep} className="btn-rose w-full">{paymentMethod === 'cod' ? 'Place Order (COD)' : 'Pay Now'}</button>
-                </div>
+                <CheckoutPaymentStep
+                  paymentMethod={paymentMethod}
+                  codFeeLabel={formatPrice(49)}
+                  onChange={setPaymentMethod}
+                  onSubmit={handleNextStep}
+                />
               )}
             </div>
           </div>
 
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-sm shadow-card p-5 sticky top-28">
-              <h3 className="font-heading text-lg font-semibold text-navy-700 mb-4">Order Summary</h3>
-              <div className="space-y-2 pt-2 text-sm font-body">
-                <div className="flex justify-between"><span className="text-gray-600">Subtotal</span><span>{formatPrice(subtotal)}</span></div>
-                {discount > 0 && <div className="flex justify-between"><span className="text-emerald-600">Coupon ({applied.appliedCode})</span><span className="text-emerald-600">−{formatPrice(discount)}</span></div>}
-                <div className="flex justify-between"><span className="text-gray-600">Shipping</span><span className={shipping === 0 ? 'text-emerald-600' : ''}>{shipping === 0 ? 'FREE' : formatPrice(shipping)}</span></div>
-                {codFee > 0 && <div className="flex justify-between"><span className="text-gray-600">COD Fee</span><span>{formatPrice(codFee)}</span></div>}
-                <div className="flex justify-between font-heading text-base font-semibold text-navy-700 pt-2 border-t border-rosegold-100"><span>Total</span><span>{formatPrice(total)}</span></div>
-              </div>
-            </div>
+            <CheckoutOrderSummary
+              items={items}
+              subtotal={subtotal}
+              discount={discount}
+              appliedCode={applied.appliedCode}
+              shipping={shipping}
+              codFee={codFee}
+              total={total}
+            />
           </div>
         </div>
       </div>

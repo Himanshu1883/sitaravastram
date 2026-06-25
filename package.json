@@ -14,6 +14,7 @@
   "dependencies": {
     "@reduxjs/toolkit": "^2.12.0",
     "@supabase/supabase-js": "^2.57.4",
+    "country-state-city": "^3.2.1",
     "framer-motion": "^12.40.0",
     "i18next": "^26.3.1",
     "lucide-react": "^0.344.0",

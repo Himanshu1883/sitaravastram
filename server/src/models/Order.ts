@@ -16,6 +16,7 @@ const addressSchema = new Schema(
     city: String,
     state: String,
     pincode: String,
+    country: String,
     isDefault: Boolean,
   },
   { _id: false },
@@ -58,6 +59,7 @@ export interface IOrder extends Document {
   total: number;
   paymentMethod: 'razorpay' | 'cod';
   couponCode?: string;
+  email?: string;
   address: unknown;
   trackingNumber?: string;
   phone?: string;
@@ -84,6 +86,7 @@ const orderSchema = new Schema<IOrder>(
     total: Number,
     paymentMethod: { type: String, enum: ['razorpay', 'cod'] },
     couponCode: String,
+    email: String,
     address: addressSchema,
     trackingNumber: String,
     phone: String,
@@ -110,6 +113,7 @@ export function toOrderDto(doc: IOrder) {
     total: doc.total,
     paymentMethod: doc.paymentMethod,
     couponCode: doc.couponCode,
+    email: doc.email,
     address: doc.address,
     trackingNumber: doc.trackingNumber,
     phone: doc.phone,

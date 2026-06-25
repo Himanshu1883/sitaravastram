@@ -101,6 +101,7 @@ export interface Address {
   city: string;
   state: string;
   pincode: string;
+  country?: string;
   isDefault: boolean;
 }
 
@@ -138,6 +139,7 @@ export interface Order {
   total: number;
   paymentMethod: 'razorpay' | 'cod';
   couponCode?: string;
+  email?: string;
   address: Address;
   trackingNumber?: string;
   phone?: string;

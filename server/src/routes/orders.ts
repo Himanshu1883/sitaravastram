@@ -39,6 +39,7 @@ router.post('/', requireCustomer, async (req, res, next) => {
       total: body.total,
       paymentMethod: body.paymentMethod,
       couponCode: body.couponCode,
+      email: body.email,
       address: body.address,
       trackingNumber: body.trackingNumber || `TRK${Date.now().toString().slice(-10)}`,
       phone: req.user!.phone,
