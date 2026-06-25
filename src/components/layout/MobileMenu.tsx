@@ -24,12 +24,14 @@ function MobileNavAccordion({
   onAccount,
   onToggleLanguage,
   languageLabel,
+  accountBadgeCount = 0,
 }: {
   items: NavItem[];
   onClose: () => void;
   onAccount: () => void;
   onToggleLanguage: () => void;
   languageLabel: string;
+  accountBadgeCount?: number;
 }) {
   const { t } = useTranslation();
   const [openNav, setOpenNav] = useState<string | null>(null);
@@ -148,8 +150,13 @@ function MobileNavAccordion({
             {languageLabel}
           </button>
         </div>
-        <button type="button" className="btn-primary block w-full text-center" onClick={onAccount}>
+        <button type="button" className="btn-primary relative block w-full text-center" onClick={onAccount}>
           {t('nav.myAccount')}
+          {accountBadgeCount > 0 && (
+            <span className="absolute -top-1.5 right-3 flex h-4 min-w-4 items-center justify-center rounded-full bg-white px-1 text-[10px] font-bold text-rosegold-600 ring-2 ring-rosegold-500">
+              {accountBadgeCount > 9 ? '9+' : accountBadgeCount}
+            </span>
+          )}
         </button>
         <a
           href="tel:+919876543210"
@@ -170,6 +177,7 @@ export default function MobileMenu({
   onAccount,
   onToggleLanguage,
   languageLabel,
+  accountBadgeCount = 0,
 }: {
   open: boolean;
   items: NavItem[];
@@ -177,6 +185,7 @@ export default function MobileMenu({
   onAccount: () => void;
   onToggleLanguage: () => void;
   languageLabel: string;
+  accountBadgeCount?: number;
 }) {
   const { t } = useTranslation();
 
@@ -231,6 +240,7 @@ export default function MobileMenu({
               }}
               onToggleLanguage={onToggleLanguage}
               languageLabel={languageLabel}
+              accountBadgeCount={accountBadgeCount}
             />
           </motion.div>
         </div>

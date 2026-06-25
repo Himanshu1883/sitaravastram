@@ -19,6 +19,7 @@ import { formatINR } from '../../lib/admin/dashboardStats';
 import AdminPageHeader from './ui/AdminPageHeader';
 import AdminCard from './ui/AdminCard';
 import AdminModal from './ui/AdminModal';
+import OrderInvoiceModal from '../invoice/OrderInvoiceModal';
 import { OrderStatusBadge } from './ui/StatusBadge';
 
 const ALL_STATUSES = 'all' as const;
@@ -28,6 +29,7 @@ const STATUS_FILTERS: { value: StatusFilter; label: string }[] = [
   { value: ALL_STATUSES, label: 'All' },
   { value: 'placed', label: 'Placed' },
   { value: 'confirmed', label: 'Confirmed' },
+  { value: 'cancel_requested', label: 'Cancel requested' },
   { value: 'shipped', label: 'Shipped' },
   { value: 'in_transit', label: 'In transit' },
   { value: 'delivered', label: 'Delivered' },
@@ -38,6 +40,7 @@ const STATUS_FILTERS: { value: StatusFilter; label: string }[] = [
 const ORDER_STATUSES: AdminOrder['status'][] = [
   'placed',
   'confirmed',
+  'cancel_requested',
   'shipped',
   'in_transit',
   'delivered',
@@ -62,86 +65,6 @@ function PaymentBadge({ method }: { method: AdminOrder['paymentMethod'] }) {
       {isCod ? <Banknote size={11} /> : <CreditCard size={11} />}
       {isCod ? 'COD' : 'Prepaid'}
     </span>
-  );
-}
-
-function InvoiceContent({ order }: { order: AdminOrder }) {
-  return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4 text-sm">
-        <div>
-          <p className="text-xs text-gray-400 mb-0.5">Customer</p>
-          <p className="font-medium text-navy-700">{order.customer}</p>
-        </div>
-        <div>
-          <p className="text-xs text-gray-400 mb-0.5">Date</p>
-          <p className="font-medium text-navy-700">{order.date}</p>
-        </div>
-        <div>
-          <p className="text-xs text-gray-400 mb-0.5">Payment</p>
-          <PaymentBadge method={order.paymentMethod} />
-        </div>
-        <div>
-          <p className="text-xs text-gray-400 mb-0.5">Status</p>
-          <OrderStatusBadge status={order.status} />
-        </div>
-      </div>
-
-      <div className="rounded-xl border border-gray-100 overflow-hidden">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="bg-cream-100/60 text-left text-xs text-gray-500">
-              <th className="px-4 py-2.5 font-semibold">Item</th>
-              <th className="px-4 py-2.5 font-semibold">Qty</th>
-              <th className="px-4 py-2.5 font-semibold text-right">Price</th>
-            </tr>
-          </thead>
-          <tbody>
-            {order.items.map((item, i) => (
-              <tr key={i} className="border-t border-gray-50">
-                <td className="px-4 py-3">
-                  <p className="font-medium text-navy-700 line-clamp-1">{item.product.name}</p>
-                  <p className="text-xs text-gray-400">
-                    {item.size} · {item.color}
-                  </p>
-                </td>
-                <td className="px-4 py-3 text-gray-600 tabular-nums">{item.quantity}</td>
-                <td className="px-4 py-3 text-right font-medium tabular-nums">
-                  {formatINR(item.product.price * item.quantity)}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="rounded-xl bg-cream-100/50 px-4 py-3 space-y-2 text-sm">
-        <div className="flex justify-between text-gray-600">
-          <span>Subtotal</span>
-          <span className="tabular-nums">{formatINR(order.subtotal)}</span>
-        </div>
-        {order.discount > 0 && (
-          <div className="flex justify-between text-emerald-600">
-            <span>Discount{order.couponCode ? ` (${order.couponCode})` : ''}</span>
-            <span className="tabular-nums">−{formatINR(order.discount)}</span>
-          </div>
-        )}
-        <div className="flex justify-between text-gray-600">
-          <span>Shipping</span>
-          <span className="tabular-nums">{formatINR(order.shipping)}</span>
-        </div>
-        {order.codFee > 0 && (
-          <div className="flex justify-between text-gray-600">
-            <span>COD fee</span>
-            <span className="tabular-nums">{formatINR(order.codFee)}</span>
-          </div>
-        )}
-        <div className="flex justify-between font-semibold text-navy-700 pt-2 border-t border-gray-200/80">
-          <span>Total</span>
-          <span className="tabular-nums">{formatINR(order.total)}</span>
-        </div>
-      </div>
-    </div>
   );
 }
 
@@ -185,7 +108,9 @@ export default function OrdersTab({ data, api }: { data: AdminData; api: AdminAp
 
   const stats = useMemo(() => {
     const orders = data.orders;
-    const pending = orders.filter(o => ['placed', 'confirmed'].includes(o.status)).length;
+    const pending = orders.filter(o =>
+      ['placed', 'confirmed', 'cancel_requested'].includes(o.status),
+    ).length;
     const shipped = orders.filter(o => ['shipped', 'in_transit'].includes(o.status)).length;
     const revenue = orders
       .filter(o => o.status !== 'cancelled' && o.status !== 'returned')
@@ -491,6 +416,41 @@ export default function OrdersTab({ data, api }: { data: AdminData; api: AdminAp
                                     <OrderStatusBadge status={order.status} />
                                     <PaymentBadge method={order.paymentMethod} />
                                   </div>
+                                  {order.status === 'cancel_requested' && (
+                                    <div className="mt-4 rounded-xl border border-orange-100 bg-orange-50/60 p-4">
+                                      <p className="text-xs font-semibold uppercase tracking-wider text-orange-700 mb-2">
+                                        Cancellation request
+                                      </p>
+                                      {order.cancelReason && (
+                                        <p className="text-sm text-gray-700 mb-3">
+                                          Reason: {order.cancelReason}
+                                        </p>
+                                      )}
+                                      <div className="flex flex-wrap gap-2">
+                                        <button
+                                          type="button"
+                                          disabled={isUpdating}
+                                          onClick={() => api.approveCancel(order.id)}
+                                          className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
+                                        >
+                                          Approve cancel
+                                        </button>
+                                        <button
+                                          type="button"
+                                          disabled={isUpdating}
+                                          onClick={() => {
+                                            const note =
+                                              window.prompt('Optional note for customer:') ??
+                                              undefined;
+                                            api.rejectCancel(order.id, note || undefined);
+                                          }}
+                                          className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-60"
+                                        >
+                                          Reject
+                                        </button>
+                                      </div>
+                                    </div>
+                                  )}
                                   <form
                                     className="mt-4 pt-4 border-t border-gray-100"
                                     onSubmit={e => {
@@ -565,24 +525,11 @@ export default function OrdersTab({ data, api }: { data: AdminData; api: AdminAp
         )}
       </AdminCard>
 
-      <AdminModal
-        open={!!invoiceOrder}
+      <OrderInvoiceModal
+        order={invoiceOrder}
+        customerName={invoiceOrder?.customer}
         onClose={() => setInvoiceOrder(null)}
-        title={invoiceOrder ? `Invoice #${invoiceOrder.id}` : ''}
-        subtitle={invoiceOrder?.customer}
-        size="lg"
-        footer={
-          <button
-            type="button"
-            onClick={() => window.print()}
-            className="btn-primary text-sm w-full sm:w-auto"
-          >
-            Print Invoice
-          </button>
-        }
-      >
-        {invoiceOrder && <InvoiceContent order={invoiceOrder} />}
-      </AdminModal>
+      />
 
       <AdminModal
         open={!!labelOrder}

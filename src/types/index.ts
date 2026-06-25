@@ -109,6 +109,7 @@ export interface OrderStatusEvent {
   status:
     | 'placed'
     | 'confirmed'
+    | 'cancel_requested'
     | 'shipped'
     | 'in_transit'
     | 'delivered'
@@ -125,6 +126,7 @@ export interface Order {
   status:
     | 'placed'
     | 'confirmed'
+    | 'cancel_requested'
     | 'shipped'
     | 'in_transit'
     | 'delivered'
@@ -143,6 +145,13 @@ export interface Order {
   address: Address;
   trackingNumber?: string;
   phone?: string;
+  customer?: string;
+  cancelReason?: string;
+  cancelRequestedAt?: string;
+  cancelledAt?: string;
+  cancelledBy?: 'customer' | 'admin' | 'system';
+  refundStatus?: 'none' | 'pending' | 'processed' | 'failed';
+  refundAmount?: number;
 }
 
 export interface Coupon {
@@ -175,8 +184,31 @@ export interface ReturnRequest {
   customer: string;
   product: string;
   reason: string;
-  status: 'pending' | 'approved' | 'rejected' | 'refunded';
+  comment?: string;
+  status:
+    | 'pending'
+    | 'approved'
+    | 'pickup_scheduled'
+    | 'picked_up'
+    | 'received'
+    | 'refund_initiated'
+    | 'refunded'
+    | 'rejected';
   date: string;
+  refundAmount?: number;
+  adminNote?: string;
+}
+
+export interface UserNotification {
+  id: string;
+  type: string;
+  title: string;
+  message: string;
+  orderId?: string;
+  returnId?: string;
+  link?: string;
+  read: boolean;
+  createdAt: string;
 }
 
 export interface InstagramPost {

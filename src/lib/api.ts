@@ -206,6 +206,46 @@ export const createOrder = (order: unknown) =>
 export const fetchOrders = () =>
   api<import('../types').Order[]>('/api/orders', { auth: 'user' });
 
+export const cancelOrder = (orderId: string, reason: string) =>
+  api<import('../types').Order>(`/api/orders/${encodeURIComponent(orderId)}/cancel`, {
+    method: 'POST',
+    body: JSON.stringify({ reason }),
+    auth: 'user',
+  });
+
+export const returnOrder = (orderId: string, data: { reason: string; comment?: string }) =>
+  api<{ id: string; orderId: string; status: string }>(
+    `/api/orders/${encodeURIComponent(orderId)}/return`,
+    { method: 'POST', body: JSON.stringify(data), auth: 'user' },
+  );
+
+export const fetchNotifications = () =>
+  api<import('../types').UserNotification[]>('/api/notifications', { auth: 'user' });
+
+export const fetchUnreadNotificationCount = () =>
+  api<{ count: number }>('/api/notifications/unread-count', { auth: 'user' });
+
+export const markNotificationRead = (id: string) =>
+  api<import('../types').UserNotification>(`/api/notifications/${id}/read`, {
+    method: 'PATCH',
+    auth: 'user',
+  });
+
+export const markAllNotificationsRead = () =>
+  api<{ success: boolean }>('/api/notifications/read-all', { method: 'PATCH', auth: 'user' });
+
+export async function fetchOrderInvoicePdf(orderId: string): Promise<Blob> {
+  const token = getToken();
+  const res = await fetch(`${API_BASE}/api/orders/${encodeURIComponent(orderId)}/invoice`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ error: res.statusText }));
+    throw new ApiError(res.status, body.error || 'Failed to download invoice');
+  }
+  return res.blob();
+}
+
 export const submitReview = (data: {
   productId?: string;
   author: string;
@@ -250,6 +290,19 @@ export const adminUpdateOrderStatus = (
   api<import('../types').Order>(`/api/admin/orders/${id}/status`, {
     method: 'PATCH',
     body: JSON.stringify(data),
+    auth: 'admin',
+  });
+
+export const adminApproveCancel = (id: string) =>
+  api<import('../types').Order>(`/api/admin/orders/${id}/cancel/approve`, {
+    method: 'POST',
+    auth: 'admin',
+  });
+
+export const adminRejectCancel = (id: string, note?: string) =>
+  api<import('../types').Order>(`/api/admin/orders/${id}/cancel/reject`, {
+    method: 'POST',
+    body: JSON.stringify({ note }),
     auth: 'admin',
   });
 

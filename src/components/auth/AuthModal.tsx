@@ -6,6 +6,7 @@ import { X, AlertCircle, Loader2, Sparkles, Truck, RefreshCw } from 'lucide-reac
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import Logo from '../ui/Logo';
+import { BRAND_LOGO_EMBLEM } from '../../lib/brand';
 import {
   closeAuthModal,
   setSession,
@@ -197,7 +198,13 @@ export default function AuthModal() {
 
             <div className="hidden w-[42%] flex-col justify-between bg-gradient-to-br from-navy-800 via-navy-700 to-navy-900 p-8 lg:flex">
               <div>
-                <Logo size="md" className="mb-8 brightness-0 invert" />
+                <Logo
+                  variant="emblem"
+                  size="xl"
+                  src={BRAND_LOGO_EMBLEM}
+                  className="mb-8"
+                  imageClassName="h-16 w-16 object-contain sm:h-[4.5rem] sm:w-[4.5rem]"
+                />
                 <h2 className="font-heading text-2xl font-semibold leading-snug text-white">
                   {t('auth.welcome')}
                 </h2>
@@ -228,7 +235,12 @@ export default function AuthModal() {
 
             <div className="flex w-full flex-col justify-center px-6 py-10 sm:px-10 lg:w-[58%] lg:py-12">
               <div className="lg:hidden mb-6 flex justify-center">
-                <Logo size="sm" />
+                <Logo
+                  variant="emblem"
+                  size="lg"
+                  src={BRAND_LOGO_EMBLEM}
+                  imageClassName="h-14 w-14 object-contain"
+                />
               </div>
 
               <h1

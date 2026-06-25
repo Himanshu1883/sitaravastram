@@ -12,12 +12,18 @@ export default function AccountDashboard({
   isSignedIn,
   onSignIn,
   onTrackOrder,
+  onViewInvoice,
+  onCancel,
+  onReturn,
 }: {
   orders: Order[];
   wishlistCount: number;
   isSignedIn: boolean;
   onSignIn: () => void;
   onTrackOrder: (order: Order) => void;
+  onViewInvoice: (order: Order) => void;
+  onCancel?: (order: Order) => void;
+  onReturn?: (order: Order) => void;
 }) {
   const { t } = useTranslation();
   const delivered = orders.filter(o => o.status === 'delivered').length;
@@ -97,6 +103,9 @@ export default function AccountDashboard({
                 order={order}
                 compact
                 onTrack={() => onTrackOrder(order)}
+                onInvoice={() => onViewInvoice(order)}
+                onCancel={onCancel ? () => onCancel(order) : undefined}
+                onReturn={onReturn ? () => onReturn(order) : undefined}
               />
             ))}
           </div>

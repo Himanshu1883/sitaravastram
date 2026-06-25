@@ -10,11 +10,17 @@ export default function AccountOrders({
   isSignedIn,
   onSignIn,
   onTrackOrder,
+  onViewInvoice,
+  onCancel,
+  onReturn,
 }: {
   orders: Order[];
   isSignedIn: boolean;
   onSignIn: () => void;
   onTrackOrder: (order: Order) => void;
+  onViewInvoice: (order: Order) => void;
+  onCancel?: (order: Order) => void;
+  onReturn?: (order: Order) => void;
 }) {
   const { t } = useTranslation();
 
@@ -42,7 +48,14 @@ export default function AccountOrders({
       ) : (
         <div className="space-y-4">
           {orders.map(order => (
-            <OrderCard key={order.id} order={order} onTrack={() => onTrackOrder(order)} />
+            <OrderCard
+              key={order.id}
+              order={order}
+              onTrack={() => onTrackOrder(order)}
+              onInvoice={() => onViewInvoice(order)}
+              onCancel={onCancel ? () => onCancel(order) : undefined}
+              onReturn={onReturn ? () => onReturn(order) : undefined}
+            />
           ))}
         </div>
       )}

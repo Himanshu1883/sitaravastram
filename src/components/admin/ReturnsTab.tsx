@@ -31,8 +31,12 @@ const STATUS_FILTERS: { value: StatusFilter; label: string }[] = [
 const RETURN_STATUSES: ReturnRequest['status'][] = [
   'pending',
   'approved',
-  'rejected',
+  'pickup_scheduled',
+  'picked_up',
+  'received',
+  'refund_initiated',
   'refunded',
+  'rejected',
 ];
 
 export default function ReturnsTab({ data, api }: { data: AdminData; api: AdminApi }) {

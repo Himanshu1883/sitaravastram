@@ -78,6 +78,11 @@ export const ORDER_STATUS_META: Record<OrderStatus, StatusMeta> = {
     color: 'text-amber-600 bg-amber-50',
     icon: Clock,
   },
+  cancel_requested: {
+    labelKey: 'account.statusCancelRequested',
+    color: 'text-orange-600 bg-orange-50',
+    icon: Clock,
+  },
   shipped: {
     labelKey: 'account.statusShipped',
     color: 'text-orange-600 bg-orange-50',
@@ -109,6 +114,7 @@ function statusRank(status: OrderStatus): number {
   const ranks: Record<OrderStatus, number> = {
     placed: 0,
     confirmed: 1,
+    cancel_requested: 1,
     shipped: 2,
     in_transit: 3,
     delivered: 4,
@@ -123,7 +129,8 @@ const CUSTOMER_STEP_COMPLETE_AT = [1, 2, 3, 4];
 export function getOrderTrackingSteps(order: Order): TrackingStepState[] {
   const history = order.statusHistory ?? [];
   const rank = statusRank(order.status);
-  const isTerminal = order.status === 'cancelled' || order.status === 'returned';
+  const isTerminal =
+    order.status === 'cancelled' || order.status === 'returned' || order.status === 'cancel_requested';
 
   return CUSTOMER_TRACKING_STEPS.map((step, index) => {
     const event = findStepEvent(step, history);
@@ -177,6 +184,8 @@ export function formatAddressLine(address: Order['address']) {
 export function trackingProgressPercent(order: Order): number {
   const steps = getOrderTrackingSteps(order);
   const completed = steps.filter(s => s.state === 'completed').length;
-  const current = steps.some(s => s.state === 'current') ? 0.5 : 0;
-  return Math.min(100, ((completed + current) / steps.length) * 100);
+  const hasCurrent = steps.some(s => s.state === 'current');
+  if (completed >= steps.length) return 100;
+  const segments = Math.max(steps.length - 1, 1);
+  return Math.min(100, ((completed + (hasCurrent ? 0.5 : 0)) / segments) * 100);
 }

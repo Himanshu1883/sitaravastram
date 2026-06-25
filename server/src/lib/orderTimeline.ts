@@ -3,6 +3,7 @@ import type { IOrder } from '../models/Order.js';
 export type OrderStatus =
   | 'placed'
   | 'confirmed'
+  | 'cancel_requested'
   | 'shipped'
   | 'in_transit'
   | 'delivered'
@@ -38,7 +39,7 @@ export function buildLegacyStatusHistory(
     { status: 'placed', at, updatedBy: 'system' },
   ];
 
-  if (doc.status === 'cancelled' || doc.status === 'returned') {
+  if (doc.status === 'cancelled' || doc.status === 'returned' || doc.status === 'cancel_requested') {
     events.push({ status: doc.status, at, updatedBy: 'system' });
     return events;
   }

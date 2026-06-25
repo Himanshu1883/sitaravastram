@@ -13,6 +13,7 @@ import CurrencySelector from '../ui/CurrencySelector';
 import SearchOverlay from './SearchOverlay';
 import MobileMenu from './MobileMenu';
 import { openAuthModal, selectIsLoggedIn, selectIsAdmin } from '../../store/authSlice';
+import { useUnreadNotificationCount } from '../../hooks/useNotifications';
 
 function DesktopNavLinks({
   items,
@@ -61,6 +62,7 @@ export default function Navbar({ showCategoryStrip = false }: { showCategoryStri
   const wishlistIds = useSelector(selectWishlistIds);
   const isLoggedIn = useSelector(selectIsLoggedIn);
   const isAdmin = useSelector(selectIsAdmin);
+  const notificationCount = useUnreadNotificationCount();
 
   const handleAccountClick = () => {
     if (isLoggedIn) {
@@ -173,9 +175,14 @@ export default function Navbar({ showCategoryStrip = false }: { showCategoryStri
               <button
                 type="button"
                 onClick={handleAccountClick}
-                className="px-4 py-2 text-sm font-body font-bold tracking-wide rounded-sm border border-navy-700 text-navy-700 hover:bg-navy-700 hover:text-white transition-all duration-200"
+                className="relative px-4 py-2 text-sm font-body font-bold tracking-wide rounded-sm border border-navy-700 text-navy-700 hover:bg-navy-700 hover:text-white transition-all duration-200"
               >
                 {t('nav.myAccount')}
+                {!isAdmin && notificationCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-rosegold-500 px-1 text-[10px] font-bold text-white">
+                    {notificationCount > 9 ? '9+' : notificationCount}
+                  </span>
+                )}
               </button>
             </div>
           </div>
@@ -235,6 +242,7 @@ export default function Navbar({ showCategoryStrip = false }: { showCategoryStri
         onAccount={handleAccountClick}
         onToggleLanguage={toggleLanguage}
         languageLabel={i18n.language === 'en' ? t('common.hindi') : t('common.english')}
+        accountBadgeCount={!isAdmin ? notificationCount : 0}
       />
     </>
   );

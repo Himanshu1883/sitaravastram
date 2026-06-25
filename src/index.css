@@ -509,3 +509,58 @@
     border-radius: 4px;
   }
 }
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+
+  html,
+  body {
+    height: auto !important;
+    overflow: visible !important;
+    background: white !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .invoice-modal-overlay {
+    position: static !important;
+    inset: auto !important;
+    background: white !important;
+    padding: 0 !important;
+  }
+
+  .invoice-modal-panel {
+    max-height: none !important;
+    overflow: visible !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .invoice-modal-body {
+    overflow: visible !important;
+    background: white !important;
+    padding: 0 !important;
+  }
+
+  .invoice-print-frame {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+
+  .invoice-watermark {
+    display: none !important;
+  }
+
+  #invoice-print-root {
+    max-width: 100% !important;
+    page-break-inside: avoid;
+  }
+}

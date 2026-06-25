@@ -2,16 +2,23 @@ import { useTranslation } from 'react-i18next';
 import { useFormatPrice } from '../../hooks/useFormatPrice';
 import { mediaUrl } from '../../lib/api';
 import { ORDER_STATUS_META } from '../../lib/account/orderStatus';
+import { canCancelOrder, canReturnOrder } from '../../lib/account/orderPolicy';
 import type { Order } from '../../types';
 import OrderTimeline from './OrderTimeline';
 
 export default function OrderCard({
   order,
   onTrack,
+  onInvoice,
+  onCancel,
+  onReturn,
   compact = false,
 }: {
   order: Order;
   onTrack?: () => void;
+  onInvoice?: () => void;
+  onCancel?: () => void;
+  onReturn?: () => void;
   compact?: boolean;
 }) {
   const { t } = useTranslation();
@@ -21,7 +28,11 @@ export default function OrderCard({
   const firstItem = order.items[0];
   const image = firstItem?.product.images[0];
   const showTimeline =
-    order.status !== 'cancelled' && order.status !== 'returned';
+    order.status !== 'cancelled' &&
+    order.status !== 'returned' &&
+    order.status !== 'cancel_requested';
+  const showCancel = onCancel && canCancelOrder(order);
+  const showReturn = onReturn && canReturnOrder(order);
 
   return (
     <article
@@ -76,11 +87,32 @@ export default function OrderCard({
             <span className="font-heading text-base font-semibold text-navy-700 tabular-nums">
               {formatPrice(order.total)}
             </span>
-            {onTrack && (
-              <button type="button" onClick={onTrack} className="btn-outline-navy text-xs">
-                {t('account.trackOrder')}
-              </button>
-            )}
+            <div className="flex flex-wrap items-center gap-2">
+              {showCancel && (
+                <button
+                  type="button"
+                  onClick={onCancel}
+                  className="rounded-sm border border-red-200 px-3 py-1.5 font-body text-xs font-semibold text-red-600 hover:bg-red-50"
+                >
+                  {t('account.cancelOrder')}
+                </button>
+              )}
+              {showReturn && (
+                <button type="button" onClick={onReturn} className="btn-outline-navy text-xs">
+                  {t('account.returnOrder')}
+                </button>
+              )}
+              {onInvoice && (
+                <button type="button" onClick={onInvoice} className="btn-outline-navy text-xs">
+                  {t('account.viewInvoice')}
+                </button>
+              )}
+              {onTrack && (
+                <button type="button" onClick={onTrack} className="btn-outline-navy text-xs">
+                  {t('account.trackOrder')}
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>

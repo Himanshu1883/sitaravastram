@@ -36,7 +36,7 @@ const statusHistorySchema = new Schema(
   {
     status: {
       type: String,
-      enum: ['placed', 'confirmed', 'shipped', 'in_transit', 'delivered', 'cancelled', 'returned'],
+      enum: ['placed', 'confirmed', 'cancel_requested', 'shipped', 'in_transit', 'delivered', 'cancelled', 'returned'],
       required: true,
     },
     at: { type: Date, default: Date.now },
@@ -66,6 +66,12 @@ export interface IOrder extends Document {
   customer?: string;
   userId?: string;
   createdAt?: Date;
+  cancelReason?: string;
+  cancelRequestedAt?: Date;
+  cancelledAt?: Date;
+  cancelledBy?: 'customer' | 'admin' | 'system';
+  refundStatus?: 'none' | 'pending' | 'processed' | 'failed';
+  refundAmount?: number;
 }
 
 const orderSchema = new Schema<IOrder>(
@@ -74,7 +80,7 @@ const orderSchema = new Schema<IOrder>(
     date: { type: String, required: true },
     status: {
       type: String,
-      enum: ['placed', 'confirmed', 'shipped', 'in_transit', 'delivered', 'cancelled', 'returned'],
+      enum: ['placed', 'confirmed', 'cancel_requested', 'shipped', 'in_transit', 'delivered', 'cancelled', 'returned'],
       default: 'placed',
     },
     statusHistory: [statusHistorySchema],
@@ -92,6 +98,12 @@ const orderSchema = new Schema<IOrder>(
     phone: String,
     customer: String,
     userId: String,
+    cancelReason: String,
+    cancelRequestedAt: Date,
+    cancelledAt: Date,
+    cancelledBy: { type: String, enum: ['customer', 'admin', 'system'] },
+    refundStatus: { type: String, enum: ['none', 'pending', 'processed', 'failed'], default: 'none' },
+    refundAmount: Number,
   },
   { timestamps: true },
 );
@@ -118,5 +130,11 @@ export function toOrderDto(doc: IOrder) {
     trackingNumber: doc.trackingNumber,
     phone: doc.phone,
     customer: doc.customer,
+    cancelReason: doc.cancelReason,
+    cancelRequestedAt: doc.cancelRequestedAt?.toISOString?.(),
+    cancelledAt: doc.cancelledAt?.toISOString?.(),
+    cancelledBy: doc.cancelledBy,
+    refundStatus: doc.refundStatus ?? 'none',
+    refundAmount: doc.refundAmount,
   };
 }

@@ -1,16 +1,23 @@
-import { X, Copy, Check } from 'lucide-react';
+import { X, Copy, Check, FileText } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Order } from '../../types';
 import { ORDER_STATUS_META, formatAddressLine } from '../../lib/account/orderStatus';
+import { canCancelOrder, canReturnOrder } from '../../lib/account/orderPolicy';
 import OrderTimeline from './OrderTimeline';
 
 export default function OrderTrackModal({
   order,
   onClose,
+  onViewInvoice,
+  onCancel,
+  onReturn,
 }: {
   order: Order;
   onClose: () => void;
+  onViewInvoice?: () => void;
+  onCancel?: () => void;
+  onReturn?: () => void;
 }) {
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
@@ -101,6 +108,31 @@ export default function OrderTrackModal({
             </p>
           </div>
         </div>
+
+        {(onViewInvoice || onCancel || onReturn) && (
+          <div className="mt-6 flex flex-wrap gap-2 border-t border-rosegold-50 pt-5">
+            {onCancel && canCancelOrder(order) && (
+              <button
+                type="button"
+                onClick={onCancel}
+                className="rounded-sm border border-red-200 px-4 py-2 font-body text-xs font-semibold text-red-600 hover:bg-red-50"
+              >
+                {t('account.cancelOrder')}
+              </button>
+            )}
+            {onReturn && canReturnOrder(order) && (
+              <button type="button" onClick={onReturn} className="btn-outline-navy text-xs">
+                {t('account.returnOrder')}
+              </button>
+            )}
+            {onViewInvoice && (
+              <button type="button" onClick={onViewInvoice} className="btn-outline-navy text-xs">
+                <FileText size={14} />
+                {t('account.viewInvoice')}
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

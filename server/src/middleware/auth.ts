@@ -61,6 +61,17 @@ export function requireUser(req: Request, _res: Response, next: NextFunction) {
 /** @deprecated use requireUser */
 export const requireCustomer = requireUser;
 
+export function requireAuthenticated(req: Request, _res: Response, next: NextFunction) {
+  const header = req.headers.authorization;
+  if (!header?.startsWith('Bearer ')) return next(new ApiError(401, 'Unauthorized'));
+  try {
+    req.user = verifyToken(header.slice(7));
+    next();
+  } catch {
+    next(new ApiError(401, 'Invalid token'));
+  }
+}
+
 export function requireAdmin(req: Request, _res: Response, next: NextFunction) {
   const header = req.headers.authorization;
   if (!header?.startsWith('Bearer ')) return next(new ApiError(401, 'Admin authentication required'));

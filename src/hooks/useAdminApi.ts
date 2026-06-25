@@ -18,6 +18,8 @@ import {
   adminCreateCoupon,
   adminUpdateCoupon,
   adminUpdateOrderStatus,
+  adminApproveCancel,
+  adminRejectCancel,
   adminUpdateReturn,
   adminCreateNotification,
 } from '../lib/api';
@@ -149,6 +151,22 @@ export function useAdminApi() {
     }));
   };
 
+  const approveCancel = async (id: string) => {
+    const saved = await adminApproveCancel(id);
+    setData(prev => ({
+      ...prev,
+      orders: prev.orders.map(o => (o.id === id ? { ...o, ...saved } : o)),
+    }));
+  };
+
+  const rejectCancel = async (id: string, note?: string) => {
+    const saved = await adminRejectCancel(id, note);
+    setData(prev => ({
+      ...prev,
+      orders: prev.orders.map(o => (o.id === id ? { ...o, ...saved } : o)),
+    }));
+  };
+
   const updateReturnStatus = async (id: string, status: ReturnRequest['status']) => {
     const saved = await adminUpdateReturn(id, status);
     setData(prev => ({
@@ -182,6 +200,8 @@ export function useAdminApi() {
     saveCoupon,
     toggleCoupon,
     updateOrderStatus,
+    approveCancel,
+    rejectCancel,
     updateReturnStatus,
     createNotification,
     importProducts,

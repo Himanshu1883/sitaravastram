@@ -15,6 +15,7 @@ import wishlistReducer from './wishlistSlice';
 import couponReducer from './couponSlice';
 import ordersReducer from './ordersSlice';
 import authReducer from './authSlice';
+import notificationsReducer from './notificationSlice';
 import currencyReducer from './currencySlice';
 import { catalogApi } from './catalogApi';
 import { preloadHomepageImages } from '../lib/preloadImages';
@@ -56,6 +57,7 @@ const rootReducer = combineReducers({
   coupon: couponReducer,
   orders: ordersReducer,
   auth: authReducer,
+  notifications: notificationsReducer,
   currency: currencyReducer,
   [catalogApi.reducerPath]: catalogApi.reducer,
 });
