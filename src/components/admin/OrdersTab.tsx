@@ -29,6 +29,7 @@ const STATUS_FILTERS: { value: StatusFilter; label: string }[] = [
   { value: 'placed', label: 'Placed' },
   { value: 'confirmed', label: 'Confirmed' },
   { value: 'shipped', label: 'Shipped' },
+  { value: 'in_transit', label: 'In transit' },
   { value: 'delivered', label: 'Delivered' },
   { value: 'cancelled', label: 'Cancelled' },
   { value: 'returned', label: 'Returned' },
@@ -38,6 +39,7 @@ const ORDER_STATUSES: AdminOrder['status'][] = [
   'placed',
   'confirmed',
   'shipped',
+  'in_transit',
   'delivered',
   'cancelled',
   'returned',
@@ -184,7 +186,7 @@ export default function OrdersTab({ data, api }: { data: AdminData; api: AdminAp
   const stats = useMemo(() => {
     const orders = data.orders;
     const pending = orders.filter(o => ['placed', 'confirmed'].includes(o.status)).length;
-    const shipped = orders.filter(o => o.status === 'shipped').length;
+    const shipped = orders.filter(o => ['shipped', 'in_transit'].includes(o.status)).length;
     const revenue = orders
       .filter(o => o.status !== 'cancelled' && o.status !== 'returned')
       .reduce((s, o) => s + o.total, 0);
@@ -219,9 +221,23 @@ export default function OrdersTab({ data, api }: { data: AdminData; api: AdminAp
     ) {
       return;
     }
+    const note =
+      status === 'shipped' || status === 'in_transit' || status === 'delivered'
+        ? window.prompt('Optional note for the customer (courier update, etc.):') ?? undefined
+        : undefined;
     setUpdatingId(order.id);
     try {
-      await api.updateOrderStatus(order.id, status);
+      await api.updateOrderStatus(order.id, { status, note: note || undefined });
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  const saveTracking = async (order: AdminOrder, trackingNumber: string) => {
+    if (trackingNumber === (order.trackingNumber ?? '')) return;
+    setUpdatingId(order.id);
+    try {
+      await api.updateOrderStatus(order.id, { trackingNumber });
     } finally {
       setUpdatingId(null);
     }
@@ -475,6 +491,59 @@ export default function OrdersTab({ data, api }: { data: AdminData; api: AdminAp
                                     <OrderStatusBadge status={order.status} />
                                     <PaymentBadge method={order.paymentMethod} />
                                   </div>
+                                  <form
+                                    className="mt-4 pt-4 border-t border-gray-100"
+                                    onSubmit={e => {
+                                      e.preventDefault();
+                                      const fd = new FormData(e.currentTarget);
+                                      saveTracking(order, String(fd.get('tracking') ?? ''));
+                                    }}
+                                  >
+                                    <label className="text-xs font-semibold uppercase tracking-wider text-gray-400 block mb-2">
+                                      Tracking number
+                                    </label>
+                                    <div className="flex gap-2">
+                                      <input
+                                        name="tracking"
+                                        defaultValue={order.trackingNumber ?? ''}
+                                        className="input-field text-sm flex-1"
+                                        placeholder="TRK1234567890"
+                                      />
+                                      <button
+                                        type="submit"
+                                        disabled={isUpdating}
+                                        className="btn-primary text-xs whitespace-nowrap"
+                                      >
+                                        Save
+                                      </button>
+                                    </div>
+                                  </form>
+                                  {order.statusHistory && order.statusHistory.length > 0 && (
+                                    <div className="mt-4 pt-4 border-t border-gray-100">
+                                      <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">
+                                        Status timeline
+                                      </p>
+                                      <ul className="space-y-2">
+                                        {order.statusHistory.map((entry, idx) => (
+                                          <li
+                                            key={`${entry.status}-${entry.at}-${idx}`}
+                                            className="text-xs text-gray-600"
+                                          >
+                                            <span className="font-semibold capitalize text-navy-700">
+                                              {entry.status.replace('_', ' ')}
+                                            </span>
+                                            {' · '}
+                                            {new Date(entry.at).toLocaleString('en-IN')}
+                                            {entry.note && (
+                                              <span className="block text-rosegold-600 mt-0.5">
+                                                {entry.note}
+                                              </span>
+                                            )}
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             </div>

@@ -104,10 +104,32 @@ export interface Address {
   isDefault: boolean;
 }
 
+export interface OrderStatusEvent {
+  status:
+    | 'placed'
+    | 'confirmed'
+    | 'shipped'
+    | 'in_transit'
+    | 'delivered'
+    | 'cancelled'
+    | 'returned';
+  at: string;
+  note?: string;
+  updatedBy?: 'admin' | 'system';
+}
+
 export interface Order {
   id: string;
   date: string;
-  status: 'placed' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled' | 'returned';
+  status:
+    | 'placed'
+    | 'confirmed'
+    | 'shipped'
+    | 'in_transit'
+    | 'delivered'
+    | 'cancelled'
+    | 'returned';
+  statusHistory?: OrderStatusEvent[];
   items: CartItem[];
   subtotal: number;
   discount: number;

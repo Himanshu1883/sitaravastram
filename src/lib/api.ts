@@ -239,8 +239,19 @@ export const adminUpdateCoupon = (id: string, data: unknown) =>
   api<import('../types').Coupon>(`/api/admin/coupons/${id}`, { method: 'PATCH', body: JSON.stringify(data), auth: 'admin' });
 
 export const adminFetchOrders = () => api<import('../types').AdminOrder[]>('/api/admin/orders', { auth: 'admin' });
-export const adminUpdateOrderStatus = (id: string, status: string) =>
-  api<import('../types').Order>(`/api/admin/orders/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }), auth: 'admin' });
+export const adminUpdateOrderStatus = (
+  id: string,
+  data: {
+    status?: import('../types').Order['status'];
+    note?: string;
+    trackingNumber?: string;
+  },
+) =>
+  api<import('../types').Order>(`/api/admin/orders/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+    auth: 'admin',
+  });
 
 export const adminFetchReturns = () => api<import('../types').ReturnRequest[]>('/api/admin/returns', { auth: 'admin' });
 export const adminUpdateReturn = (id: string, status: string) =>

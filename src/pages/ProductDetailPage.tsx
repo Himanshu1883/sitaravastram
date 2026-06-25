@@ -579,7 +579,7 @@ export default function ProductDetailPage() {
             {product.showColorSelector && product.colors.length > 0 && (
               <div className="mb-5">
                 <p className="mb-3 font-body text-xs font-bold uppercase tracking-wider text-navy-800">
-                  {t('filters.color')}:{' '}
+                  {t('collection.color')}:{' '}
                   <span className="font-normal normal-case tracking-normal text-gray-600">{selectedColor}</span>
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -610,7 +610,7 @@ export default function ProductDetailPage() {
                       sizeError ? 'text-red-500' : 'text-navy-800'
                     }`}
                   >
-                    {t('filters.size')}
+                    {t('collection.size')}
                     {sizeError && (
                       <span className="ml-1 font-normal normal-case tracking-normal text-red-400">
                         — {t('product.selectSize')}

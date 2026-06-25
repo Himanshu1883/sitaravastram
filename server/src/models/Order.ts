@@ -1,4 +1,10 @@
 import mongoose, { Schema, type Document } from 'mongoose';
+import {
+  normalizeStatusHistory,
+  serializeStatusHistory,
+  type OrderStatus,
+  type StatusHistoryEntry,
+} from '../lib/orderTimeline.js';
 
 const addressSchema = new Schema(
   {
@@ -25,10 +31,25 @@ const cartItemSchema = new Schema(
   { _id: false },
 );
 
+const statusHistorySchema = new Schema(
+  {
+    status: {
+      type: String,
+      enum: ['placed', 'confirmed', 'shipped', 'in_transit', 'delivered', 'cancelled', 'returned'],
+      required: true,
+    },
+    at: { type: Date, default: Date.now },
+    note: String,
+    updatedBy: { type: String, enum: ['admin', 'system'], default: 'system' },
+  },
+  { _id: false },
+);
+
 export interface IOrder extends Document {
   orderId: string;
   date: string;
-  status: 'placed' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled' | 'returned';
+  status: OrderStatus;
+  statusHistory?: StatusHistoryEntry[];
   items: unknown[];
   subtotal: number;
   discount: number;
@@ -42,6 +63,7 @@ export interface IOrder extends Document {
   phone?: string;
   customer?: string;
   userId?: string;
+  createdAt?: Date;
 }
 
 const orderSchema = new Schema<IOrder>(
@@ -50,9 +72,10 @@ const orderSchema = new Schema<IOrder>(
     date: { type: String, required: true },
     status: {
       type: String,
-      enum: ['placed', 'confirmed', 'shipped', 'delivered', 'cancelled', 'returned'],
+      enum: ['placed', 'confirmed', 'shipped', 'in_transit', 'delivered', 'cancelled', 'returned'],
       default: 'placed',
     },
+    statusHistory: [statusHistorySchema],
     items: [cartItemSchema],
     subtotal: Number,
     discount: Number,
@@ -73,10 +96,12 @@ const orderSchema = new Schema<IOrder>(
 export const Order = mongoose.model<IOrder>('Order', orderSchema);
 
 export function toOrderDto(doc: IOrder) {
+  const history = normalizeStatusHistory(doc);
   return {
     id: doc.orderId,
     date: doc.date,
     status: doc.status,
+    statusHistory: serializeStatusHistory(history),
     items: doc.items,
     subtotal: doc.subtotal,
     discount: doc.discount,

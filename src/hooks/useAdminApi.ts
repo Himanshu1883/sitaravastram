@@ -134,8 +134,15 @@ export function useAdminApi() {
     }));
   };
 
-  const updateOrderStatus = async (id: string, status: AdminOrder['status']) => {
-    const saved = await adminUpdateOrderStatus(id, status);
+  const updateOrderStatus = async (
+    id: string,
+    data: {
+      status?: AdminOrder['status'];
+      note?: string;
+      trackingNumber?: string;
+    },
+  ) => {
+    const saved = await adminUpdateOrderStatus(id, data);
     setData(prev => ({
       ...prev,
       orders: prev.orders.map(o => (o.id === id ? { ...o, ...saved } : o)),

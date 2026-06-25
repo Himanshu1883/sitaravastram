@@ -7,6 +7,7 @@ const orderStyles: Record<OrderStatus, string> = {
   placed: 'bg-blue-50 text-blue-700 ring-blue-100',
   confirmed: 'bg-indigo-50 text-indigo-700 ring-indigo-100',
   shipped: 'bg-amber-50 text-amber-700 ring-amber-100',
+  in_transit: 'bg-sky-50 text-sky-700 ring-sky-100',
   delivered: 'bg-emerald-50 text-emerald-700 ring-emerald-100',
   cancelled: 'bg-red-50 text-red-600 ring-red-100',
   returned: 'bg-gray-100 text-gray-600 ring-gray-200',
