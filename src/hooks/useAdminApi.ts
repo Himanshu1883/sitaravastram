@@ -84,8 +84,21 @@ export function useAdminApi() {
   };
 
   const deleteProduct = async (id: string) => {
-    await adminDeleteProduct(id);
-    setData(prev => ({ ...prev, products: prev.products.filter(p => p.id !== id) }));
+    let previousProducts: Product[] | null = null;
+    setData(prev => {
+      previousProducts = prev.products;
+      return { ...prev, products: prev.products.filter(p => p.id !== id) };
+    });
+
+    try {
+      await adminDeleteProduct(id);
+      store.dispatch(catalogApi.util.invalidateTags(['Homepage', 'Products', 'Product']));
+    } catch (err) {
+      if (previousProducts) {
+        setData(prev => ({ ...prev, products: previousProducts! }));
+      }
+      throw err;
+    }
   };
 
   const updateStock = async (id: string, stock: number, inStock: boolean) => {

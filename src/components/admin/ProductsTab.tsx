@@ -377,10 +377,12 @@ export default function ProductsTab({ data, api }: { data: AdminData; api: Admin
 
   const deleteProduct = async (product: Product) => {
     if (!window.confirm(`Delete "${product.name}"? This cannot be undone.`)) return;
+    if (editing?.id === product.id) setEditing(null);
     setDeletingId(product.id);
     try {
       await api.deleteProduct(product.id);
-      if (editing?.id === product.id) setEditing(null);
+    } catch {
+      window.alert('Could not delete product. Please try again.');
     } finally {
       setDeletingId(null);
     }
