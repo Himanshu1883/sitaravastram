@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
-import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useContentTranslation } from '../../hooks/useContentTranslation';
 import { useCategories, useHomepage } from '../../hooks/useCatalog';
 import CatalogImage from '../ui/CatalogImage';
+import VideoEditorialBanner from '../ui/VideoEditorialBanner';
 import NewArrivals from './NewArrivals';
 import type { Category } from '../../types';
 
@@ -70,11 +70,11 @@ function CollagePanel({
           <p className="mt-1.5 text-[11px] text-white/50 sm:text-xs">{stylesLabel}</p>
         )}
         {hero ? (
-          <span className="mt-6 inline-flex items-center gap-2 border border-white/35 px-6 py-2.5 text-[11px] uppercase tracking-[0.18em] text-white transition-colors duration-300 hover:bg-white/10">
+          <span className="btn-outline mt-6 gap-2">
             {exploreLabel} <ArrowRight size={13} />
           </span>
         ) : (
-          <span className="mt-3 inline-flex translate-y-2 items-center gap-1.5 border-b border-rosegold-300/40 pb-0.5 text-[11px] uppercase tracking-[0.16em] text-rosegold-300 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+          <span className="btn-link mt-3 translate-y-2 text-rosegold-300 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:text-rosegold-200 group-hover:opacity-100">
             {shopNowLabel} <ArrowRight size={12} />
           </span>
         )}
@@ -98,10 +98,7 @@ function ExploreFooter() {
       <p className="font-heading text-2xl font-medium text-navy-700 sm:text-3xl">
         {t('home.exploreEveryCategory')}
       </p>
-      <Link
-        to="/collections"
-        className="group inline-flex items-center gap-2 border border-navy-700 px-6 py-3 text-[11px] font-medium uppercase tracking-[0.18em] text-navy-700 transition-colors duration-300 hover:bg-navy-700 hover:text-white"
-      >
+      <Link to="/collections" className="btn-outline-navy group">
         {t('home.viewAllCollections')}
         <ArrowRight size={14} className="transition-transform duration-300 group-hover:translate-x-1" />
       </Link>
@@ -110,54 +107,20 @@ function ExploreFooter() {
 }
 
 function CategoryVideoBanner() {
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    const play = () => {
-      void video.play().catch(() => {
-        /* autoplay may be blocked until user gesture; muted usually works */
-      });
-    };
-
-    play();
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) play();
-      },
-      { threshold: 0.15 },
-    );
-    observer.observe(video);
-
-    const onVisibility = () => {
-      if (document.visibilityState === 'visible') play();
-    };
-    document.addEventListener('visibilitychange', onVisibility);
-
-    return () => {
-      observer.disconnect();
-      document.removeEventListener('visibilitychange', onVisibility);
-    };
-  }, []);
+  const { t } = useTranslation();
 
   return (
-    <Banner>
-      <video
-        ref={videoRef}
-        className="absolute inset-0 h-full w-full object-cover"
-        src={CATEGORY_EDITORIAL_VIDEO}
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="auto"
-        aria-label="Sitara Vastram fashion editorial"
-      />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-navy-950/40 via-transparent to-navy-950/15" />
-    </Banner>
+    <VideoEditorialBanner
+      src={CATEGORY_EDITORIAL_VIDEO}
+      ariaLabel="Sitara Vastram fashion editorial"
+      title={t('home.categoryVideoTitle', { defaultValue: 'Made to drape with grace' })}
+      subtitle={t('home.categoryVideoSubtitle', {
+        defaultValue:
+          'Quiet texture, warm light, and pieces designed for slower, more beautiful days.',
+      })}
+      ctaHref="/collections"
+      ctaLabel={t('home.viewAllCollections', { defaultValue: 'View all collections' })}
+    />
   );
 }
 

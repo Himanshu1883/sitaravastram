@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useMemo, useRef, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useHomepage } from '../../hooks/useCatalog';
@@ -7,62 +7,28 @@ import { useGetProductsQuery } from '../../store/catalogApi';
 import type { FeaturedCollectionItem } from '../../lib/api';
 import type { Product } from '../../types';
 import ShoppableImage from '../ui/ShoppableImage';
+import VideoEditorialBanner from '../ui/VideoEditorialBanner';
 
 const FEATURED_CRAFT_VIDEO =
   '/assets/images/Models_in_embroidered_attire_202606241720.mp4';
 
-function useAutoplayVideo() {
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    const play = () => {
-      void video.play().catch(() => undefined);
-    };
-
-    play();
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) play();
-      },
-      { threshold: 0.15 },
-    );
-    observer.observe(video);
-
-    const onVisibility = () => {
-      if (document.visibilityState === 'visible') play();
-    };
-    document.addEventListener('visibilitychange', onVisibility);
-
-    return () => {
-      observer.disconnect();
-      document.removeEventListener('visibilitychange', onVisibility);
-    };
-  }, []);
-
-  return videoRef;
-}
-
 function FeaturedVideoIntro() {
-  const videoRef = useAutoplayVideo();
+  const { t } = useTranslation();
 
   return (
-    <div className="relative mb-12 w-full sm:mb-16">
-      <video
-        ref={videoRef}
-        className="block h-auto w-full"
+    <div className="mb-12 w-full sm:mb-16">
+      <VideoEditorialBanner
         src={FEATURED_CRAFT_VIDEO}
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="auto"
-        aria-label="Sitara Vastram embroidered collection"
+        ariaLabel="Sitara Vastram embroidered collection"
+        layout="inline"
+        title={t('home.featuredVideoTitle', { defaultValue: 'Embroidered to stand apart' })}
+        subtitle={t('home.featuredVideoSubtitle', {
+          defaultValue:
+            "Hand-finished detail and timeless silhouettes for life's most graceful moments.",
+        })}
+        ctaHref="/collections/wedding"
+        ctaLabel={t('home.featuredVideoCta', { defaultValue: 'Explore the collection' })}
       />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-navy-950/40 via-transparent to-navy-950/10" />
     </div>
   );
 }
@@ -241,18 +207,9 @@ function FeatureBlock({ feature, index, productsBySlug }: FeatureBlockProps) {
               inView ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'
             }`}
           >
-            <Link to={feature.href} className="group inline-flex items-center gap-0 self-start">
-              <span className="relative py-1 pr-4 font-body text-[11px] font-bold uppercase tracking-[0.22em] text-navy-700">
-                {feature.cta || t(`featured.${featureId}.cta`)}
-                <span className="absolute bottom-0 left-0 h-px w-full origin-left scale-x-100 bg-navy-700 transition-transform duration-300 group-hover:scale-x-0" />
-                <span className="absolute bottom-0 left-0 h-px w-full origin-right scale-x-0 bg-rosegold-500 transition-transform duration-300 group-hover:scale-x-100" />
-              </span>
-              <span className="flex h-8 w-8 items-center justify-center border border-navy-700 transition-all duration-300 group-hover:border-rosegold-500 group-hover:bg-rosegold-500">
-                <ArrowUpRight
-                  size={14}
-                  className="text-navy-700 transition-colors duration-300 group-hover:-translate-y-px group-hover:translate-x-px group-hover:text-white"
-                />
-              </span>
+            <Link to={feature.href} className="btn-outline-navy group self-start">
+              {feature.cta || t(`featured.${featureId}.cta`)}
+              <ArrowRight size={14} className="transition-transform duration-300 group-hover:translate-x-0.5" />
             </Link>
           </div>
         </div>

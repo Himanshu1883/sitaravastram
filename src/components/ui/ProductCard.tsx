@@ -17,9 +17,16 @@ import { preloadProductGallery } from '../../lib/preloadImages';
 interface ProductCardProps {
   product: Product;
   className?: string;
+  hideColors?: boolean;
+  compact?: boolean;
 }
 
-export default function ProductCard({ product, className = '' }: ProductCardProps) {
+export default function ProductCard({
+  product,
+  className = '',
+  hideColors = false,
+  compact = false,
+}: ProductCardProps) {
   const { t } = useTranslation();
   const [hovered, setHovered] = useState(false);
   const dispatch = useDispatch();
@@ -59,29 +66,31 @@ export default function ProductCard({ product, className = '' }: ProductCardProp
       onMouseLeave={() => setHovered(false)}
     >
       {/* Image */}
-      <div className="relative overflow-hidden aspect-[3/4] bg-cream-200">
+      <div
+        className={`relative overflow-hidden bg-cream-200 ${
+          compact ? 'aspect-[4/5]' : 'aspect-[3/4]'
+        }`}
+      >
         <CatalogImage
           src={product.images[hovered && product.images.length > 1 ? 1 : 0]}
           alt={product.name}
           variant="card"
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          className="h-full w-full object-cover"
         />
 
         <div
-          className={`pointer-events-none absolute inset-0 bg-gradient-to-t from-navy-900/45 via-navy-900/5 to-transparent transition-opacity duration-300 ${
-            hovered ? 'opacity-100' : 'opacity-0'
-          }`}
-        />
-
-        <div
-          className={`absolute inset-x-0 bottom-4 flex justify-center px-3 transition-all duration-300 ${
+          className={`absolute inset-x-0 flex justify-center px-3 transition-all duration-300 ${
+            compact ? 'bottom-3' : 'bottom-4'
+          } ${
             hovered ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-3 opacity-0'
           }`}
         >
           <button
             type="button"
             onClick={handleAddToCart}
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-2.5 font-body text-[11px] font-semibold uppercase tracking-[0.14em] text-navy-900 shadow-[0_4px_20px_rgba(0,0,0,0.15)] transition-colors duration-300 hover:bg-navy-900 hover:text-white"
+            className={`inline-flex items-center justify-center gap-2 rounded-full bg-white font-body font-semibold uppercase tracking-[0.14em] text-navy-900 shadow-[0_4px_20px_rgba(0,0,0,0.15)] transition-colors duration-300 hover:bg-navy-900 hover:text-white ${
+              compact ? 'px-4 py-2 text-[10px]' : 'px-5 py-2.5 text-[11px]'
+            }`}
             aria-label={t('product.addToBag')}
           >
             <ShopBagPlusIcon />
@@ -118,40 +127,45 @@ export default function ProductCard({ product, className = '' }: ProductCardProp
       </div>
 
       {/* Info */}
-      <div className="p-4">
-        <p className="type-overline text-rosegold-500 mb-1">{product.fabric}</p>
-        <h3 className="type-body-sm font-medium text-navy-700 line-clamp-2 mb-2 group-hover:text-rosegold-500 transition-colors">
+      <div className={compact ? 'p-3' : 'p-4'}>
+        <p className={`type-overline text-rosegold-500 ${compact ? 'mb-0.5 text-[9px]' : 'mb-1'}`}>
+          {product.fabric}
+        </p>
+        <h3
+          className={`font-medium text-navy-700 line-clamp-2 group-hover:text-rosegold-500 transition-colors ${
+            compact ? 'mb-1.5 text-xs leading-snug' : 'type-body-sm mb-2'
+          }`}
+        >
           {product.name}
         </h3>
 
-        {/* Rating */}
-        <div className="flex items-center gap-1.5 mb-3">
-          <div className="flex">
-            {[1, 2, 3, 4, 5].map(s => (
-              <Star
-                key={s}
-                size={11}
-                className={s <= Math.round(product.rating) ? 'text-amber-400 fill-amber-400' : 'text-gray-300 fill-gray-300'}
-              />
-            ))}
+        {!compact && (
+          <div className="flex items-center gap-1.5 mb-3">
+            <div className="flex">
+              {[1, 2, 3, 4, 5].map(s => (
+                <Star
+                  key={s}
+                  size={11}
+                  className={s <= Math.round(product.rating) ? 'text-amber-400 fill-amber-400' : 'text-gray-300 fill-gray-300'}
+                />
+              ))}
+            </div>
+            <span className="type-caption">({product.reviewCount})</span>
           </div>
-          <span className="type-caption">({product.reviewCount})</span>
-        </div>
+        )}
 
-        {/* Price */}
         <div className="flex items-baseline gap-2">
-          <span className="type-price text-navy-700">
+          <span className={compact ? 'text-sm font-semibold text-navy-700' : 'type-price text-navy-700'}>
             {formatPrice(product.price)}
           </span>
           {product.originalPrice && (
-            <span className="type-body-xs text-gray-400 line-through">
+            <span className={`text-gray-400 line-through ${compact ? 'text-xs' : 'type-body-xs'}`}>
               {formatPrice(product.originalPrice)}
             </span>
           )}
         </div>
 
-        {/* Color swatches */}
-        {product.colors.length > 1 && (
+        {!hideColors && product.colors.length > 1 && (
           <div className="flex items-center gap-1.5 mt-2">
             {product.colors.slice(0, 4).map((color, i) => (
               <div

@@ -104,7 +104,7 @@ function OccasionCard({
             {name}
           </h3>
           <p className="mt-1 font-body text-xs text-white/70 sm:text-sm">{description}</p>
-          <span className="mt-3 inline-flex items-center gap-1.5 font-body text-[11px] font-semibold uppercase tracking-[0.16em] text-rosegold-300 transition-colors group-hover:text-rosegold-200">
+          <span className="btn-link mt-3 text-rosegold-300 group-hover:text-rosegold-200">
             {shopNowLabel}
             <ArrowRight size={12} className="transition-transform duration-300 group-hover:translate-x-0.5" />
           </span>
@@ -228,10 +228,7 @@ export default function ShopByOccasion() {
         </div>
 
         <div className="mt-10 flex justify-center lg:mt-12">
-          <Link
-            to="/collections"
-            className="group inline-flex items-center gap-3 rounded-full border border-gray-300 bg-cream-50 px-6 py-3.5 font-body text-[11px] font-semibold uppercase tracking-[0.18em] text-navy-700 transition-all duration-300 hover:border-navy-700 hover:bg-white"
-          >
+          <Link to="/collections" className="btn-outline-navy group">
             <LayoutGrid size={15} className="text-rosegold-500" />
             {t('home.viewAllCollections')}
             <ArrowRight size={14} className="transition-transform duration-300 group-hover:translate-x-0.5" />

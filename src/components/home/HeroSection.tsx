@@ -2,7 +2,7 @@
 import { Link } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay, EffectFade } from 'swiper/modules';
-import { ArrowRight, ChevronRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useContentTranslation } from '../../hooks/useContentTranslation';
 import { useHomepage } from '../../hooks/useCatalog';
 import CatalogImage from '../ui/CatalogImage';
@@ -86,19 +86,13 @@ export default function HeroSection() {
 
                     {/* CTAs */}
                     <div className="flex flex-wrap items-center gap-4 animate-fade-up">
-                      <Link
-                        to={slide.ctaLink}
-                        className="group inline-flex items-center gap-2 bg-rosegold-500 text-white font-inter font-semibold text-sm tracking-wider uppercase px-7 py-4 rounded-sm hover:bg-rosegold-600 transition-all duration-300 hover:shadow-rose-lg"
-                      >
+                      <Link to={slide.ctaLink} className="btn-primary group inline-flex items-center gap-2">
                         {hero(slide.id, 'cta1', slide.cta1)}
                         <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
                       </Link>
-                      <Link
-                        to={slide.ctaLink}
-                        className="group inline-flex items-center gap-2 text-white font-inter font-medium text-sm tracking-wider border-b border-white/50 pb-0.5 hover:border-rosegold-400 hover:text-rosegold-300 transition-all duration-300"
-                      >
+                      <Link to={slide.ctaLink} className="btn-outline group inline-flex items-center gap-2">
                         {hero(slide.id, 'cta2', slide.cta2)}
-                        <ChevronRight size={15} className="transition-transform duration-200 group-hover:translate-x-1" />
+                        <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
                       </Link>
                     </div>
                   </div>

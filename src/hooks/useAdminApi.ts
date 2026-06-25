@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { Product, Category, Coupon, AdminOrder, ReturnRequest, Notification } from '../types';
+import { store } from '../store';
+import { catalogApi } from '../store/catalogApi';
 import {
   adminFetchProducts,
   adminFetchCategories,
@@ -77,6 +79,7 @@ export function useAdminApi() {
         ? [...prev.products, saved]
         : prev.products.map(p => (p.id === saved.id ? saved : p)),
     }));
+    store.dispatch(catalogApi.util.invalidateTags(['Homepage', 'Products', 'Product']));
     return saved;
   };
 

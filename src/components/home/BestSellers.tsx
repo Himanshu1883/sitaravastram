@@ -3,7 +3,7 @@ import { ArrowRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation } from 'swiper/modules';
-import ProductCard from '../ui/ProductCard';
+import AnimatedProductCard from '../ui/AnimatedProductCard';
 import SectionHeading from '../ui/SectionHeading';
 import { useHomepage } from '../../hooks/useCatalog';
 
@@ -17,9 +17,9 @@ export default function BestSellers() {
   const copy = data?.sectionCopy?.bestSellers;
 
   return (
-    <section className="py-20 bg-cream-100">
+    <section className="bg-cream-100 py-20">
       <div className="w-full px-2 sm:px-3 lg:px-4">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-4">
+        <div className="mb-12 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <SectionHeading
             overline={copy?.overline || t('home.mostLoved')}
             title={copy?.title || t('home.bestSellers')}
@@ -27,27 +27,33 @@ export default function BestSellers() {
           />
           <Link
             to="/collections/best-sellers"
-            className="group flex items-center gap-2 text-sm font-body font-medium text-rosegold-500 hover:text-navy-700 transition-colors whitespace-nowrap mb-10 sm:mb-0"
+            className="btn-link group mb-10 whitespace-nowrap sm:mb-0"
           >
-            {copy?.cta || t('home.allBestsellers')}            <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+            {copy?.cta || t('home.allBestsellers')}
+            <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
           </Link>
         </div>
 
         <Swiper
           modules={[Navigation]}
           navigation
-          slidesPerView={1}
-          spaceBetween={20}
+          slidesPerView={1.15}
+          spaceBetween={14}
           breakpoints={{
-            480: { slidesPerView: 2 },
-            768: { slidesPerView: 3 },
-            1024: { slidesPerView: 4 },
+            480: { slidesPerView: 2, spaceBetween: 16 },
+            768: { slidesPerView: 3, spaceBetween: 18 },
+            1024: { slidesPerView: 4, spaceBetween: 20 },
           }}
           className="product-swiper"
         >
-          {displayProducts.map(product => (
+          {displayProducts.map((product, index) => (
             <SwiperSlide key={product.id}>
-              <ProductCard product={product} />
+              <AnimatedProductCard
+                product={product}
+                index={index}
+                hideColors
+                compact
+              />
             </SwiperSlide>
           ))}
         </Swiper>

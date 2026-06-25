@@ -134,6 +134,22 @@
     @apply bg-rosegold-500 text-white transition-all duration-300 hover:bg-rosegold-600 hover:shadow-rose active:scale-95;
   }
 
+  .btn-outline-navy {
+    font-family: var(--font-body);
+    font-size: var(--element-button-font-size);
+    font-weight: var(--font-weight-500);
+    letter-spacing: var(--element-button-letter-spacing);
+    text-transform: var(--element-button-text-transform);
+    padding-block: var(--element-button-padding-block);
+    padding-inline: var(--element-button-padding-inline);
+    border-radius: var(--element-button-radius);
+    @apply inline-flex items-center justify-center gap-2 border border-navy-700 text-navy-700 transition-all duration-300 hover:bg-navy-700 hover:text-white active:scale-95;
+  }
+
+  .btn-link {
+    @apply inline-flex items-center gap-2 font-body text-sm font-medium text-rosegold-500 transition-colors hover:text-navy-700;
+  }
+
   .section-heading {
     @apply type-heading-xl text-navy-700;
   }
@@ -143,7 +159,7 @@
   }
 
   .luxury-card {
-    @apply bg-white rounded-sm shadow-card hover:shadow-card-hover transition-all duration-500;
+    @apply bg-white rounded-sm shadow-card;
   }
 
   .luxury-divider {

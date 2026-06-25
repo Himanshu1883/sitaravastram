@@ -39,8 +39,9 @@ export default function InstagramFeed() {
         </div>
 
         <div className="text-center mt-8">
-          <a href={profileUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-body font-semibold text-navy-700 border border-navy-700 px-6 py-3 rounded-sm hover:bg-navy-700 hover:text-white transition-all duration-300">
-            <Instagram size={16} />{copy?.cta || t('home.followInstagram')}
+          <a href={profileUrl} target="_blank" rel="noopener noreferrer" className="btn-outline-navy">
+            <Instagram size={16} />
+            {copy?.cta || t('home.followInstagram')}
           </a>
         </div>
       </div>

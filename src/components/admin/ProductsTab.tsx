@@ -45,6 +45,7 @@ function ProductForm({
   onVideoUpload,
   onRemoveImage,
   uploading,
+  savingMedia,
 }: {
   product: Product;
   categories: AdminData['categories'];
@@ -53,6 +54,7 @@ function ProductForm({
   onVideoUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveImage: (index: number) => void;
   uploading: boolean;
+  savingMedia: boolean;
 }) {
   const set = (patch: Partial<Product>) => onChange({ ...product, ...patch });
 
@@ -194,14 +196,25 @@ function ProductForm({
         <p className="text-xs font-bold uppercase tracking-wider text-rosegold-600 mb-3">
           Media
         </p>
-        <div className="flex flex-wrap gap-2 mb-3">
+        {(uploading || savingMedia) && (
+          <p className="mb-2 flex items-center gap-2 text-xs font-medium text-rosegold-600">
+            <Loader2 size={14} className="animate-spin" />
+            {uploading ? 'Uploading…' : 'Removing image…'}
+          </p>
+        )}
+        <div className={`flex flex-wrap gap-2 mb-3 ${savingMedia ? 'pointer-events-none opacity-60' : ''}`}>
           {product.images.map((img, i) => (
-            <div key={i} className="relative group w-20 h-24 rounded-xl overflow-hidden border border-gray-100">
-              <img src={mediaUrl(img)} alt="" className="w-full h-full object-cover" />
+            <div
+              key={img}
+              className="relative group w-20 h-24 rounded-xl overflow-hidden border border-gray-100"
+            >
+              <img src={mediaUrl(img)} alt="" className="h-full w-full object-cover" />
               <button
                 type="button"
                 onClick={() => onRemoveImage(i)}
-                className="absolute top-1 right-1 p-1 rounded-md bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                disabled={uploading || savingMedia}
+                className="absolute top-1 right-1 rounded-md bg-black/50 p-1 text-white opacity-100 transition-opacity disabled:cursor-not-allowed sm:opacity-0 sm:group-hover:opacity-100"
+                aria-label="Remove image"
               >
                 <X size={12} />
               </button>
@@ -209,7 +222,13 @@ function ProductForm({
           ))}
         </div>
         <div className="flex flex-wrap gap-3">
-          <label className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-dashed border-rosegold-300 text-sm font-medium text-rosegold-600 hover:bg-rosegold-50 cursor-pointer transition-colors">
+          <label
+            className={`inline-flex items-center gap-2 rounded-xl border border-dashed border-rosegold-300 px-4 py-2 text-sm font-medium text-rosegold-600 transition-colors ${
+              uploading || savingMedia
+                ? 'cursor-not-allowed opacity-50'
+                : 'cursor-pointer hover:bg-rosegold-50'
+            }`}
+          >
             <ImagePlus size={16} />
             {uploading ? 'Uploading…' : 'Add images'}
             <input
@@ -217,18 +236,24 @@ function ProductForm({
               accept="image/*"
               multiple
               className="hidden"
-              disabled={uploading}
+              disabled={uploading || savingMedia}
               onChange={onImageUpload}
             />
           </label>
-          <label className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-dashed border-gray-300 text-sm font-medium text-gray-600 hover:bg-gray-50 cursor-pointer transition-colors">
+          <label
+            className={`inline-flex items-center gap-2 rounded-xl border border-dashed border-gray-300 px-4 py-2 text-sm font-medium text-gray-600 transition-colors ${
+              uploading || savingMedia
+                ? 'cursor-not-allowed opacity-50'
+                : 'cursor-pointer hover:bg-gray-50'
+            }`}
+          >
             <ImagePlus size={16} />
             {uploading ? 'Uploading…' : product.video ? 'Replace video' : 'Add video'}
             <input
               type="file"
               accept="video/*"
               className="hidden"
-              disabled={uploading}
+              disabled={uploading || savingMedia}
               onChange={onVideoUpload}
             />
           </label>
@@ -310,6 +335,7 @@ export default function ProductsTab({ data, api }: { data: AdminData; api: Admin
   const [showBulk, setShowBulk] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [savingMedia, setSavingMedia] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -417,6 +443,32 @@ export default function ProductsTab({ data, api }: { data: AdminData; api: Admin
     } finally {
       setUploading(false);
       e.target.value = '';
+    }
+  };
+
+  const handleRemoveImage = async (index: number) => {
+    if (!editing || uploading || savingMedia) return;
+
+    const previous = editing;
+    const updated: Product = {
+      ...editing,
+      images: editing.images.filter((_, idx) => idx !== index),
+    };
+
+    setEditing(updated);
+
+    const isPersisted = data.products.some(p => p.id === editing.id);
+    if (!isPersisted) return;
+
+    setSavingMedia(true);
+    try {
+      const saved = await api.saveProduct(updated, false);
+      setEditing(saved);
+    } catch {
+      setEditing(previous);
+      window.alert('Could not remove image. Please try again.');
+    } finally {
+      setSavingMedia(false);
     }
   };
 
@@ -659,7 +711,7 @@ export default function ProductsTab({ data, api }: { data: AdminData; api: Admin
 
       <AdminModal
         open={!!editing}
-        onClose={() => !saving && setEditing(null)}
+        onClose={() => !saving && !savingMedia && !uploading && setEditing(null)}
         title={isNewProduct ? 'Add product' : 'Edit product'}
         subtitle={editing?.name || 'New catalog item'}
         size="lg"
@@ -668,7 +720,7 @@ export default function ProductsTab({ data, api }: { data: AdminData; api: Admin
             <button
               type="button"
               onClick={() => setEditing(null)}
-              disabled={saving}
+              disabled={saving || savingMedia || uploading}
               className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-navy-700 transition-colors"
             >
               Cancel
@@ -676,7 +728,7 @@ export default function ProductsTab({ data, api }: { data: AdminData; api: Admin
             <button
               type="button"
               onClick={saveProduct}
-              disabled={saving || !editing?.name.trim()}
+              disabled={saving || savingMedia || uploading || !editing?.name.trim()}
               className="btn-primary text-sm inline-flex items-center justify-center gap-2 min-w-[120px]"
             >
               {saving && <Loader2 size={14} className="animate-spin" />}
@@ -692,13 +744,9 @@ export default function ProductsTab({ data, api }: { data: AdminData; api: Admin
             onChange={setEditing}
             onImageUpload={handleImageUpload}
             onVideoUpload={handleVideoUpload}
-            onRemoveImage={i =>
-              setEditing({
-                ...editing,
-                images: editing.images.filter((_, idx) => idx !== i),
-              })
-            }
+            onRemoveImage={handleRemoveImage}
             uploading={uploading}
+            savingMedia={savingMedia}
           />
         )}
       </AdminModal>
