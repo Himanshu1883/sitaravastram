@@ -28,6 +28,27 @@ export interface Product {
   isBestSeller?: boolean;
   inStock: boolean;
   tags: string[];
+  customFields?: ProductCustomField[];
+}
+
+export type ProductCustomFieldType =
+  | 'text'
+  | 'textarea'
+  | 'number'
+  | 'boolean'
+  | 'list'
+  | 'url'
+  | 'image'
+  | 'video';
+
+export interface ProductCustomField {
+  id: string;
+  label: string;
+  key: string;
+  type: ProductCustomFieldType;
+  value: string | number | boolean | string[];
+  showOnStorefront: boolean;
+  order: number;
 }
 
 export interface Category {

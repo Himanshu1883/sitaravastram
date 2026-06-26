@@ -28,6 +28,7 @@ export function emptyProduct(): Product {
     inStock: true,
     tags: [],
     stock: 10,
+    customFields: [],
   };
 }
 

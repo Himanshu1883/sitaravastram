@@ -1,5 +1,25 @@
 import mongoose, { Schema, type Document } from 'mongoose';
 
+export type CustomFieldType =
+  | 'text'
+  | 'textarea'
+  | 'number'
+  | 'boolean'
+  | 'list'
+  | 'url'
+  | 'image'
+  | 'video';
+
+export interface IProductCustomField {
+  id: string;
+  label: string;
+  key: string;
+  type: CustomFieldType;
+  value: unknown;
+  showOnStorefront: boolean;
+  order: number;
+}
+
 export interface IProduct extends Document {
   legacyId: string;
   name: string;
@@ -30,7 +50,25 @@ export interface IProduct extends Document {
   isBestSeller?: boolean;
   inStock: boolean;
   tags: string[];
+  customFields?: IProductCustomField[];
 }
+
+const customFieldSchema = new Schema(
+  {
+    id: { type: String, required: true },
+    label: { type: String, required: true },
+    key: { type: String, required: true },
+    type: {
+      type: String,
+      enum: ['text', 'textarea', 'number', 'boolean', 'list', 'url', 'image', 'video'],
+      required: true,
+    },
+    value: Schema.Types.Mixed,
+    showOnStorefront: { type: Boolean, default: true },
+    order: { type: Number, default: 0 },
+  },
+  { _id: false },
+);
 
 const productSchema = new Schema<IProduct>(
   {
@@ -63,6 +101,7 @@ const productSchema = new Schema<IProduct>(
     isBestSeller: Boolean,
     inStock: { type: Boolean, default: true },
     tags: [String],
+    customFields: [customFieldSchema],
   },
   { timestamps: true },
 );
@@ -103,5 +142,17 @@ export function toProductDto(doc: IProduct) {
     isBestSeller: doc.isBestSeller,
     inStock: doc.inStock,
     tags: doc.tags,
+    customFields: (doc.customFields ?? [])
+      .slice()
+      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+      .map(f => ({
+        id: f.id,
+        label: f.label,
+        key: f.key,
+        type: f.type,
+        value: f.value,
+        showOnStorefront: f.showOnStorefront ?? true,
+        order: f.order ?? 0,
+      })),
   };
 }

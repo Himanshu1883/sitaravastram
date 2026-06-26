@@ -25,7 +25,9 @@ import {
 import AdminPageHeader from './ui/AdminPageHeader';
 import AdminCard from './ui/AdminCard';
 import AdminModal from './ui/AdminModal';
+import ProductCustomFieldsEditor from './ProductCustomFieldsEditor';
 import { StockBadge } from './ui/StockBadge';
+import { validateMediaFile } from '../../lib/admin/mediaValidation';
 
 type StockFilter = 'all' | 'in' | 'low' | 'out';
 
@@ -233,7 +235,7 @@ function ProductForm({
             {uploading ? 'Uploading…' : 'Add images'}
             <input
               type="file"
-              accept="image/*"
+              accept="image/jpeg,image/png,image/webp"
               multiple
               className="hidden"
               disabled={uploading || savingMedia}
@@ -251,7 +253,7 @@ function ProductForm({
             {uploading ? 'Uploading…' : product.video ? 'Replace video' : 'Add video'}
             <input
               type="file"
-              accept="video/*"
+              accept="video/mp4,video/webm"
               className="hidden"
               disabled={uploading || savingMedia}
               onChange={onVideoUpload}
@@ -325,6 +327,12 @@ function ProductForm({
           Colors and sizes are saved either way. Toggles control whether shoppers see them on the product page.
         </p>
       </section>
+
+      <ProductCustomFieldsEditor
+        fields={product.customFields ?? []}
+        onChange={customFields => set({ customFields })}
+        disabled={uploading || savingMedia}
+      />
     </div>
   );
 }
@@ -365,10 +373,31 @@ export default function ProductsTab({ data, api }: { data: AdminData; api: Admin
 
   const saveProduct = async () => {
     if (!editing || !editing.name.trim()) return;
+
+    const invalidField = (editing.customFields ?? []).find(f => {
+      if (!f.label.trim()) return true;
+      if (f.type === 'boolean') return false;
+      if (f.type === 'list') return !Array.isArray(f.value) || f.value.length === 0;
+      if (f.type === 'number') return typeof f.value !== 'number' || !Number.isFinite(f.value);
+      return !String(f.value ?? '').trim();
+    });
+    if (invalidField) {
+      window.alert('Each custom field needs a label and a value.');
+      return;
+    }
+
     setSaving(true);
     try {
+      const payload: Product = {
+        ...editing,
+        customFields: (editing.customFields ?? []).map((f, i) => ({
+          ...f,
+          key: f.key || slugify(f.label),
+          order: i,
+        })),
+      };
       const exists = data.products.find(p => p.id === editing.id);
-      await api.saveProduct(editing, !exists);
+      await api.saveProduct(payload, !exists);
       setEditing(null);
     } finally {
       setSaving(false);
@@ -425,10 +454,17 @@ export default function ProductsTab({ data, api }: { data: AdminData; api: Admin
     try {
       const urls: string[] = [];
       for (const file of Array.from(files)) {
+        const check = validateMediaFile(file, 'image');
+        if (!check.ok) {
+          window.alert(check.error);
+          continue;
+        }
         const { url } = await uploadMedia(file);
         urls.push(url);
       }
-      setEditing({ ...editing, images: [...editing.images, ...urls] });
+      if (urls.length) {
+        setEditing({ ...editing, images: [...editing.images, ...urls] });
+      }
     } finally {
       setUploading(false);
       e.target.value = '';
@@ -438,6 +474,12 @@ export default function ProductsTab({ data, api }: { data: AdminData; api: Admin
   const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !editing) return;
+    const check = validateMediaFile(file, 'video');
+    if (!check.ok) {
+      window.alert(check.error);
+      e.target.value = '';
+      return;
+    }
     setUploading(true);
     try {
       const { url } = await uploadMedia(file);

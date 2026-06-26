@@ -28,6 +28,7 @@ import { fetchReviews, submitReview } from '../lib/api';
 import { mediaUrl } from '../lib/media';
 import { useProduct, useProducts, useCategories } from '../hooks/useCatalog';
 import ProductCard from '../components/ui/ProductCard';
+import ProductCustomFieldValue from '../components/product/ProductCustomFieldValue';
 import CatalogImage from '../components/ui/CatalogImage';
 import { preloadProductDetail, preloadProductGallery } from '../lib/preloadImages';
 import type { RootState } from '../store';
@@ -377,7 +378,7 @@ export default function ProductDetailPage() {
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedColor, setSelectedColor] = useState('');
   const [quantity] = useState(1);
-  const [openSections, setOpenSections] = useState({
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     details: false,
     fabric: false,
     shipping: false,
@@ -754,6 +755,25 @@ export default function ProductDetailPage() {
                 <p className="mb-2">{product.deliveryTime}</p>
                 <p>{product.returnPolicy}</p>
               </PdpAccordion>
+
+              {(product.customFields ?? [])
+                .filter(f => f.showOnStorefront)
+                .sort((a, b) => a.order - b.order)
+                .map(field => (
+                  <PdpAccordion
+                    key={field.id}
+                    title={field.label}
+                    open={openSections[`custom-${field.id}`] ?? false}
+                    onToggle={() =>
+                      setOpenSections(prev => ({
+                        ...prev,
+                        [`custom-${field.id}`]: !prev[`custom-${field.id}`],
+                      }))
+                    }
+                  >
+                    <ProductCustomFieldValue field={field} />
+                  </PdpAccordion>
+                ))}
             </div>
           </div>
         </div>
